@@ -13,7 +13,7 @@ namespace ProjectilesImproved
     {
         public static bool IsInitialized = false;
         public static event Action OnLoadComplete;
-        public static List<BulletsBase> ActiveProjectiles = new List<BulletsBase>();
+        public static List<BulletBase> ActiveProjectiles = new List<BulletBase>();
 
         public const string ModName = "Projectiles Improved";
         public const ushort ModID = 4112;
@@ -38,7 +38,7 @@ namespace ProjectilesImproved
             OnLoadComplete?.Invoke();
         }
 
-        public static void SpawnProjectile(BulletsBase data)
+        public static void SpawnProjectile(BulletBase data)
         {
             ActiveProjectiles.Add(data);
         }
@@ -49,7 +49,7 @@ namespace ProjectilesImproved
 
             for (int i = 0; i < ActiveProjectiles.Count; i++)
             {
-                BulletsBase bullet = ActiveProjectiles[i];
+                BulletBase bullet = ActiveProjectiles[i];
 
                 if (bullet.HasExpired)
                 {

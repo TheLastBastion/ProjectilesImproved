@@ -49,35 +49,30 @@ namespace ProjectilesImproved.Weapons
         public IMyGunObject<MyGunBase> gun { get; private set; } = null;
         public bool IsShooting => gun.IsShooting || terminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
 
-        private MyEntity3DSoundEmitter soundEmitter;
-        //private MyParticleEffect muzzleFlash;
-
         private MyWeaponDefinition weapon = null;
         private IMyFunctionalBlock block = null;
         private IMyCubeBlock cube = null;
+        private MyEntity3DSoundEmitter soundEmitter;
+
+        private bool IsFixedGun = false;
+        private bool terminalShooting = false;
+
         private double timeTillNextShot = 1d;
         private int currentShotInBurst = 0;
         private float cooldownTime = 0;
-
-        private bool IsFixedGun = false;
-
-        private bool terminalShooting = false;
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
             block = Entity as IMyFunctionalBlock;
             cube = Entity as IMyCubeBlock;
             gun = Entity as IMyGunObject<MyGunBase>;
-
-            IsFixedGun = Entity is IMySmallGatlingGun || Entity is IMySmallMissileLauncher || Entity is IMySmallMissileLauncherReload;
+            IsFixedGun = Entity is IMySmallGatlingGun; // || Entity is IMySmallMissileLauncher || Entity is IMySmallMissileLauncherReload;
 
             soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
-            //MyParticlesManager.TryCreateParticleEffect("Muzzle_Flash_Large", gun.GunBase.GetMuzzleWorldMatrix(), out muzzleFlash);
-            //muzzleFlash.Stop();
 
             if (!Core.IsInitialized)
             {
-                Core.OnLoadComplete += init;
+                Core.OnLoadComplete += Init;
             }
             else
             {
@@ -87,9 +82,9 @@ namespace ProjectilesImproved.Weapons
             }
         }
 
-        private void init()
+        private void Init()
         {
-            Core.OnLoadComplete -= init;
+            Core.OnLoadComplete -= Init;
             OverrideDefaultControls();
             getWeaponDef();
             NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
@@ -129,14 +124,14 @@ namespace ProjectilesImproved.Weapons
             {
                 MyAPIGateway.TerminalControls.GetActions<IMySmallGatlingGun>(out actions);
             }
-            else if (Entity is IMySmallMissileLauncher)
-            {
-                MyAPIGateway.TerminalControls.GetActions<IMySmallMissileLauncher>(out actions);
-            }
-            else if (Entity is IMySmallMissileLauncherReload)
-            {
-                MyAPIGateway.TerminalControls.GetActions<IMySmallMissileLauncherReload>(out actions);
-            }
+            //else if (Entity is IMySmallMissileLauncher)
+            //{
+            //    MyAPIGateway.TerminalControls.GetActions<IMySmallMissileLauncher>(out actions);
+            //}
+            //else if (Entity is IMySmallMissileLauncherReload)
+            //{
+            //    MyAPIGateway.TerminalControls.GetActions<IMySmallMissileLauncherReload>(out actions);
+            //}
 
             MyLog.Default.Info($"============ Terminal Actions ==============");
 
@@ -162,7 +157,7 @@ namespace ProjectilesImproved.Weapons
                         //}
                     };
 
-                    a.Writer = weaponsFiringWriter;
+                    a.Writer = WeaponsFiringWriter;
                 }
                 if (a.Id == "Shoot_On")
                 {
@@ -183,7 +178,7 @@ namespace ProjectilesImproved.Weapons
                         //}
                     };
 
-                    a.Writer = weaponsFiringWriter;
+                    a.Writer = WeaponsFiringWriter;
                 }
                 else if (a.Id == "Shoot_Off")
                 {
@@ -193,7 +188,7 @@ namespace ProjectilesImproved.Weapons
                         (block.GameLogic as WeaponsBase).terminalShooting = false;
                     };
 
-                    a.Writer = weaponsFiringWriter;
+                    a.Writer = WeaponsFiringWriter;
                 }
             }
 
@@ -206,14 +201,14 @@ namespace ProjectilesImproved.Weapons
             {
                 MyAPIGateway.TerminalControls.GetControls<IMySmallGatlingGun>(out controls);
             }
-            else if (Entity is IMySmallMissileLauncher)
-            {
-                MyAPIGateway.TerminalControls.GetControls<IMySmallMissileLauncher>(out controls);
-            }
-            else if (Entity is IMySmallMissileLauncherReload)
-            {
-                MyAPIGateway.TerminalControls.GetControls<IMySmallMissileLauncherReload>(out controls);
-            }
+            //else if (Entity is IMySmallMissileLauncher)
+            //{
+            //    MyAPIGateway.TerminalControls.GetControls<IMySmallMissileLauncher>(out controls);
+            //}
+            //else if (Entity is IMySmallMissileLauncherReload)
+            //{
+            //    MyAPIGateway.TerminalControls.GetControls<IMySmallMissileLauncherReload>(out controls);
+            //}
 
             MyLog.Default.Info($"============ Terminal Controls ==============");
 
@@ -240,7 +235,7 @@ namespace ProjectilesImproved.Weapons
             MyLog.Default.Flush();
         }
 
-        private void weaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
+        private void WeaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
         {
             if ((block.GameLogic as WeaponsBase).terminalShooting)
             {
@@ -282,15 +277,15 @@ namespace ProjectilesImproved.Weapons
             {
                 Vector3D direction = gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, gun.GunBase.GetMuzzleWorldMatrix().Forward);
 
-                Standard fireData = new Standard()
+                BulletDrop fireData = new BulletDrop()
                 {
                     ShooterID = Entity.EntityId,
                     WeaponId = weapon.Id,
                     Weapon = weapon,
                     MagazineId = gun.GunBase.CurrentAmmoMagazineId,
                     Magazine = gun.GunBase.CurrentAmmoMagazineDefinition,
-                    Ammo = gun.GunBase.CurrentAmmoDefinition,
-                    Direction = direction,//Vector3D.IsUnit(ref direction) ? direction : Vector3D.Normalize(direction),
+                    Ammo = (MyProjectileAmmoDefinition)gun.GunBase.CurrentAmmoDefinition,
+                    Direction = Vector3D.IsUnit(ref direction) ? direction : Vector3D.Normalize(direction),
                     Position = gun.GunBase.GetMuzzleWorldPosition(),
                     Velocity = block.CubeGrid.Physics.LinearVelocity + direction * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed
                 };
@@ -302,7 +297,6 @@ namespace ProjectilesImproved.Weapons
                     timeTillNextShot--;
 
                     soundEmitter.PlaySound(gun.GunBase.ShootSound, false, false, false, false, false, null);
-                    //soundEmitter.PlaySound(gun.GunBase.SecondarySound, false, false, false, false, false, null);
 
                     currentShotInBurst++;
                     if (currentShotInBurst == gun.GunBase.ShotsInBurst)
