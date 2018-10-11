@@ -1,12 +1,12 @@
-﻿using ProtoBuf;
+﻿using ProjectilesImproved.Effects;
+using ProtoBuf;
 using Sandbox.Definitions;
+using Sandbox.Game;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using VRage.Game;
-using VRage.Game.Components;
 using VRage.Game.ModAPI;
-using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
 
@@ -46,7 +46,13 @@ namespace ProjectilesImproved.Bullets
         public Vector3D Velocity;
 
         [ProtoMember(8)]
+        public Vector3 Up;
+
+        [ProtoMember(9)]
         public int LifeTimeTicks = 0;
+
+        [ProtoMember(10)]
+        public EffectBase OnHitEffects;
 
         public bool HasExpired;
 
@@ -58,12 +64,13 @@ namespace ProjectilesImproved.Bullets
 
         public MyProjectileAmmoDefinition Ammo;
 
-        public Vector3D PositionBeforeUpdate;
+        public Vector3D ToEnd;
+        public float LengthMultiplyer => 40f * Ammo.ProjectileTrailScale;
 
         public float LastPositionFraction = 0;
 
 
-        private int CollisionCheckFrames = -1;
+        public int CollisionCheckFrames { get; private set; } = -1;
         private int CollisionCheckCounter = 0;
 
         public virtual void Update() { }
@@ -90,7 +97,7 @@ namespace ProjectilesImproved.Bullets
                 MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
                     new Vector4(Ammo.ProjectileTrailColor * scaleFactor * 10f, 1f),
-                    Position + (Velocity * Tick) * LastPositionFraction,
+                    Position + VelocityPerTick * LastPositionFraction,
                     Direction,
                     lengthMultiplier,
                     thickness);
@@ -101,41 +108,42 @@ namespace ProjectilesImproved.Bullets
 
         public virtual void CollisionDetection()
         {
-            if (!DoCollisionCheck()) return;
+            if (!DoCollisionCheck() || HasExpired) return;
 
-            float lengthMultiplier = 40f * Ammo.ProjectileTrailScale;
-            Vector3D toEnd = Position + VelocityPerTick + (Direction * lengthMultiplier);
-
+            ToEnd = Position + (VelocityPerTick * CollisionCheckFrames);// + (Direction * LengthMultiplyer);
 
             List<IHitInfo> hitlist = new List<IHitInfo>();
-            MyAPIGateway.Physics.CastRay(PositionBeforeUpdate, toEnd, hitlist);
-            foreach (IHitInfo hit in hitlist)
+
+
+            if (Ammo.SpeedVar > 600)
             {
-                if (hit.HitEntity is IMyDestroyableObject)
-                {
-                    IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                    (hit.HitEntity as IMyDestroyableObject).DoDamage(Ammo.ProjectileHealthDamage, Bullet, true, default(MyHitInfo), ShooterID);
+                IHitInfo hit;
+                MyAPIGateway.Physics.CastLongRay(Position, ToEnd, out hit, true);
+                hitlist.Add(hit);
+            }
+            else
+            {
+                MyAPIGateway.Physics.CastRay(Position, ToEnd, hitlist);
+            }
 
-                    hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, Direction * Ammo.ProjectileHitImpulse, hit.Position, null);
+            MyVisualScriptLogicProvider.AddGPS("", "", Position, Color.Green);
 
-                    LastPositionFraction = hit.Fraction;
-                    break;
-                }
-                else if (hit.HitEntity is IMyCubeGrid)
+            if (hitlist.Count > 0)
+            {
+                if (OnHitEffects == null)
                 {
-                    IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                    Vector3I? hitPos = grid.RayCastBlocks(PositionBeforeUpdate, toEnd);
-                    if (hitPos.HasValue)
+                    if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
                     {
-                        IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
-                        block.DoDamage(Ammo.ProjectileMassDamage, Bullet, true, default(MyHitInfo), ShooterID);
-
-                        block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, Direction * Ammo.ProjectileHitImpulse, hit.Position, null);
-
-                        LastPositionFraction = hit.Fraction;
-                        break;
+                        OnHitEffects = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
+                    }
+                    else
+                    {
+                        OnHitEffects = new EffectBase();
                     }
                 }
+
+                OnHitEffects.Execute(hitlist[0], this);
+                HasExpired = true;
             }
         }
 
@@ -155,7 +163,11 @@ namespace ProjectilesImproved.Bullets
 
         public int CollisionCheckWaitFrames()
         {
-            if (CollisionCheckFrames == -1)
+            if (this is BulletDrop)
+            {
+                CollisionCheckFrames = 1;
+            }
+            else if (CollisionCheckFrames == -1)
             {
                 if (MaxSpeedLimit == 0)
                 {

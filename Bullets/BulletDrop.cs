@@ -23,7 +23,7 @@ namespace ProjectilesImproved.Bullets
 
             ExternalForceData forceData = WorldPlanets.GetExternalForces(Position);
 
-            Velocity = Velocity + (forceData.Gravity * 0.5);
+            Velocity = Velocity + (forceData.Gravity * Settings.GravityMultiplyer);
             Direction = Vector3D.Normalize(Velocity);
             Position += VelocityPerTick;
             DistanceTraveled += VelocityPerTick.LengthSquared();

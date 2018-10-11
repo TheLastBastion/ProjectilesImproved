@@ -277,6 +277,8 @@ namespace ProjectilesImproved.Weapons
             {
                 Vector3D direction = gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, gun.GunBase.GetMuzzleWorldMatrix().Forward);
 
+                MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
+
                 BulletDrop fireData = new BulletDrop()
                 {
                     ShooterID = Entity.EntityId,
@@ -286,8 +288,9 @@ namespace ProjectilesImproved.Weapons
                     Magazine = gun.GunBase.CurrentAmmoMagazineDefinition,
                     Ammo = (MyProjectileAmmoDefinition)gun.GunBase.CurrentAmmoDefinition,
                     Direction = Vector3D.IsUnit(ref direction) ? direction : Vector3D.Normalize(direction),
-                    Position = gun.GunBase.GetMuzzleWorldPosition(),
-                    Velocity = block.CubeGrid.Physics.LinearVelocity + direction * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed
+                    Position = muzzleMatrix.Translation,
+                    Velocity = block.CubeGrid.Physics.LinearVelocity + direction * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed,
+                    Up = muzzleMatrix.Up
                 };
 
                 while (timeTillNextShot >= 1)
