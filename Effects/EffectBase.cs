@@ -22,9 +22,9 @@ namespace ProjectilesImproved.Effects
             if (hit.HitEntity is IMyDestroyableObject)
             {
                 IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.Ammo.ProjectileHealthDamage, bullet.Ammo.Id.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
 
-                hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.Ammo.ProjectileHitImpulse, hit.Position, null);
+                hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
                 bullet.LastPositionFraction = hit.Fraction;
                 bullet.HasExpired = true;
@@ -36,9 +36,9 @@ namespace ProjectilesImproved.Effects
                 if (hitPos.HasValue)
                 {
                     IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
-                    block.DoDamage(bullet.Ammo.ProjectileMassDamage, bullet.Ammo.Id.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                    block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
 
-                    block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.Ammo.ProjectileHitImpulse, hit.Position, null);
+                    block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
                     bullet.LastPositionFraction = hit.Fraction;
                     bullet.HasExpired = true;

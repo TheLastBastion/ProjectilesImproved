@@ -17,13 +17,13 @@ namespace ProjectilesImproved.Bullets
     {
         public static MyStringId BulletMaterial = MyStringId.GetOrCompute("ProjectileTrailLine");
         public static MyStringHash Bullet = MyStringHash.GetOrCompute("bullet");
-        public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ? 
+        public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ?
             MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
 
         public const float Tick = 1f / 60f;
         public Vector3D VelocityPerTick => Velocity * Tick;
-        public bool IsAtRange => DistanceTraveled * LifeTimeTicks > Ammo.MaxTrajectory * Ammo.MaxTrajectory;
-        public bool UseLongRaycast => Ammo.DesiredSpeed * Tick * CollisionCheckFrames > 50;
+        public bool IsAtRange => DistanceTraveled * LifeTimeTicks > MaxTrajectory * MaxTrajectory;
+        public bool UseLongRaycast => ProjectileSpeed * Tick * CollisionCheckFrames > 50;
 
         [ProtoMember(1)]
         public long GridId;
@@ -52,6 +52,27 @@ namespace ProjectilesImproved.Bullets
         [ProtoMember(9)]
         public int LifeTimeTicks;
 
+        [ProtoMember(10)]
+        public float ProjectileMassDamage = -1;
+
+        [ProtoMember(13)]
+        public float ProjectileHealthDamage = -1;
+
+        [ProtoMember(11)]
+        public float ProjectileSpeed = -1;
+
+        [ProtoMember(12)]
+        public float ProjectileHitImpulse = -1;
+
+        [ProtoMember(13)]
+        public float ProjectileTrailScale = -1;
+
+        [ProtoMember(14)]
+        public float MaxTrajectory = -1;
+
+        [ProtoMember(15)]
+        public Vector3 ProjectileTrailColor = Vector3.Zero;
+
         public bool IsInitialized = false;
 
         public bool HasExpired = false;
@@ -62,13 +83,13 @@ namespace ProjectilesImproved.Bullets
 
         public MyAmmoMagazineDefinition Magazine;
 
-        public MyProjectileAmmoDefinition Ammo;
+        //public MyProjectileAmmoDefinition Ammo;
 
         public EffectBase OnHitEffects;
 
         public Vector3D Start;
         public Vector3D End;
-        public float LengthMultiplyer => 40f * Ammo.ProjectileTrailScale;
+        public float LengthMultiplyer => 40f * ProjectileTrailScale;
 
         public float LastPositionFraction = 0;
 
@@ -90,10 +111,21 @@ namespace ProjectilesImproved.Bullets
                 Magazine = MyDefinitionManager.Static.GetAmmoMagazineDefinition(MagazineId);
             }
 
-            if (Ammo == null)
-            {
-                Ammo = (MyProjectileAmmoDefinition)MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
-            }
+            MyProjectileAmmoDefinition Ammo = (MyProjectileAmmoDefinition)MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
+
+            if (ProjectileMassDamage == -1)
+                ProjectileMassDamage = Ammo.ProjectileMassDamage;
+            if (ProjectileHealthDamage == -1)
+                ProjectileHealthDamage = Ammo.ProjectileHealthDamage;
+            if (ProjectileSpeed == -1)
+                ProjectileSpeed = Ammo.DesiredSpeed;
+            if (ProjectileHitImpulse == -1)
+                ProjectileHitImpulse = Ammo.ProjectileHitImpulse;
+            if (MaxTrajectory == -1)
+                MaxTrajectory = Ammo.MaxTrajectory;
+
+            if (ProjectileTrailColor == Vector3.Zero)
+                ProjectileTrailColor = Ammo.ProjectileTrailColor;
 
             if (OnHitEffects == null)
             {
@@ -137,14 +169,14 @@ namespace ProjectilesImproved.Bullets
         public virtual void Draw()
         {
             float scaleFactor = MyParticlesManager.Paused ? 1f : MyUtils.GetRandomFloat(1f, 2f);
-            float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (Ammo.ProjectileTrailScale + 0.5f);
+            float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (ProjectileTrailScale + 0.5f);
             thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
 
             if (LastPositionFraction == 0)
             {
                 MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
-                    new Vector4(Ammo.ProjectileTrailColor * scaleFactor * 10f, 1f),
+                    new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
                     PositionMatrix.Translation,
                     PositionMatrix.Forward,
                     LengthMultiplyer,
@@ -154,7 +186,7 @@ namespace ProjectilesImproved.Bullets
             {
                 MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
-                    new Vector4(Ammo.ProjectileTrailColor * scaleFactor * 10f, 1f),
+                    new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
                     PositionMatrix.Translation + VelocityPerTick * LastPositionFraction,
                     PositionMatrix.Forward,
                     LengthMultiplyer,
@@ -199,7 +231,7 @@ namespace ProjectilesImproved.Bullets
 
             if (hit != null && hit.Position != null)
             {
-                MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
+                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
                 OnHitEffects.Execute(hit, this);
             }
         }
@@ -233,8 +265,8 @@ namespace ProjectilesImproved.Bullets
                 }
                 else
                 {
-                    CollisionCheckFrames = 1 + (int)Math.Ceiling((Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f);
-                    MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.DesiredSpeed / MaxSpeedLimit)}, With Reduction: {(Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f}");
+                    CollisionCheckFrames = 1 + (int)Math.Ceiling((ProjectileSpeed / MaxSpeedLimit) * 0.5f);
+                    //MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.DesiredSpeed / MaxSpeedLimit)}, With Reduction: {(Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f}");
                     MyLog.Default.Flush();
 
                     //if (CollisionCheckFrames < 1)
