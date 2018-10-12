@@ -235,6 +235,7 @@ namespace ProjectilesImproved.Bullets
                 {
                     CollisionCheckFrames = (int)Math.Floor((Ammo.SpeedVar / MaxSpeedLimit) * 0.5f);
                     MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.SpeedVar / MaxSpeedLimit)}, With Reduction: {(Ammo.SpeedVar / MaxSpeedLimit) * 0.5f}");
+                    MyLog.Default.Flush();
 
                     if (CollisionCheckFrames < 1)
                     {
