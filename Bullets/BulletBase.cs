@@ -206,6 +206,7 @@ namespace ProjectilesImproved.Bullets
             if (DoShortRaycast)
             {
                 End = Start + VelocityPerTick;
+                DoShortRaycast = false;
             }
             else
             {
@@ -221,8 +222,6 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void CollisionDetection()
         {
-            if (!DoCollisionCheck()) return;
-
             IHitInfo hit = null;
 
             if (UseLongRaycast)
@@ -250,11 +249,12 @@ namespace ProjectilesImproved.Bullets
                 }
                 else
                 {
-                    CollisionCheckCounter = CollisionCheckFrames - framesToWait;
+                    CollisionCheckCounter = CollisionCheckWaitFrames() - framesToWait;
+                    DoShortRaycast = true;
                 }
 
                 //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
-                OnHitEffects.Execute(hit, this);
+                //OnHitEffects.Execute(hit, this);
             }
         }
 
@@ -289,12 +289,7 @@ namespace ProjectilesImproved.Bullets
                 {
                     CollisionCheckFrames = 1 + (int)Math.Ceiling((ProjectileSpeed / MaxSpeedLimit) * 0.5f);
                     //MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.DesiredSpeed / MaxSpeedLimit)}, With Reduction: {(Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f}");
-                    MyLog.Default.Flush();
-
-                    //if (CollisionCheckFrames < 1)
-                    //{
-                    //    CollisionCheckFrames = 1;
-                    //}
+                    //MyLog.Default.Flush();
                 }
             }
 
