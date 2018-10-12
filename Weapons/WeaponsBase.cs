@@ -249,7 +249,7 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
-            MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
+            //MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
             if (timeTillNextShot < 1)
             {
                 timeTillNextShot += weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire * FireRateMultiplayer;
@@ -271,7 +271,7 @@ namespace ProjectilesImproved.Weapons
                 return;
             }
 
-            MyAPIGateway.Utilities.ShowNotification($"Mouse: {gun.IsShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME)} Terminal: {terminalShooting} Next: {timeTillNextShot.ToString("n3")} BurstShot: {currentShotInBurst}/{gun.GunBase.ShotsInBurst} BackKick: {gun.GunBase.CurrentAmmoDefinition.BackkickForce}", 1); // {weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire}
+            //MyAPIGateway.Utilities.ShowNotification($"Mouse: {gun.IsShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME)} Terminal: {terminalShooting} Next: {timeTillNextShot.ToString("n3")} BurstShot: {currentShotInBurst}/{gun.GunBase.ShotsInBurst} BackKick: {gun.GunBase.CurrentAmmoDefinition.BackkickForce}", 1); // {weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire}
 
             if (timeTillNextShot >= 1)
             {

@@ -161,6 +161,7 @@ namespace ProjectilesImproved.Bullets
                 HasExpired = true;
             }
 
+            MyAPIGateway.Utilities.ShowNotification($"CheckFrames: {CollisionCheckWaitFrames()}, Current: {CollisionCheckCounter}", 1);
             //MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
         }
 
@@ -213,8 +214,7 @@ namespace ProjectilesImproved.Bullets
                 End = Start + (VelocityPerTick * CollisionCheckFrames);
             }
 
-
-            MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
+            //MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
         }
 
         /// <summary>
