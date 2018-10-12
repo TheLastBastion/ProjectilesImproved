@@ -95,6 +95,7 @@ namespace ProjectilesImproved.Bullets
 
         public int CollisionCheckFrames { get; private set; } = -1;
         private int CollisionCheckCounter = 0;
+        private bool DoShortRaycast = false;
 
         /// <summary>
         /// Initializes all empty variables
@@ -202,7 +203,15 @@ namespace ProjectilesImproved.Bullets
         public virtual void PreCollitionDetection()
         {
             Start = PositionMatrix.Translation;
-            End = Start + (VelocityPerTick * CollisionCheckFrames);
+            if (DoShortRaycast)
+            {
+                End = Start + VelocityPerTick;
+            }
+            else
+            {
+                End = Start + (VelocityPerTick * CollisionCheckFrames);
+            }
+
 
             //MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
         }
@@ -212,6 +221,8 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void CollisionDetection()
         {
+            if (!DoCollisionCheck()) return;
+
             IHitInfo hit = null;
 
             if (UseLongRaycast)
@@ -231,6 +242,16 @@ namespace ProjectilesImproved.Bullets
 
             if (hit != null && hit.Position != null)
             {
+                int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
+                if (framesToWait < 1)
+                {
+                    OnHitEffects.Execute(hit, this);
+                }
+                else
+                {
+                    CollisionCheckCounter = CollisionCheckFrames - framesToWait;
+                }
+
                 //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
                 OnHitEffects.Execute(hit, this);
             }
