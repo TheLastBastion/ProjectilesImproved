@@ -1,4 +1,5 @@
-﻿using VRageMath;
+﻿using Sandbox.Game;
+using VRageMath;
 
 namespace ProjectilesImproved.Bullets
 {
@@ -17,6 +18,8 @@ namespace ProjectilesImproved.Bullets
             {
                 HasExpired = true;
             }
+
+            MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
         }
     }
 }

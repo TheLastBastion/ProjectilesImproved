@@ -15,7 +15,7 @@ namespace ProjectilesImproved
             //{ MyStringHash.GetOrCompute("OKI50mmAmmoPars"), new ExplosiveRounds() { AffectVoxels = true, Radius = 1, NextEffect = null }}
         };
 
-        public const float GravityMultiplyer = 0.05f;
+        public const float GravityMultiplyer = 0.4f;
 
 
     }

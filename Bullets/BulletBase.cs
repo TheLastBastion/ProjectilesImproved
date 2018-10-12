@@ -109,6 +109,9 @@ namespace ProjectilesImproved.Bullets
             IsInitialized = true;
         }
 
+        /// <summary>
+        /// Updates LifetimeTicks that keeps track of distance traveled
+        /// </summary>
         public void PreUpdate()
         {
             LifeTimeTicks++;
@@ -127,10 +130,11 @@ namespace ProjectilesImproved.Bullets
             MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
         }
 
+        /// <summary>
+        /// Draws the projectile
+        /// </summary>
         public virtual void Draw()
         {
-            float lengthMultiplier = 40f * Ammo.ProjectileTrailScale;
-
             float scaleFactor = MyParticlesManager.Paused ? 1f : MyUtils.GetRandomFloat(1f, 2f);
             float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (Ammo.ProjectileTrailScale + 0.5f);
             thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
@@ -142,7 +146,7 @@ namespace ProjectilesImproved.Bullets
                     new Vector4(Ammo.ProjectileTrailColor * scaleFactor * 10f, 1f),
                     PositionMatrix.Translation,
                     PositionMatrix.Forward,
-                    lengthMultiplier,
+                    LengthMultiplyer,
                     thickness);
             }
             else
@@ -152,7 +156,7 @@ namespace ProjectilesImproved.Bullets
                     new Vector4(Ammo.ProjectileTrailColor * scaleFactor * 10f, 1f),
                     PositionMatrix.Translation + VelocityPerTick * LastPositionFraction,
                     PositionMatrix.Forward,
-                    lengthMultiplier,
+                    LengthMultiplyer,
                     thickness);
 
                 HasExpired = true;
@@ -160,21 +164,23 @@ namespace ProjectilesImproved.Bullets
         }
 
         /// <summary>
-        /// Define collision start and end points
+        /// Define collision start and end points and other precalculation operations
         /// </summary>
         public virtual void PreCollitionDetection()
         {
             Start = PositionMatrix.Translation;
             End = Start + (VelocityPerTick * CollisionCheckFrames);
 
-            MyVisualScriptLogicProvider.AddGPS("", "", Start + (VelocityPerTick * CollisionCheckFrames * 0.5f), Color.Orange);
+            MyVisualScriptLogicProvider.AddGPS("", "", Start + (VelocityPerTick * CollisionCheckFrames * 0.5f), Color.Pink);
             MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
         }
 
+        /// <summary>
+        /// Checks for collisions
+        /// </summary>
         public virtual void CollisionDetection()
         {
             List<IHitInfo> hitlist = new List<IHitInfo>();
-
 
             if (Ammo.SpeedVar > 600)
             {
@@ -228,6 +234,7 @@ namespace ProjectilesImproved.Bullets
                 else
                 {
                     CollisionCheckFrames = (int)Math.Floor((Ammo.SpeedVar / MaxSpeedLimit) * 0.5f);
+                    MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}");
 
                     if (CollisionCheckFrames < 1)
                     {
