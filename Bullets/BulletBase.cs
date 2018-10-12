@@ -182,7 +182,7 @@ namespace ProjectilesImproved.Bullets
         {
             List<IHitInfo> hitlist = new List<IHitInfo>();
 
-            if (Ammo.SpeedVar > 600)
+            if (Ammo.DesiredSpeed > 600)
             {
                 IHitInfo hit;
                 MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
@@ -233,8 +233,8 @@ namespace ProjectilesImproved.Bullets
                 }
                 else
                 {
-                    CollisionCheckFrames = (int)Math.Floor((Ammo.SpeedVar / MaxSpeedLimit) * 0.5f);
-                    MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.SpeedVar / MaxSpeedLimit)}, With Reduction: {(Ammo.SpeedVar / MaxSpeedLimit) * 0.5f}");
+                    CollisionCheckFrames = (int)Math.Floor((Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f);
+                    MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.DesiredSpeed / MaxSpeedLimit)}, With Reduction: {(Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f}");
                     MyLog.Default.Flush();
 
                     if (CollisionCheckFrames < 1)
