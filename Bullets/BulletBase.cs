@@ -22,6 +22,7 @@ namespace ProjectilesImproved.Bullets
 
         public const float Tick = 1f / 60f;
         public Vector3D VelocityPerTick => Velocity * Tick;
+        public bool IsAtRange => DistanceTraveled * LifeTimeTicks > Ammo.MaxTrajectory * Ammo.MaxTrajectory;
 
         [ProtoMember(1)]
         public long GridId;
@@ -122,7 +123,7 @@ namespace ProjectilesImproved.Bullets
             PositionMatrix.Translation += VelocityPerTick;
             DistanceTraveled += VelocityPerTick.LengthSquared();
 
-            if (DistanceTraveled * LifeTimeTicks > Ammo.MaxTrajectory * Ammo.MaxTrajectory)
+            if (IsAtRange)
             {
                 HasExpired = true;
             }
@@ -171,7 +172,7 @@ namespace ProjectilesImproved.Bullets
             Start = PositionMatrix.Translation;
             End = Start + (VelocityPerTick * CollisionCheckFrames);
 
-            MyVisualScriptLogicProvider.AddGPS("", "", Start + (VelocityPerTick * CollisionCheckFrames * 0.5f), Color.Pink);
+            //MyVisualScriptLogicProvider.AddGPS("", "", Start + (VelocityPerTick * CollisionCheckFrames * 0.5f), Color.Pink);
             MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
         }
 
@@ -195,6 +196,7 @@ namespace ProjectilesImproved.Bullets
 
             if (hitlist.Count > 0)
             {
+                MyVisualScriptLogicProvider.AddGPS("", "", hitlist[0].Position, Color.Red);
                 OnHitEffects.Execute(hitlist[0], this);
                 HasExpired = true;
             }

@@ -14,7 +14,7 @@ namespace ProjectilesImproved.Bullets
             PositionMatrix.Translation += VelocityPerTick;
             DistanceTraveled += VelocityPerTick.LengthSquared();
 
-            if (DistanceTraveled * LifeTimeTicks > Ammo.MaxTrajectory * Ammo.MaxTrajectory)
+            if (IsAtRange)
             {
                 HasExpired = true;
             }

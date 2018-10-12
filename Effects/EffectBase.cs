@@ -3,6 +3,7 @@ using ProtoBuf;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
+using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects
@@ -18,6 +19,21 @@ namespace ProjectilesImproved.Effects
 
         public virtual void Execute(IHitInfo hit, BulletBase bullet)
         {
+            MyLog.Default.Info($"hit: {hit == null}");
+            MyLog.Default.Flush();
+            MyLog.Default.Info($"hitEntity: {hit.HitEntity == null}");
+            MyLog.Default.Flush();
+            MyLog.Default.Info($"bullet.Ammo: {bullet.Ammo == null}");
+            MyLog.Default.Flush();
+            MyLog.Default.Info($"bullet.PositionMatrix: {bullet.PositionMatrix == null}");
+            MyLog.Default.Flush();
+            MyLog.Default.Info($"bullet.Start: {bullet.Start == null}");
+            MyLog.Default.Flush();
+            MyLog.Default.Info($"bullet.End: {bullet.End == null}");
+            MyLog.Default.Flush();
+            MyLog.Default.Info($"NextEffect: {NextEffect == null}");
+            MyLog.Default.Flush();
+
             if (hit.HitEntity is IMyDestroyableObject)
             {
                 IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
@@ -30,7 +46,7 @@ namespace ProjectilesImproved.Effects
             else if (hit.HitEntity is IMyCubeGrid)
             {
                 IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3I? hitPos = grid.RayCastBlocks(bullet.PositionMatrix.Translation, bullet.End);
+                Vector3I? hitPos = grid.RayCastBlocks(bullet.Start, bullet.End);
                 if (hitPos.HasValue)
                 {
                     IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
