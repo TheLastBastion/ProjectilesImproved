@@ -92,14 +92,7 @@ namespace ProjectilesImproved.Bullets
 
             if (Ammo == null)
             {
-                MyLog.Default.Info($"Ammo ID: {AmmoId}");
-                MyLog.Default.Flush();
-                MyAmmoDefinition def = MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
-                MyLog.Default.Info($"Ammo is null: {def == null}");
-                MyLog.Default.Flush();
                 Ammo = (MyProjectileAmmoDefinition)MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
-                MyLog.Default.Info($"Ammo after convert is null: {Ammo == null}");
-                MyLog.Default.Flush();
             }
 
             if (OnHitEffects == null)
@@ -188,28 +181,28 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void CollisionDetection()
         {
-            List<IHitInfo> hitlist = new List<IHitInfo>();
+            IHitInfo hit = null;
 
             if (UseLongRaycast)
             {
-                IHitInfo hit;
                 MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
-                hitlist.Add(hit);
             }
             else
             {
+                List<IHitInfo> hitlist = new List<IHitInfo>();
                 MyAPIGateway.Physics.CastRay(Start, End, hitlist);
+
+                if (hitlist.Count > 0)
+                {
+                    hit = hitlist[0];
+                }
             }
 
-            if (hitlist.Count > 0)
+            if (hit != null && hit.Position != null)
             {
-                MyLog.Default.Info($"hit: {hitlist.Count}");
-                MyLog.Default.Flush();
-                MyLog.Default.Info($"hit: {OnHitEffects == null}");
-                MyLog.Default.Flush();
-                MyVisualScriptLogicProvider.AddGPS("", "", hitlist[0].Position, Color.Red);
-                OnHitEffects.Execute(hitlist[0], this);
-                HasExpired = true;
+                MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
+                OnHitEffects.Execute(hit, this);
+                //HasExpired = true;
             }
         }
 

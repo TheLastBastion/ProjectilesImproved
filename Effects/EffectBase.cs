@@ -19,21 +19,6 @@ namespace ProjectilesImproved.Effects
 
         public virtual void Execute(IHitInfo hit, BulletBase bullet)
         {
-            MyLog.Default.Info($"hit: {hit == null}");
-            MyLog.Default.Flush();
-            MyLog.Default.Info($"hitEntity: {hit.HitEntity == null}");
-            MyLog.Default.Flush();
-            MyLog.Default.Info($"bullet.Ammo: {bullet.Ammo == null}");
-            MyLog.Default.Flush();
-            MyLog.Default.Info($"bullet.PositionMatrix: {bullet.PositionMatrix == null}");
-            MyLog.Default.Flush();
-            MyLog.Default.Info($"bullet.Start: {bullet.Start == null}");
-            MyLog.Default.Flush();
-            MyLog.Default.Info($"bullet.End: {bullet.End == null}");
-            MyLog.Default.Flush();
-            MyLog.Default.Info($"NextEffect: {NextEffect == null}");
-            MyLog.Default.Flush();
-
             if (hit.HitEntity is IMyDestroyableObject)
             {
                 IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
@@ -42,6 +27,7 @@ namespace ProjectilesImproved.Effects
                 hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.Ammo.ProjectileHitImpulse, hit.Position, null);
 
                 bullet.LastPositionFraction = hit.Fraction;
+                bullet.HasExpired = true;
             }
             else if (hit.HitEntity is IMyCubeGrid)
             {
@@ -55,6 +41,7 @@ namespace ProjectilesImproved.Effects
                     block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.Ammo.ProjectileHitImpulse, hit.Position, null);
 
                     bullet.LastPositionFraction = hit.Fraction;
+                    bullet.HasExpired = true;
                 }
             }
 
