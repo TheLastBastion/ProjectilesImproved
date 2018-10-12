@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ProjectilesImproved.Bullets;
+﻿using ProjectilesImproved.Bullets;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -15,10 +12,21 @@ namespace ProjectilesImproved.Effects
         public override void Execute(IHitInfo hit, BulletBase bullet)
         {
             float hitEntityHealth = 5000; // default value if voxel or something
+
             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
             if (obj != null)
             {
                 hitEntityHealth = obj.Integrity;
+            }
+            else if (hit.HitEntity is IMyCubeGrid)
+            {
+                IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
+                Vector3I? hitPos = grid.RayCastBlocks(bullet.PositionMatrix.Translation, bullet.VelocityPerTick);
+                if (hitPos.HasValue)
+                {
+                    obj = grid.GetCubeBlock(hitPos.Value);
+                    hitEntityHealth = obj.Integrity;
+                }
             }
 
             Vector3 hitObjectVelocity = Vector3.Zero;
@@ -27,8 +35,10 @@ namespace ProjectilesImproved.Effects
                 hitObjectVelocity = hit.HitEntity.Physics.LinearVelocity;
             }
 
+            Vector3 relativeV = bullet.Velocity - hitObjectVelocity;
+
             float deflectionFactor = bullet.Ammo.ProjectileMassDamage / (hitEntityHealth + bullet.Ammo.ProjectileMassDamage);
-            float deflectionAngle0to90 = Vector3.Distance(-Vector3.Normalize(bullet.Velocity), hitObjectVelocity);
+            float deflectionAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal) / 1.5f;
 
             if (deflectionAngle0to90 > deflectionFactor)
             {
@@ -43,7 +53,6 @@ namespace ProjectilesImproved.Effects
                     obj.DoDamage(bullet.Ammo.ProjectileMassDamage * (1 - deflectionAngle0to90), bullet.Ammo.Id.SubtypeId, true);
                 }
 
-                Vector3 relativeV = bullet.Velocity - hitObjectVelocity;
                 bullet.Velocity = (deflectionAngle0to90 * Vector3.Reflect(relativeV, hit.Normal)) + hitObjectVelocity;
                 bullet.Ammo.ProjectileMassDamage = bullet.Ammo.ProjectileMassDamage * deflectionAngle0to90;
             }
