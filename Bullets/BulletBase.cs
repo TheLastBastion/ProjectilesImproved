@@ -172,7 +172,6 @@ namespace ProjectilesImproved.Bullets
             Start = PositionMatrix.Translation;
             End = Start + (VelocityPerTick * CollisionCheckFrames);
 
-            //MyVisualScriptLogicProvider.AddGPS("", "", Start + (VelocityPerTick * CollisionCheckFrames * 0.5f), Color.Pink);
             MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
         }
 
@@ -202,7 +201,6 @@ namespace ProjectilesImproved.Bullets
             {
                 MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
                 OnHitEffects.Execute(hit, this);
-                //HasExpired = true;
             }
         }
 
@@ -227,10 +225,6 @@ namespace ProjectilesImproved.Bullets
 
         public int CollisionCheckWaitFrames()
         {
-            //if (this is BulletDrop)
-            //{
-            //    CollisionCheckFrames = 1;
-            //}
             if (CollisionCheckFrames == -1)
             {
                 if (MaxSpeedLimit == 0)
@@ -239,14 +233,14 @@ namespace ProjectilesImproved.Bullets
                 }
                 else
                 {
-                    CollisionCheckFrames = (int)Math.Floor((Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f);
+                    CollisionCheckFrames = 1 + (int)Math.Ceiling((Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f);
                     MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.DesiredSpeed / MaxSpeedLimit)}, With Reduction: {(Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f}");
                     MyLog.Default.Flush();
 
-                    if (CollisionCheckFrames < 1)
-                    {
-                        CollisionCheckFrames = 1;
-                    }
+                    //if (CollisionCheckFrames < 1)
+                    //{
+                    //    CollisionCheckFrames = 1;
+                    //}
                 }
             }
 
