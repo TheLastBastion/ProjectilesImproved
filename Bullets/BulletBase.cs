@@ -23,6 +23,7 @@ namespace ProjectilesImproved.Bullets
         public const float Tick = 1f / 60f;
         public Vector3D VelocityPerTick => Velocity * Tick;
         public bool IsAtRange => DistanceTraveled * LifeTimeTicks > Ammo.MaxTrajectory * Ammo.MaxTrajectory;
+        public bool UseLongRaycast => Ammo.DesiredSpeed * Tick * CollisionCheckFrames > 50;
 
         [ProtoMember(1)]
         public long GridId;
@@ -79,7 +80,6 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public void Init()
         {
-
             if (Weapon == null)
             {
                 Weapon = MyDefinitionManager.Static.GetWeaponDefinition(WeaponId);
@@ -183,7 +183,7 @@ namespace ProjectilesImproved.Bullets
         {
             List<IHitInfo> hitlist = new List<IHitInfo>();
 
-            if (Ammo.DesiredSpeed > 600)
+            if (UseLongRaycast)
             {
                 IHitInfo hit;
                 MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
@@ -196,6 +196,10 @@ namespace ProjectilesImproved.Bullets
 
             if (hitlist.Count > 0)
             {
+                MyLog.Default.Info($"hit: {hitlist.Count}");
+                MyLog.Default.Flush();
+                MyLog.Default.Info($"hit: {OnHitEffects == null}");
+                MyLog.Default.Flush();
                 MyVisualScriptLogicProvider.AddGPS("", "", hitlist[0].Position, Color.Red);
                 OnHitEffects.Execute(hitlist[0], this);
                 HasExpired = true;
