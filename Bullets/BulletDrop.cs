@@ -19,7 +19,7 @@ namespace ProjectilesImproved.Bullets
                 HasExpired = true;
             }
 
-            MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
+            //MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
         }
     }
 }
