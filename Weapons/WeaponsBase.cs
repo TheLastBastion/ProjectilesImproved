@@ -291,6 +291,7 @@ namespace ProjectilesImproved.Weapons
                     WeaponId = weapon.Id,
                     MagazineId = gun.GunBase.CurrentAmmoMagazineId,
                     AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
+                    Velocity = block.CubeGrid.Physics.LinearVelocity + positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed,
                     PositionMatrix = positionMatrix
                 };
 
