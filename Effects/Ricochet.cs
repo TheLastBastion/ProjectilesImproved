@@ -55,6 +55,7 @@ namespace ProjectilesImproved.Effects
 
                 bullet.Velocity = (deflectionAngle0to90 * Vector3.Reflect(relativeV, hit.Normal)) + hitObjectVelocity;
                 bullet.ProjectileMassDamage = bullet.ProjectileMassDamage * deflectionAngle0to90;
+                bullet.ResetCollisionCheck();
             }
             else
             {
