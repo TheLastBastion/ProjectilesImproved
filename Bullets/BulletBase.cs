@@ -214,7 +214,7 @@ namespace ProjectilesImproved.Bullets
             }
 
 
-            //MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
+            MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
         }
 
         /// <summary>
