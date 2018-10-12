@@ -128,7 +128,7 @@ namespace ProjectilesImproved.Bullets
                 HasExpired = true;
             }
 
-            MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
+            //MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace ProjectilesImproved.Bullets
             Start = PositionMatrix.Translation;
             End = Start + (VelocityPerTick * CollisionCheckFrames);
 
-            MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
+            //MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
         }
 
         /// <summary>
