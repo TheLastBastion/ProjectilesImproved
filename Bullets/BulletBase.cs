@@ -17,44 +17,42 @@ namespace ProjectilesImproved.Bullets
     {
         public static MyStringId BulletMaterial = MyStringId.GetOrCompute("ProjectileTrailLine");
         public static MyStringHash Bullet = MyStringHash.GetOrCompute("bullet");
-        public const float Tick = 1f / 60f;
-
         public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ? 
             MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
 
+        public const float Tick = 1f / 60f;
         public Vector3D VelocityPerTick => Velocity * Tick;
 
         [ProtoMember(1)]
-        public long ShooterID;
+        public long GridId;
 
         [ProtoMember(2)]
-        public MyDefinitionId WeaponId;
+        public long BlockId;
 
         [ProtoMember(3)]
-        public MyDefinitionId MagazineId;
+        public MyDefinitionId WeaponId;
 
         [ProtoMember(4)]
-        public Vector3D Direction;
+        public MyDefinitionId MagazineId;
 
         [ProtoMember(5)]
-        public double DistanceTraveled;
+        public MyDefinitionId AmmoId;
 
         [ProtoMember(6)]
-        public Vector3D Position;
+        public MatrixD PositionMatrix;
 
         [ProtoMember(7)]
-        public Vector3D Velocity;
+        public double DistanceTraveled;
 
         [ProtoMember(8)]
-        public Vector3 Up;
+        public Vector3D Velocity;
 
         [ProtoMember(9)]
-        public int LifeTimeTicks = 0;
+        public int LifeTimeTicks;
 
-        [ProtoMember(10)]
-        public EffectBase OnHitEffects;
+        public bool IsInitialized = false;
 
-        public bool HasExpired;
+        public bool HasExpired = false;
 
         public IMySlimBlock Slim;
 
@@ -64,20 +62,75 @@ namespace ProjectilesImproved.Bullets
 
         public MyProjectileAmmoDefinition Ammo;
 
-        public Vector3D ToEnd;
+        public EffectBase OnHitEffects;
+
+        public Vector3D Start;
+        public Vector3D End;
         public float LengthMultiplyer => 40f * Ammo.ProjectileTrailScale;
 
         public float LastPositionFraction = 0;
 
-
         public int CollisionCheckFrames { get; private set; } = -1;
         private int CollisionCheckCounter = 0;
 
-        public virtual void Update() { }
+        /// <summary>
+        /// Initializes all empty variables
+        /// </summary>
+        public void Init()
+        {
+
+            if (Weapon == null)
+            {
+                Weapon = MyDefinitionManager.Static.GetWeaponDefinition(WeaponId);
+            }
+
+            if (Magazine == null)
+            {
+                Magazine = MyDefinitionManager.Static.GetAmmoMagazineDefinition(MagazineId);
+            }
+
+            if (Ammo == null)
+            {
+                Ammo = (MyProjectileAmmoDefinition)MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
+            }
+
+            if (OnHitEffects == null)
+            {
+                if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
+                {
+                    OnHitEffects = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
+                }
+                else
+                {
+                    OnHitEffects = new EffectBase();
+                }
+            }
+
+            IsInitialized = true;
+        }
+
+        public void PreUpdate()
+        {
+            LifeTimeTicks++;
+        }
+
+        public virtual void Update()
+        {
+            PositionMatrix.Translation += VelocityPerTick;
+            DistanceTraveled += VelocityPerTick.LengthSquared();
+
+            if (DistanceTraveled * LifeTimeTicks > Ammo.MaxTrajectory * Ammo.MaxTrajectory)
+            {
+                HasExpired = true;
+            }
+
+            MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
+        }
 
         public virtual void Draw()
         {
             float lengthMultiplier = 40f * Ammo.ProjectileTrailScale;
+
             float scaleFactor = MyParticlesManager.Paused ? 1f : MyUtils.GetRandomFloat(1f, 2f);
             float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (Ammo.ProjectileTrailScale + 0.5f);
             thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
@@ -87,8 +140,8 @@ namespace ProjectilesImproved.Bullets
                 MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
                     new Vector4(Ammo.ProjectileTrailColor * scaleFactor * 10f, 1f),
-                    Position,
-                    Direction,
+                    PositionMatrix.Translation,
+                    PositionMatrix.Forward,
                     lengthMultiplier,
                     thickness);
             }
@@ -97,8 +150,8 @@ namespace ProjectilesImproved.Bullets
                 MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
                     new Vector4(Ammo.ProjectileTrailColor * scaleFactor * 10f, 1f),
-                    Position + VelocityPerTick * LastPositionFraction,
-                    Direction,
+                    PositionMatrix.Translation + VelocityPerTick * LastPositionFraction,
+                    PositionMatrix.Forward,
                     lengthMultiplier,
                     thickness);
 
@@ -106,49 +159,48 @@ namespace ProjectilesImproved.Bullets
             }
         }
 
+        /// <summary>
+        /// Define collision start and end points
+        /// </summary>
+        public virtual void PreCollitionDetection()
+        {
+            Start = PositionMatrix.Translation;
+            End = Start + (VelocityPerTick * CollisionCheckFrames);
+
+            MyVisualScriptLogicProvider.AddGPS("", "", Start + (VelocityPerTick * CollisionCheckFrames * 0.5f), Color.Orange);
+            MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
+        }
+
         public virtual void CollisionDetection()
         {
-            if (!DoCollisionCheck() || HasExpired) return;
-
-            ToEnd = Position + (VelocityPerTick * CollisionCheckFrames);// + (Direction * LengthMultiplyer);
-
             List<IHitInfo> hitlist = new List<IHitInfo>();
 
 
             if (Ammo.SpeedVar > 600)
             {
                 IHitInfo hit;
-                MyAPIGateway.Physics.CastLongRay(Position, ToEnd, out hit, true);
+                MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
                 hitlist.Add(hit);
             }
             else
             {
-                MyAPIGateway.Physics.CastRay(Position, ToEnd, hitlist);
+                MyAPIGateway.Physics.CastRay(Start, End, hitlist);
             }
-
-            MyVisualScriptLogicProvider.AddGPS("", "", Position, Color.Green);
 
             if (hitlist.Count > 0)
             {
-                if (OnHitEffects == null)
-                {
-                    if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
-                    {
-                        OnHitEffects = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
-                    }
-                    else
-                    {
-                        OnHitEffects = new EffectBase();
-                    }
-                }
-
                 OnHitEffects.Execute(hitlist[0], this);
                 HasExpired = true;
             }
         }
 
-        private bool DoCollisionCheck()
+        public bool DoCollisionCheck()
         {
+            if (HasExpired)
+            {
+                return false;
+            }
+
             CollisionCheckCounter++;
             if (CollisionCheckCounter != CollisionCheckWaitFrames())
             {
@@ -163,11 +215,11 @@ namespace ProjectilesImproved.Bullets
 
         public int CollisionCheckWaitFrames()
         {
-            if (this is BulletDrop)
-            {
-                CollisionCheckFrames = 1;
-            }
-            else if (CollisionCheckFrames == -1)
+            //if (this is BulletDrop)
+            //{
+            //    CollisionCheckFrames = 1;
+            //}
+            if (CollisionCheckFrames == -1)
             {
                 if (MaxSpeedLimit == 0)
                 {

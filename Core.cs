@@ -57,7 +57,21 @@ namespace ProjectilesImproved
                     i--;
                 }
 
+                if (!bullet.IsInitialized)
+                {
+                    bullet.Init();
+                }
+
+                bullet.PreUpdate();
                 bullet.Update();
+
+                if (bullet.DoCollisionCheck())
+                {
+                    bullet.PreCollitionDetection();
+                    bullet.CollisionDetection();
+                }
+
+                bullet.Draw();
             }
         }
     }

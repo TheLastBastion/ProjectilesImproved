@@ -275,22 +275,23 @@ namespace ProjectilesImproved.Weapons
 
             if (timeTillNextShot >= 1)
             {
-                Vector3D direction = gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, gun.GunBase.GetMuzzleWorldMatrix().Forward);
+                //Vector3D direction = gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, gun.GunBase.GetMuzzleWorldMatrix().Forward);
 
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
 
+                MatrixD positionMatrix = Matrix.CreateWorld(
+                    muzzleMatrix.Translation,
+                    gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
+                    muzzleMatrix.Up);
+
                 BulletDrop fireData = new BulletDrop()
                 {
-                    ShooterID = Entity.EntityId,
+                    GridId = cube.CubeGrid.EntityId,
+                    BlockId = Entity.EntityId,
                     WeaponId = weapon.Id,
-                    Weapon = weapon,
                     MagazineId = gun.GunBase.CurrentAmmoMagazineId,
-                    Magazine = gun.GunBase.CurrentAmmoMagazineDefinition,
-                    Ammo = (MyProjectileAmmoDefinition)gun.GunBase.CurrentAmmoDefinition,
-                    Direction = Vector3D.IsUnit(ref direction) ? direction : Vector3D.Normalize(direction),
-                    Position = muzzleMatrix.Translation,
-                    Velocity = block.CubeGrid.Physics.LinearVelocity + direction * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed,
-                    Up = muzzleMatrix.Up
+                    AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
+                    PositionMatrix = positionMatrix
                 };
 
                 while (timeTillNextShot >= 1)
@@ -310,10 +311,10 @@ namespace ProjectilesImproved.Weapons
                         break;
                     }
 
-                    fireData.Position += direction * (timeTillNextShot * 0.03); // using timeTillNextShot to offset bullets being fired in the same frame
+                    positionMatrix.Translation += positionMatrix.Forward * (timeTillNextShot * 0.03); // using timeTillNextShot to offset bullets being fired in the same frame
                 }
 
-                var forceVector = -direction * gun.GunBase.CurrentAmmoDefinition.BackkickForce;
+                var forceVector = -positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.BackkickForce;
                 block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, block.GetPosition(), null);
             }
         }
