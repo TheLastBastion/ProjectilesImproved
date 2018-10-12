@@ -242,7 +242,8 @@ namespace ProjectilesImproved.Bullets
 
             if (hit != null && hit.Position != null)
             {
-                int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
+                int framesToWait = (int)Math.Floor((1f-hit.Fraction) * (float)CollisionCheckFrames);
+                MyLog.Default.Info($"Fraction: {hit.Fraction}, Frames: {CollisionCheckFrames}, FramesToWait: {framesToWait}");
                 if (framesToWait < 1)
                 {
                     OnHitEffects.Execute(hit, this);
