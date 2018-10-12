@@ -92,7 +92,14 @@ namespace ProjectilesImproved.Bullets
 
             if (Ammo == null)
             {
+                MyLog.Default.Info($"Ammo ID: {AmmoId}");
+                MyLog.Default.Flush();
+                MyAmmoDefinition def = MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
+                MyLog.Default.Info($"Ammo is null: {def == null}");
+                MyLog.Default.Flush();
                 Ammo = (MyProjectileAmmoDefinition)MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
+                MyLog.Default.Info($"Ammo after convert is null: {Ammo == null}");
+                MyLog.Default.Flush();
             }
 
             if (OnHitEffects == null)
