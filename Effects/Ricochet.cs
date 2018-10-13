@@ -58,7 +58,7 @@ namespace ProjectilesImproved.Effects
                 bullet.ResetCollisionCheck();
 
                 bullet.PositionMatrix.Translation = hit.Position;
-                bullet.PositionMatrix.Translation = bullet.VelocityPerTick;
+                bullet.PositionMatrix.Translation = Vector3D.Normalize(bullet.Velocity) * 25;
             }
             else
             {
