@@ -57,8 +57,9 @@ namespace ProjectilesImproved.Effects
                 bullet.ProjectileMassDamage = bullet.ProjectileMassDamage * deflectionAngle0to90;
                 bullet.ResetCollisionCheck();
 
+                bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity);
                 bullet.PositionMatrix.Translation = hit.Position;
-                bullet.PositionMatrix.Translation = Vector3D.Normalize(bullet.Velocity) * 25;
+                bullet.PositionMatrix.Translation = bullet.PositionMatrix.Forward * 25;
             }
             else
             {
