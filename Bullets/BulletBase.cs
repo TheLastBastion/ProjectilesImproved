@@ -179,23 +179,23 @@ namespace ProjectilesImproved.Bullets
                 MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
                     new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
-                    PositionMatrix.Translation,
+                    PositionMatrix.Translation*(PositionMatrix.Forward*(LengthMultiplyer/2)),
                     PositionMatrix.Forward,
                     LengthMultiplyer,
                     thickness);
             }
-            else
-            {
-                MyTransparentGeometry.AddLineBillboard(
-                    BulletMaterial,
-                    new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
-                    PositionMatrix.Translation + VelocityPerTick * LastPositionFraction,
-                    PositionMatrix.Forward,
-                    LengthMultiplyer,
-                    thickness);
+            //else
+            //{
+            //    MyTransparentGeometry.AddLineBillboard(
+            //        BulletMaterial,
+            //        new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
+            //        PositionMatrix.Translation * (PositionMatrix.Forward * (LengthMultiplyer / 2)) + VelocityPerTick * LastPositionFraction,
+            //        PositionMatrix.Forward,
+            //        LengthMultiplyer,
+            //        thickness);
 
-                HasExpired = true;
-            }
+            //    HasExpired = true;
+            //}
         }
 
         /// <summary>
