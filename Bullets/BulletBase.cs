@@ -293,8 +293,8 @@ namespace ProjectilesImproved.Bullets
                 }
             }
 
-            //return CollisionCheckFrames;
-            return 1;
+            CollisionCheckFrames = 1;
+            return CollisionCheckFrames;
         }
 
         public void ResetCollisionCheck()
