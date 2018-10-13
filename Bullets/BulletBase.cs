@@ -190,15 +190,15 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void PreCollitionDetection()
         {
-            Start = PositionMatrix.Translation;
+            Start = PositionMatrix.Translation + (PositionMatrix.Backward * (ProjectileSpeed * Tick));
             if (DoShortRaycast)
             {
-                End = PreviousPosition + VelocityPerTick;
+                End = PositionMatrix.Translation + VelocityPerTick;
                 DoShortRaycast = false;
             }
             else
             {
-                End = PreviousPosition + (VelocityPerTick * CollisionCheckFrames);
+                End = PositionMatrix.Translation + (VelocityPerTick * CollisionCheckFrames);
             }
 
             //MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
