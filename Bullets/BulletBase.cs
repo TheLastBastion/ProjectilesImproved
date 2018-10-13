@@ -89,7 +89,7 @@ namespace ProjectilesImproved.Bullets
 
         public Vector3D Start;
         public Vector3D End;
-        public float LengthMultiplyer => 40f * ProjectileTrailScale;
+        public float LengthMultiplyer => 10f * ProjectileTrailScale;
 
         public float LastPositionFraction = 0;
 
@@ -174,28 +174,13 @@ namespace ProjectilesImproved.Bullets
             float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (ProjectileTrailScale + 0.5f);
             thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
 
-            //if (LastPositionFraction == 0)
-            //{
             MyTransparentGeometry.AddLineBillboard(
                 BulletMaterial,
                 new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
-                PositionMatrix.Translation,// + (PositionMatrix.Forward * (LengthMultiplyer / 2)),
+                PositionMatrix.Translation,
                 -PositionMatrix.Forward,
                 LengthMultiplyer,
                 thickness);
-            //}
-            //else
-            //{
-            //    MyTransparentGeometry.AddLineBillboard(
-            //        BulletMaterial,
-            //        new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
-            //        PositionMatrix.Translation * (PositionMatrix.Forward * (LengthMultiplyer / 2)) + VelocityPerTick * LastPositionFraction,
-            //        PositionMatrix.Forward,
-            //        LengthMultiplyer,
-            //        thickness);
-
-            //    HasExpired = true;
-            //}
         }
 
         /// <summary>
