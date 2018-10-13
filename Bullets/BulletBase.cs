@@ -97,6 +97,7 @@ namespace ProjectilesImproved.Bullets
         public int CollisionCheckFrames { get; private set; } = -1;
         private int CollisionCheckCounter = 0;
         private bool DoShortRaycast = false;
+        private float VelocityPerTickLength = 0;
 
         /// <summary>
         /// Initializes all empty variables
@@ -140,6 +141,8 @@ namespace ProjectilesImproved.Bullets
                     OnHitEffects = new EffectBase();
                 }
             }
+
+            VelocityPerTickLength = (float)VelocityPerTick.Length();
 
             IsInitialized = true;
         }
@@ -190,7 +193,7 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void PreCollitionDetection()
         {
-            Start = PositionMatrix.Translation + ((LifeTimeTicks == 0) ? Vector3D.Zero : (PositionMatrix.Backward * (ProjectileSpeed * Tick)));
+            Start = PositionMatrix.Translation + ((LifeTimeTicks == 0) ? Vector3D.Zero : (PositionMatrix.Backward * VelocityPerTickLength));
             if (DoShortRaycast)
             {
                 End = PositionMatrix.Translation + VelocityPerTick;
