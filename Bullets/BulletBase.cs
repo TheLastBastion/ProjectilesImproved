@@ -241,9 +241,9 @@ namespace ProjectilesImproved.Bullets
                     DoShortRaycast = true;
                 }
 
-                MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
-                MyVisualScriptLogicProvider.AddGPS("", "", hit.Position+hit.Normal*0.5f, Color.Yellow);
-                MyVisualScriptLogicProvider.AddGPS("", "", hit.Position+hit.Normal, Color.Pink);
+                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
+                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position+hit.Normal*0.5f, Color.Yellow);
+                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position+hit.Normal, Color.Pink);
             }
         }
 
