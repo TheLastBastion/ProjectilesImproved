@@ -87,6 +87,7 @@ namespace ProjectilesImproved.Bullets
 
         public EffectBase OnHitEffects;
 
+        public Vector3D PreviousPosition;
         public Vector3D Start;
         public Vector3D End;
         public float LengthMultiplyer => 10f * ProjectileTrailScale;
@@ -148,6 +149,7 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public void PreUpdate()
         {
+            PreviousPosition = PositionMatrix.Translation;
             LifeTimeTicks++;
         }
 
@@ -191,12 +193,12 @@ namespace ProjectilesImproved.Bullets
             Start = PositionMatrix.Translation;
             if (DoShortRaycast)
             {
-                End = Start + VelocityPerTick;
+                End = PreviousPosition + VelocityPerTick;
                 DoShortRaycast = false;
             }
             else
             {
-                End = Start + (VelocityPerTick * CollisionCheckFrames);
+                End = PreviousPosition + (VelocityPerTick * CollisionCheckFrames);
             }
 
             //MyVisualScriptLogicProvider.AddGPS("", "", End, Color.Orange);
