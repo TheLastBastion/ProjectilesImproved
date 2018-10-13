@@ -11,9 +11,9 @@ namespace ProjectilesImproved
 
         public static readonly Dictionary<MyStringHash, EffectBase> AmmoEffectLookup = new Dictionary<MyStringHash, EffectBase>()
         {
-            //{ MyStringHash.GetOrCompute("OKI23mmAmmoPars"), new Ricochet() },
-            //{ MyStringHash.GetOrCompute("OKI230mmAmmoPars"), new Ricochet() },
-            //{ MyStringHash.GetOrCompute("OKI50mmAmmoPars"), new Ricochet() }
+            { MyStringHash.GetOrCompute("OKI23mmAmmoPars"), new Ricochet() },
+            { MyStringHash.GetOrCompute("OKI230mmAmmoPars"), new Ricochet() },
+            { MyStringHash.GetOrCompute("OKI50mmAmmoPars"), new Ricochet() }
             //{ MyStringHash.GetOrCompute("OKI230mmAmmoPars"), new ExplosiveRounds() { AffectVoxels = true, Radius = 5, NextEffect = null }},
             //{ MyStringHash.GetOrCompute("OKI50mmAmmoPars"), new ExplosiveRounds() { AffectVoxels = true, Radius = 1, NextEffect = null }}
         };

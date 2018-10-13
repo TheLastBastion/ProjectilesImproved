@@ -59,6 +59,10 @@ namespace ProjectilesImproved.Effects
 
                 bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity);
                 bullet.PositionMatrix.Translation = hit.Position;
+
+                bullet.PreCollitionDetection();
+                bullet.CollisionDetection();
+
             }
             else
             {
@@ -66,6 +70,8 @@ namespace ProjectilesImproved.Effects
                 {
                     obj.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true);
                 }
+
+                bullet.HasExpired = true;
             }
 
             MyLog.Default.Info($"Entity Health {hitEntityHealth}, Bullet Damage {bullet.ProjectileMassDamage}, Angle: {deflectionAngle0to90}, Degree: {deflectionAngle0to90*90}");
