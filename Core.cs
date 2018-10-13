@@ -55,6 +55,7 @@ namespace ProjectilesImproved
                 {
                     ActiveProjectiles.RemoveAt(i);
                     i--;
+                    continue;
                 }
 
                 if (!bullet.IsInitialized)
