@@ -53,10 +53,12 @@ namespace ProjectilesImproved.Effects
                     obj.DoDamage(bullet.ProjectileMassDamage * (1 - deflectionAngle0to90), bullet.AmmoId.SubtypeId, true);
                 }
 
-                bullet.PositionMatrix.Translation = hit.Position;
                 bullet.Velocity = (deflectionAngle0to90 * Vector3.Reflect(relativeV, hit.Normal)) + hitObjectVelocity;
                 bullet.ProjectileMassDamage = bullet.ProjectileMassDamage * deflectionAngle0to90;
                 bullet.ResetCollisionCheck();
+
+                bullet.PositionMatrix.Translation = hit.Position;
+                bullet.PositionMatrix.Translation = bullet.Velocity;
             }
             else
             {
