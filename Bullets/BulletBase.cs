@@ -193,7 +193,7 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void PreCollitionDetection()
         {
-            Start = PositionMatrix.Translation + ((LifeTimeTicks == 0) ? Vector3D.Zero : (PositionMatrix.Backward * VelocityPerTickLength));
+            Start = PositionMatrix.Translation + ((LifeTimeTicks == 1) ? Vector3D.Zero : (PositionMatrix.Backward * VelocityPerTickLength));
             if (DoShortRaycast)
             {
                 End = PositionMatrix.Translation + VelocityPerTick;
