@@ -59,7 +59,7 @@ namespace ProjectilesImproved.Effects
 
                 bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity);
                 bullet.PositionMatrix.Translation = hit.Position;
-                bullet.PositionMatrix.Translation += bullet.PositionMatrix.Forward * 25;
+                //bullet.PositionMatrix.Translation += bullet.PositionMatrix.Forward * 25;
             }
             else
             {
