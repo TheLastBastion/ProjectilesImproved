@@ -161,7 +161,7 @@ namespace ProjectilesImproved.Bullets
                 HasExpired = true;
             }
 
-            MyAPIGateway.Utilities.ShowNotification($"CheckFrames: {CollisionCheckWaitFrames()}, Current: {CollisionCheckCounter}", 1);
+            //MyAPIGateway.Utilities.ShowNotification($"CheckFrames: {CollisionCheckWaitFrames()}, Current: {CollisionCheckCounter}", 1);
             //MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
         }
 
@@ -242,7 +242,7 @@ namespace ProjectilesImproved.Bullets
             if (hit != null && hit.Position != null)
             {
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
-                MyLog.Default.Info($"Fraction: {hit.Fraction}, Frames: {CollisionCheckFrames}, FramesToWait: {framesToWait}");
+                MyLog.Default.Info($"Fraction: {hit.Fraction}, Frames: {CollisionCheckFrames}, FramesToWait: {framesToWait}, Current Collision Counter: {CollisionCheckCounter}");
                 if (framesToWait < 1)
                 {
                     OnHitEffects.Execute(hit, this);
@@ -293,7 +293,8 @@ namespace ProjectilesImproved.Bullets
                 }
             }
 
-            return CollisionCheckFrames;
+            //return CollisionCheckFrames;
+            return 1;
         }
 
         public void ResetCollisionCheck()
