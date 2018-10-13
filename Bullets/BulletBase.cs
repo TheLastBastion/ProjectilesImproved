@@ -179,8 +179,8 @@ namespace ProjectilesImproved.Bullets
             MyTransparentGeometry.AddLineBillboard(
                 BulletMaterial,
                 new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
-                PositionMatrix.Translation + (PositionMatrix.Forward * (LengthMultiplyer / 2)),
-                PositionMatrix.Forward,
+                PositionMatrix.Translation,// + (PositionMatrix.Forward * (LengthMultiplyer / 2)),
+                -PositionMatrix.Forward,
                 LengthMultiplyer,
                 thickness);
             //}
