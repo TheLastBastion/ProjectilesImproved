@@ -37,7 +37,7 @@ namespace ProjectilesImproved.Effects
 
             Vector3 relativeV = bullet.Velocity - hitObjectVelocity;
 
-            float deflectionFactor = bullet.ProjectileMassDamage / (hitEntityHealth + bullet.ProjectileMassDamage) + 0.2f;
+            float deflectionFactor = bullet.ProjectileMassDamage / (hitEntityHealth + bullet.ProjectileMassDamage) + 0.5f;
             float deflectionAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal) / 1.5f;
 
             if (deflectionAngle0to90 > deflectionFactor)

@@ -227,7 +227,7 @@ namespace ProjectilesImproved.Bullets
             if (hit != null && hit.Position != null)
             {
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
-                MyLog.Default.Info($"Fraction: {hit.Fraction}, Frames: {CollisionCheckFrames}, FramesToWait: {framesToWait}, Current Collision Counter: {CollisionCheckCounter}");
+                //MyLog.Default.Info($"Fraction: {hit.Fraction}, Frames: {CollisionCheckFrames}, FramesToWait: {framesToWait}, Current Collision Counter: {CollisionCheckCounter}");
                 if (framesToWait < 1)
                 {
                     OnHitEffects.Execute(hit, this);
@@ -239,7 +239,6 @@ namespace ProjectilesImproved.Bullets
                 }
 
                 //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
-                //OnHitEffects.Execute(hit, this);
             }
         }
 

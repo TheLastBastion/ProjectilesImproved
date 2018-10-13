@@ -63,7 +63,6 @@ namespace ProjectilesImproved
                 }
 
                 bullet.PreUpdate();
-                bullet.Update();
 
                 if (bullet.DoCollisionCheck())
                 {
@@ -72,6 +71,7 @@ namespace ProjectilesImproved
                 }
 
                 bullet.Draw();
+                bullet.Update();
             }
         }
     }
