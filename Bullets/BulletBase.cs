@@ -214,12 +214,12 @@ namespace ProjectilesImproved.Bullets
 
             if (UseLongRaycast)
             {
-                MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
+                MyAPIGateway.Physics.CastLongRay(End, Start, out hit, true);
             }
             else
             {
                 List<IHitInfo> hitlist = new List<IHitInfo>();
-                MyAPIGateway.Physics.CastRay(Start, End, hitlist);
+                MyAPIGateway.Physics.CastRay(End, Start, hitlist);
 
                 if (hitlist.Count > 0)
                 {
