@@ -174,16 +174,16 @@ namespace ProjectilesImproved.Bullets
             float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (ProjectileTrailScale + 0.5f);
             thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
 
-            if (LastPositionFraction == 0)
-            {
-                MyTransparentGeometry.AddLineBillboard(
-                    BulletMaterial,
-                    new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
-                    PositionMatrix.Translation*(PositionMatrix.Forward*(LengthMultiplyer/2)),
-                    PositionMatrix.Forward,
-                    LengthMultiplyer,
-                    thickness);
-            }
+            //if (LastPositionFraction == 0)
+            //{
+            MyTransparentGeometry.AddLineBillboard(
+                BulletMaterial,
+                new Vector4(ProjectileTrailColor * scaleFactor * 10f, 1f),
+                PositionMatrix.Translation + (PositionMatrix.Forward * (LengthMultiplyer / 2)),
+                PositionMatrix.Forward,
+                LengthMultiplyer,
+                thickness);
+            //}
             //else
             //{
             //    MyTransparentGeometry.AddLineBillboard(
