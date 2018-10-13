@@ -165,8 +165,6 @@ namespace ProjectilesImproved.Bullets
             {
                 HasExpired = true;
             }
-
-            MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green, 60);
         }
 
         /// <summary>
@@ -202,8 +200,6 @@ namespace ProjectilesImproved.Bullets
             {
                 End = PositionMatrix.Translation + (VelocityPerTick * CollisionCheckFrames);
             }
-
-            MyVisualScriptLogicProvider.AddGPS("", "", Start, Color.Orange, 60);
         }
 
         /// <summary>
@@ -212,6 +208,9 @@ namespace ProjectilesImproved.Bullets
         public virtual void CollisionDetection()
         {
             IHitInfo hit = null;
+
+            MyVisualScriptLogicProvider.AddGPS("", "", Start, Color.Orange, 60);
+            MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green, 60);
 
             if (UseLongRaycast)
             {
