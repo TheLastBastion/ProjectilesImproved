@@ -242,8 +242,8 @@ namespace ProjectilesImproved.Bullets
                 }
 
                 MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
-                MyVisualScriptLogicProvider.AddGPS("", "", hit.Normal, Color.Red);
-                MyVisualScriptLogicProvider.AddGPS("", "", hit.Normal*2, Color.Red);
+                MyVisualScriptLogicProvider.AddGPS("", "", hit.Normal*0.5f, Color.Yellow);
+                MyVisualScriptLogicProvider.AddGPS("", "", hit.Normal, Color.Pink);
             }
         }
 
