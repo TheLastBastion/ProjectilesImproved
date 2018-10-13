@@ -44,8 +44,9 @@ namespace ProjectilesImproved.Effects
             {
                 if (hit.HitEntity.Physics != null)
                 {
-                    float impulse = hitObjectVelocity.Length() * bullet.ProjectileHitImpulse * (1- deflectionAngle0to90);
+                    float impulse = hitObjectVelocity.Length() * bullet.ProjectileHitImpulse * (1 - deflectionAngle0to90);
                     hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Velocity * impulse * -hit.Normal, hit.Position, null);
+                    bullet.ProjectileHitImpulse = bullet.ProjectileHitImpulse * (1 - deflectionAngle0to90);
                 }
 
                 if (obj != null)
@@ -60,7 +61,11 @@ namespace ProjectilesImproved.Effects
                 bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity);
                 bullet.PositionMatrix.Translation = hit.Position;
 
-                bullet.PreCollitionDetection();
+
+                bullet.Start = bullet.PositionMatrix.Translation + (bullet.PositionMatrix.Forward*0.5f); // ensure it does not hit itself
+                bullet.End = bullet.PositionMatrix.Translation + bullet.VelocityPerTick;
+
+
                 bullet.CollisionDetection();
                 bullet.Draw();
 
