@@ -209,17 +209,17 @@ namespace ProjectilesImproved.Bullets
         {
             IHitInfo hit = null;
 
-            MyVisualScriptLogicProvider.AddGPS("", "", Start, Color.Orange, 60);
-            MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green, 60);
+            //MyVisualScriptLogicProvider.AddGPS("", "", Start, Color.Orange, 60);
+            //MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green, 60);
 
             if (UseLongRaycast)
             {
-                MyAPIGateway.Physics.CastLongRay(End, Start, out hit, true);
+                MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
             }
             else
             {
                 List<IHitInfo> hitlist = new List<IHitInfo>();
-                MyAPIGateway.Physics.CastRay(End, Start, hitlist);
+                MyAPIGateway.Physics.CastRay(Start, End, hitlist);
 
                 if (hitlist.Count > 0)
                 {
@@ -241,7 +241,9 @@ namespace ProjectilesImproved.Bullets
                     DoShortRaycast = true;
                 }
 
-                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
+                MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
+                MyVisualScriptLogicProvider.AddGPS("", "", hit.Normal, Color.Red);
+                MyVisualScriptLogicProvider.AddGPS("", "", hit.Normal*2, Color.Red);
             }
         }
 
