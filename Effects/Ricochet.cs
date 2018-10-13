@@ -37,7 +37,7 @@ namespace ProjectilesImproved.Effects
 
             Vector3 relativeV = bullet.Velocity - hitObjectVelocity;
 
-            float deflectionFactor = bullet.ProjectileMassDamage / (hitEntityHealth + bullet.ProjectileMassDamage) + 0.2f;
+            float deflectionFactor = 0; //bullet.ProjectileMassDamage / (hitEntityHealth + bullet.ProjectileMassDamage) + 0.2f;
             float deflectionAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal) / 1.5f;
 
             if (deflectionAngle0to90 > deflectionFactor)
@@ -53,6 +53,7 @@ namespace ProjectilesImproved.Effects
                     obj.DoDamage(bullet.ProjectileMassDamage * (1 - deflectionAngle0to90), bullet.AmmoId.SubtypeId, true);
                 }
 
+                bullet.PositionMatrix.Translation = hit.Position;
                 bullet.Velocity = (deflectionAngle0to90 * Vector3.Reflect(relativeV, hit.Normal)) + hitObjectVelocity;
                 bullet.ProjectileMassDamage = bullet.ProjectileMassDamage * deflectionAngle0to90;
                 bullet.ResetCollisionCheck();
