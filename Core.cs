@@ -43,7 +43,7 @@ namespace ProjectilesImproved
             ActiveProjectiles.Add(data);
         }
 
-        public override void UpdateAfterSimulation()
+        public override void UpdateBeforeSimulation()
         {
             MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
 
