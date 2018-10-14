@@ -90,7 +90,7 @@ namespace ProjectilesImproved.Bullets
         public Vector3D PreviousPosition;
         public Vector3D Start;
         public Vector3D End;
-        public float LengthMultiplyer => (ProjectileSpeed * 0.003f) * ProjectileTrailScale;
+        public float LengthMultiplyer => (ProjectileSpeed * 0.006f) * ProjectileTrailScale;
 
         public float LastPositionFraction = 0;
 
