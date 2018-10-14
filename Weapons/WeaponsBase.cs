@@ -5,10 +5,8 @@ using Sandbox.Game.Entities;
 using Sandbox.Game.Weapons;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
-using System;
 using System.Collections.Generic;
 using System.Text;
-using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
@@ -28,16 +26,6 @@ namespace ProjectilesImproved.Weapons
     public class SmallGatling : WeaponsBase
     {
     }
-
-    //[MyEntityComponentDescriptor(typeof(MyObjectBuilder_SmallMissileLauncher), false)]
-    //public class SmallMissileLauncher : WeaponsOverload
-    //{
-    //}
-
-    //[MyEntityComponentDescriptor(typeof(MyObjectBuilder_SmallMissileLauncherReload), false)]
-    //public class SmallMissileLauncherReload : WeaponsOverload
-    //{
-    //}
 
     public class WeaponsBase : MyGameLogicComponent
     {
@@ -124,14 +112,6 @@ namespace ProjectilesImproved.Weapons
             {
                 MyAPIGateway.TerminalControls.GetActions<IMySmallGatlingGun>(out actions);
             }
-            //else if (Entity is IMySmallMissileLauncher)
-            //{
-            //    MyAPIGateway.TerminalControls.GetActions<IMySmallMissileLauncher>(out actions);
-            //}
-            //else if (Entity is IMySmallMissileLauncherReload)
-            //{
-            //    MyAPIGateway.TerminalControls.GetActions<IMySmallMissileLauncherReload>(out actions);
-            //}
 
             MyLog.Default.Info($"============ Terminal Actions ==============");
 
@@ -146,15 +126,6 @@ namespace ProjectilesImproved.Weapons
                         WeaponsBase weps = block.GameLogic as WeaponsBase;
                         MyAPIGateway.Utilities.ShowNotification($"shoot", 1000);
                         weps.terminalShooting = !weps.terminalShooting;
-
-                        //if (weps.NeedsUpdate == MyEntityUpdateEnum.EACH_FRAME)
-                        //{
-                        //    weps.terminalShooting = false;
-                        //}
-                        //else
-                        //{
-                        //    weps.terminalShooting = true;
-                        //}
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -163,19 +134,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        //MyAPIGateway.Utilities.ShowNotification($"Shoot on {block.GameLogic is WeaponsOverload}", 1000);
-
-                        //WeaponsOverload weps = block.GameLogic as WeaponsOverload;
-
                         (block.GameLogic as WeaponsBase).terminalShooting = true;
-
-                        //MyGunStatusEnum status;
-                        //weps.gun.CanShoot(MyShootActionEnum.PrimaryAction, block.OwnerId, out status);
-                        ////MyAPIGateway.Utilities.ShowNotification($"Shoot on {block.GameLogic is WeaponsOverload} {weps.gun.ShootDirectionUpdateTime} {weps.gun.GunBase.LastShootTime} {status.ToString()}", 1000);
-                        //if (weps.gun.CanShoot(MyShootActionEnum.PrimaryAction, block.OwnerId, out status) && block.IsFunctional)
-                        //{
-                        //    weps.terminalShooting = true;
-                        //}
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -201,14 +160,6 @@ namespace ProjectilesImproved.Weapons
             {
                 MyAPIGateway.TerminalControls.GetControls<IMySmallGatlingGun>(out controls);
             }
-            //else if (Entity is IMySmallMissileLauncher)
-            //{
-            //    MyAPIGateway.TerminalControls.GetControls<IMySmallMissileLauncher>(out controls);
-            //}
-            //else if (Entity is IMySmallMissileLauncherReload)
-            //{
-            //    MyAPIGateway.TerminalControls.GetControls<IMySmallMissileLauncherReload>(out controls);
-            //}
 
             MyLog.Default.Info($"============ Terminal Controls ==============");
 
@@ -275,12 +226,10 @@ namespace ProjectilesImproved.Weapons
 
             if (timeTillNextShot >= 1)
             {
-                //Vector3D direction = gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, gun.GunBase.GetMuzzleWorldMatrix().Forward);
-
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
 
                 MatrixD positionMatrix = Matrix.CreateWorld(
-                    muzzleMatrix.Translation,
+                    muzzleMatrix.Translation + cube.CubeGrid.Physics.LinearVelocity,
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
