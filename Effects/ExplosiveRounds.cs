@@ -84,7 +84,7 @@ namespace ProjectilesImproved.Effects
                     y = Math.Cos(i * step2) * calcRange;
                     Vector3D point = new Vector3D(x, y, z);
 
-                    MyVisualScriptLogicProvider.AddGPS("", "", point, Color.Red);
+                    MyVisualScriptLogicProvider.AddGPS("", "", Epicenter + point, Color.Red);
                     lineList.Add(new LineD(Epicenter, Epicenter+point));
                 }
             }
