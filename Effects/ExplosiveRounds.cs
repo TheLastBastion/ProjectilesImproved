@@ -26,6 +26,7 @@ namespace ProjectilesImproved.Effects
         public bool AffectVoxels { get; set; }
 
         List<LinePair> pairList;
+        Dictionary<IMySlimBlock, float> AccumulatedDamage = new Dictionary<IMySlimBlock, float>();
 
         public override void Execute(IHitInfo hit, BulletBase bullet)
         {
@@ -56,7 +57,7 @@ namespace ProjectilesImproved.Effects
             }
 
             SortLists();
-            DamageBlocks(bullet.ProjectileMassDamage / pairList.Count, bullet.AmmoId.SubtypeId);
+            DamageBlocks((bullet.ProjectileMassDamage / pairList.Count), bullet.AmmoId.SubtypeId, bullet.BlockId);
 
             bullet.HasExpired = true;
         }
@@ -110,7 +111,7 @@ namespace ProjectilesImproved.Effects
 
         }
 
-        private void DamageBlocks(float damage, MyStringHash ammoId) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
+        private void DamageBlocks(float damage, MyStringHash ammoId, long shooter) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
             MyLog.Default.Info($"Count: {pairList.Count}, Damage: {damage}");
             foreach (LinePair pair in pairList)
@@ -119,24 +120,28 @@ namespace ProjectilesImproved.Effects
                 //double tempDmg = lineDmg;
                 for (int i = 0; i < pair.blockList.Count && tempDmg > 0; i++)
                 {
-                    MyLog.Default.Info($"Integrity: {pair.blockList[i].block.Integrity}");
-                    //tempDmg -= pair.blockList[i].block.Integrity;
-                    //pair.blockList[i].block.DoDamage(tempDmg, ammoId, true);
+                    IMySlimBlock block = pair.blockList[i].block;
 
-
-                    BlockDesc block = pair.blockList[i];
-                    if (block.IsDestroyed) continue;
-
-                    //MyVisualScriptLogicProvider.AddGPS("", "", block.block.CubeGrid.GridIntegerToWorld(block.block.Position), new Color(255 * (tempDmg / damage), 0, 0));
-
-                    tempDmg = block.AddDamage(tempDmg);
-
-                    if (block.IsDestroyed)
+                    if (!AccumulatedDamage.ContainsKey(block))
                     {
-                        block.block.DoDamage(block.AccumulatedDamage, ammoId, true);
+                        AccumulatedDamage.Add(block, 0);
                     }
 
-                    MyLog.Default.Info($"Integrity: {block.block.Integrity}, Damage Delt: {block.AccumulatedDamage}, Damage Remaining: {tempDmg}");
+                    float current = AccumulatedDamage[block] + tempDmg;
+
+                    if (current >= block.Integrity)
+                    {
+                        tempDmg = current - block.Integrity;
+                        AccumulatedDamage[block] = block.Integrity;
+                        block.DoDamage(block.Integrity, ammoId, true, null, shooter);
+                    }
+                    else
+                    {
+                        AccumulatedDamage[block] += tempDmg;
+                        tempDmg = 0;
+                    }
+
+                    MyLog.Default.Info($"Integrity: {pair.blockList[i].block.Integrity}, Damage Done: {AccumulatedDamage[block]}, OverKill: {tempDmg}");
                 }
             }
         }
@@ -169,33 +174,12 @@ namespace ProjectilesImproved.Effects
         {
             public double distance;
             public IMySlimBlock block;
-            public bool IsDestroyed;
-            public float AccumulatedDamage;
 
             public BlockDesc(IMySlimBlock blovk, double dist)
             {
                 distance = dist;
                 block = blovk;
-                AccumulatedDamage = 0;
-                IsDestroyed = false;
             }
-
-            public float AddDamage(float damage)
-            {
-                float resultantDamage = AccumulatedDamage + damage;
-                if (resultantDamage < block.Integrity)
-                {
-                    AccumulatedDamage += damage;
-                    return 0;
-                }
-                else
-                {
-                    AccumulatedDamage = block.Integrity;
-                    IsDestroyed = true;
-                    return resultantDamage - block.Integrity;
-                }
-            }
-
         }
 
         public struct LinePair
