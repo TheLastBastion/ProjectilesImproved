@@ -119,12 +119,17 @@ namespace ProjectilesImproved.Effects
                 //double tempDmg = lineDmg;
                 for (int i = 0; i < pair.blockList.Count && tempDmg > 0; i++)
                 {
-                    IMySlimBlock block = pair.blockList[i].block;
-                    MyVisualScriptLogicProvider.AddGPS("", "", block.CubeGrid.GridIntegerToWorld(block.Position), new Color(255 * (tempDmg / damage), 0, 0));
+                    BlockDesc block = pair.blockList[i];
+                    if (block.IsDestroyed) continue;
 
-                    tempDmg -= block.Integrity;
-                    block.DoDamage(damage, ammoId, true);
-                    //do damage to block + reduce tempDmg
+                    MyVisualScriptLogicProvider.AddGPS("", "", block.block.CubeGrid.GridIntegerToWorld(block.block.Position), new Color(255 * (tempDmg / damage), 0, 0));
+
+                    tempDmg = block.AddDamage(tempDmg);
+
+                    if (block.IsDestroyed)
+                    {
+                        block.block.DoDamage(block.block.Integrity, ammoId, true);
+                    }
                 }
             }
         }
@@ -157,12 +162,33 @@ namespace ProjectilesImproved.Effects
         {
             public double distance;
             public IMySlimBlock block;
+            public bool IsDestroyed;
+            private float accumulatedDamage;
 
             public BlockDesc(IMySlimBlock blovk, double dist)
             {
                 distance = dist;
                 block = blovk;
+                accumulatedDamage = 0;
+                IsDestroyed = false;
             }
+
+            public float AddDamage(float damage)
+            {
+                float resultantDamage = accumulatedDamage + damage;
+                if (resultantDamage < block.Integrity)
+                {
+                    accumulatedDamage += damage;
+                    return 0;
+                }
+                else
+                {
+                    //accumulatedDamage = block.Integrity;
+                    IsDestroyed = true;
+                    return resultantDamage - block.Integrity;
+                }
+            }
+
         }
 
         public struct LinePair
