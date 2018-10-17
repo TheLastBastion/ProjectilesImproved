@@ -112,24 +112,29 @@ namespace ProjectilesImproved.Effects
 
         private void DamageBlocks(float damage, MyStringHash ammoId) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
-            float tempDmg = damage;
             MyLog.Default.Info($"Count: {pairList.Count}, Damage: {damage}");
             foreach (LinePair pair in pairList)
             {
+                float tempDmg = damage;
                 //double tempDmg = lineDmg;
                 for (int i = 0; i < pair.blockList.Count && tempDmg > 0; i++)
                 {
-                    BlockDesc block = pair.blockList[i];
-                    if (block.IsDestroyed) continue;
+                    MyLog.Default.Info($"Integrity: {pair.blockList[i].block.Integrity}");
+                    tempDmg -= pair.blockList[i].block.Integrity;
+                    pair.blockList[i].block.DoDamage(tempDmg, ammoId, true);
 
-                    MyVisualScriptLogicProvider.AddGPS("", "", block.block.CubeGrid.GridIntegerToWorld(block.block.Position), new Color(255 * (tempDmg / damage), 0, 0));
 
-                    tempDmg = block.AddDamage(tempDmg);
+                    //BlockDesc block = pair.blockList[i];
+                    //if (block.IsDestroyed) continue;
 
-                    if (block.IsDestroyed)
-                    {
-                        block.block.DoDamage(block.block.Integrity, ammoId, true);
-                    }
+                    //MyVisualScriptLogicProvider.AddGPS("", "", block.block.CubeGrid.GridIntegerToWorld(block.block.Position), new Color(255 * (tempDmg / damage), 0, 0));
+
+                    //tempDmg = block.AddDamage(tempDmg);
+
+                    //if (block.IsDestroyed)
+                    //{
+                    //    block.block.DoDamage(block.block.Integrity, ammoId, true);
+                    //}
                 }
             }
         }
