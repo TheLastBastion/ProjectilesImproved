@@ -55,7 +55,8 @@ namespace ProjectilesImproved.Effects
             }
 
             SortLists();
-            //DamageBlocks(damage);
+
+            DamageBlocks(bullet.ProjectileMassDamage / pairList.Count);
         }
 
         public void LineWriter()
@@ -84,7 +85,7 @@ namespace ProjectilesImproved.Effects
                     y = Math.Cos(i * step2) * calcRange;
                     Vector3D point = new Vector3D(x, y, z);
 
-                    MyVisualScriptLogicProvider.AddGPS("", "", Epicenter + point, Color.Red);
+                    //MyVisualScriptLogicProvider.AddGPS("", "", Epicenter + point, Color.Red);
                     lineList.Add(new LineD(Epicenter, Epicenter+point));
                 }
             }
@@ -107,14 +108,17 @@ namespace ProjectilesImproved.Effects
 
         }
 
-        private void DamageBlocks(double lineDmg) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
+        private void DamageBlocks(float damage) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
+            float tempDmg = damage;
             foreach (LinePair pair in pairList)
             {
-                double tempDmg = lineDmg;
+                //double tempDmg = lineDmg;
                 for (int i = 0; i < pair.blockList.Count && tempDmg > 0; i++)
                 {
                     IMySlimBlock block = pair.blockList[i].block;
+                    MyVisualScriptLogicProvider.AddGPS("", "", block.CubeGrid.GridIntegerToWorld(block.Position), new Color(255 * (tempDmg / damage), 0, 0));
+
                     //do damage to block + reduce tempDmg
                 }
             }
