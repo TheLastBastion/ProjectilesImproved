@@ -8,6 +8,7 @@ using System.Linq;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.ModAPI;
+using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects
@@ -55,8 +56,9 @@ namespace ProjectilesImproved.Effects
             }
 
             SortLists();
+            DamageBlocks(bullet.ProjectileMassDamage / pairList.Count, bullet.AmmoId.SubtypeId);
 
-            DamageBlocks(bullet.ProjectileMassDamage / pairList.Count);
+            bullet.HasExpired = true;
         }
 
         public void LineWriter()
@@ -108,7 +110,7 @@ namespace ProjectilesImproved.Effects
 
         }
 
-        private void DamageBlocks(float damage) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
+        private void DamageBlocks(float damage, MyStringHash ammoId) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
             float tempDmg = damage;
             foreach (LinePair pair in pairList)
@@ -119,6 +121,8 @@ namespace ProjectilesImproved.Effects
                     IMySlimBlock block = pair.blockList[i].block;
                     MyVisualScriptLogicProvider.AddGPS("", "", block.CubeGrid.GridIntegerToWorld(block.Position), new Color(255 * (tempDmg / damage), 0, 0));
 
+                    tempDmg -= block.Integrity;
+                    block.DoDamage(damage, ammoId, true);
                     //do damage to block + reduce tempDmg
                 }
             }
