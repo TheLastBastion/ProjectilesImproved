@@ -113,6 +113,7 @@ namespace ProjectilesImproved.Effects
         private void DamageBlocks(float damage, MyStringHash ammoId) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
             float tempDmg = damage;
+            MyLog.Default.Info($"Count: {pairList.Count}, Damage: {damage}");
             foreach (LinePair pair in pairList)
             {
                 //double tempDmg = lineDmg;
