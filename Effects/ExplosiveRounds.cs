@@ -120,21 +120,23 @@ namespace ProjectilesImproved.Effects
                 for (int i = 0; i < pair.blockList.Count && tempDmg > 0; i++)
                 {
                     MyLog.Default.Info($"Integrity: {pair.blockList[i].block.Integrity}");
-                    tempDmg -= pair.blockList[i].block.Integrity;
-                    pair.blockList[i].block.DoDamage(tempDmg, ammoId, true);
+                    //tempDmg -= pair.blockList[i].block.Integrity;
+                    //pair.blockList[i].block.DoDamage(tempDmg, ammoId, true);
 
 
-                    //BlockDesc block = pair.blockList[i];
-                    //if (block.IsDestroyed) continue;
+                    BlockDesc block = pair.blockList[i];
+                    if (block.IsDestroyed) continue;
 
                     //MyVisualScriptLogicProvider.AddGPS("", "", block.block.CubeGrid.GridIntegerToWorld(block.block.Position), new Color(255 * (tempDmg / damage), 0, 0));
 
-                    //tempDmg = block.AddDamage(tempDmg);
+                    tempDmg = block.AddDamage(tempDmg);
 
-                    //if (block.IsDestroyed)
-                    //{
-                    //    block.block.DoDamage(block.block.Integrity, ammoId, true);
-                    //}
+                    if (block.IsDestroyed)
+                    {
+                        block.block.DoDamage(block.AccumulatedDamage, ammoId, true);
+                    }
+
+                    MyLog.Default.Info($"Integrity: {block.block.Integrity}, Damage Delt: {block.AccumulatedDamage}, Damage Remaining: {tempDmg}");
                 }
             }
         }
@@ -168,27 +170,27 @@ namespace ProjectilesImproved.Effects
             public double distance;
             public IMySlimBlock block;
             public bool IsDestroyed;
-            private float accumulatedDamage;
+            public float AccumulatedDamage;
 
             public BlockDesc(IMySlimBlock blovk, double dist)
             {
                 distance = dist;
                 block = blovk;
-                accumulatedDamage = 0;
+                AccumulatedDamage = 0;
                 IsDestroyed = false;
             }
 
             public float AddDamage(float damage)
             {
-                float resultantDamage = accumulatedDamage + damage;
+                float resultantDamage = AccumulatedDamage + damage;
                 if (resultantDamage < block.Integrity)
                 {
-                    accumulatedDamage += damage;
+                    AccumulatedDamage += damage;
                     return 0;
                 }
                 else
                 {
-                    //accumulatedDamage = block.Integrity;
+                    AccumulatedDamage = block.Integrity;
                     IsDestroyed = true;
                     return resultantDamage - block.Integrity;
                 }
