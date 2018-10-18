@@ -59,7 +59,7 @@ namespace ProjectilesImproved.Effects
                         BlockEater(block);
                     }
                     watch.Stop();
-                    MyAPIGateway.Utilities.ShowNotification($"Block Eater Time: {(watch.ElapsedTicks/Stopwatch.Frequency)*1000d} Ticks", 10000);
+                    MyAPIGateway.Utilities.ShowNotification($"Block Eater Time: {watch.ElapsedTicks} Ticks, {Stopwatch.Frequency} Frequency", 10000);
                 }
                 else if (ent is IMyDestroyableObject)
                 {
@@ -109,7 +109,7 @@ namespace ProjectilesImproved.Effects
                 parings[i] = new Paring(parings[i].Point, pair.BlockList.OrderBy(p => p.DistanceSqud).ToList());
             }
             watch.Stop();
-            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {(watch.ElapsedTicks / Stopwatch.Frequency) * 1000d} Ticks", 10000);
+            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {watch.ElapsedTicks} Ticks, {Stopwatch.Frequency} Frequency", 10000);
 
         }
 
@@ -149,7 +149,7 @@ namespace ProjectilesImproved.Effects
             }
 
             watch.Stop();
-            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {(watch.ElapsedTicks / Stopwatch.Frequency) * 1000d} Ticks", 10000);
+            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {watch.ElapsedTicks} Ticks, {Stopwatch.Frequency} Frequency", 10000);
         }
     }
 }
