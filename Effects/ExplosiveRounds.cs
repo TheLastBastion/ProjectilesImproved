@@ -4,6 +4,7 @@ using Sandbox.Game;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -69,6 +70,8 @@ namespace ProjectilesImproved.Effects
 
         private void BlockEater(IMySlimBlock block)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             //LineD checkLine;
             BoundingBoxD bounds;
             block.GetWorldBoundingBox(out bounds);
@@ -91,21 +94,30 @@ namespace ProjectilesImproved.Effects
                     pair.BlockList.Add(desc);
                 }
             }
+
+            watch.Stop();
+            MyAPIGateway.Utilities.ShowNotification($"Block Eater Time: {watch.ElapsedTicks} Ticks", 10000);
         }
 
         private void SortLists()
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             for (int i = 0; i < parings.Length; i++)
             {
                 Paring pair = parings[i];
                 parings[i] = new Paring(parings[i].Point, pair.BlockList.OrderBy(p => p.DistanceSqud).ToList());
             }
+            watch.Stop();
+            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {watch.ElapsedTicks} Ticks", 10000);
 
         }
 
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
-            MyLog.Default.Info($"Count: {parings.Length}, Damage: {damage}");
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+
             foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
@@ -132,9 +144,12 @@ namespace ProjectilesImproved.Effects
                         tempDmg = 0;
                     }
 
-                    MyLog.Default.Info($"Integrity: {pair.BlockList[i].Block.Integrity}, Damage Done: {AccumulatedDamage[block]}, OverKill: {tempDmg}");
+                    //MyLog.Default.Info($"Integrity: {pair.BlockList[i].Block.Integrity}, Damage Done: {AccumulatedDamage[block]}, OverKill: {tempDmg}");
                 }
             }
+
+            watch.Stop();
+            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {watch.ElapsedTicks} Ticks", 10000);
         }
     }
 }
