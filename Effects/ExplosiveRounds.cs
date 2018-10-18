@@ -90,6 +90,7 @@ namespace ProjectilesImproved.Effects
             foreach (Paring pair in parings)
             {
                 Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
+                MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
                 LineD line = new LineD(Epicenter, translatedPoint);
 
                 if (bounds.Intersects(ref line))
