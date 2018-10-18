@@ -51,10 +51,15 @@ namespace ProjectilesImproved.Effects
 
                     List<IMySlimBlock> blocks = new List<IMySlimBlock>(); //I'm like, 80% sure this will work right
                     grid.GetBlocks(blocks);
+
+                    Stopwatch watch = new Stopwatch();
+                    watch.Start();
                     foreach (IMySlimBlock block in blocks)
                     {
                         BlockEater(block);
                     }
+                    watch.Stop();
+                    MyAPIGateway.Utilities.ShowNotification($"Block Eater Time: {(watch.ElapsedTicks/Stopwatch.Frequency)*1000} Ticks", 10000);
                 }
                 else if (ent is IMyDestroyableObject)
                 {
@@ -70,8 +75,6 @@ namespace ProjectilesImproved.Effects
 
         private void BlockEater(IMySlimBlock block)
         {
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
             //LineD checkLine;
             BoundingBoxD bounds;
             block.GetWorldBoundingBox(out bounds);
@@ -94,9 +97,6 @@ namespace ProjectilesImproved.Effects
                     pair.BlockList.Add(desc);
                 }
             }
-
-            watch.Stop();
-            MyAPIGateway.Utilities.ShowNotification($"Block Eater Time: {watch.ElapsedTicks} Ticks", 10000);
         }
 
         private void SortLists()
@@ -109,7 +109,7 @@ namespace ProjectilesImproved.Effects
                 parings[i] = new Paring(parings[i].Point, pair.BlockList.OrderBy(p => p.DistanceSqud).ToList());
             }
             watch.Stop();
-            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {watch.ElapsedTicks} Ticks", 10000);
+            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {(watch.ElapsedTicks / Stopwatch.Frequency) * 1000} Ticks", 10000);
 
         }
 
@@ -149,7 +149,7 @@ namespace ProjectilesImproved.Effects
             }
 
             watch.Stop();
-            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {watch.ElapsedTicks} Ticks", 10000);
+            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {(watch.ElapsedTicks / Stopwatch.Frequency) * 1000} Ticks", 10000);
         }
     }
 }
