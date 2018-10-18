@@ -35,6 +35,7 @@ namespace ProjectilesImproved.Effects
         {
             // these are temp
             Epicenter = hit.Position;
+            MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
             parings = ExplosionShapeGenerator.Instance.ShapeLookup[bullet.AmmoId.SubtypeId];
 
             hitPositionMatrix = new MatrixD(bullet.PositionMatrix);
