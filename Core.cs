@@ -5,6 +5,7 @@ using VRage.Game;
 using VRage.Game.Components;
 using ModNetworkAPI;
 using ProjectilesImproved.Bullets;
+using ProjectilesImproved.Effects;
 
 namespace ProjectilesImproved
 {
@@ -34,6 +35,7 @@ namespace ProjectilesImproved
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
 
+            ExplosionShapeGenerator.Instance = new ExplosionShapeGenerator();
             IsInitialized = true;
             OnLoadComplete?.Invoke();
         }

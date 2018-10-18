@@ -10,6 +10,7 @@ using VRage.Game.ModAPI.Interfaces;
 using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
+using static ProjectilesImproved.Effects.ExplosionShapeGenerator;
 
 namespace ProjectilesImproved.Effects
 {
@@ -25,14 +26,18 @@ namespace ProjectilesImproved.Effects
         [ProtoMember(4)]
         public bool AffectVoxels { get; set; }
 
-        List<LinePair> pairList;
+        Paring[] parings;
         Dictionary<IMySlimBlock, float> AccumulatedDamage = new Dictionary<IMySlimBlock, float>();
+        MatrixD hitPositionMatrix;
 
         public override void Execute(IHitInfo hit, BulletBase bullet)
         {
             // these are temp
             Epicenter = hit.Position;
-            LineWriter();
+            parings = ExplosionShapeGenerator.Instance.ShapeLookup[bullet.AmmoId.SubtypeId];
+
+            hitPositionMatrix = new MatrixD(bullet.PositionMatrix);
+            hitPositionMatrix.Translation = hit.Position;
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
@@ -47,7 +52,7 @@ namespace ProjectilesImproved.Effects
                     grid.GetBlocks(blocks);
                     foreach (IMySlimBlock block in blocks)
                     {
-                        BlockEater(block, grid);
+                        BlockEater(block);
                     }
                 }
                 else if (ent is IMyDestroyableObject)
@@ -57,70 +62,56 @@ namespace ProjectilesImproved.Effects
             }
 
             SortLists();
-            DamageBlocks((bullet.ProjectileMassDamage / pairList.Count), bullet.AmmoId.SubtypeId, bullet.BlockId);
+            DamageBlocks((bullet.ProjectileMassDamage / parings.Length), bullet.AmmoId.SubtypeId, bullet.BlockId);
 
             bullet.HasExpired = true;
         }
 
-        public void LineWriter()
+        private void BlockEater(IMySlimBlock block)
         {
-            List<LineD> lineList = new List<LineD>();
-            pairList = new List<LinePair>();
+            //LineD checkLine;
+            BoundingBoxD bounds;
+            block.GetWorldBoundingBox(out bounds);
 
-            double x = 0;
-            double y = 0;
-            double z = 0;
-            double calcRange = 0;
-
-            double step = Math.Atan(0.4 / Radius);
-            int steps = (int)Math.Ceiling(Math.PI / step);
-
-            for (int h = 0; h < steps; h++)
+            double distance = (block.CubeGrid.GridIntegerToWorld(block.Position) - Epicenter).LengthSquared();
+            if (distance > Radius * Radius)
             {
-                z = (1 - Math.Cos(h * step)) * Radius;
-                calcRange = Math.Sin(h * step) * Radius;
-                float step2 = (float)Math.Atan(0.4 / calcRange);
-                int steps2 = (int)Math.Ceiling(2 * Math.PI / step2);
-
-                for (int i = 0; i < steps2; i++)
-                {
-                    x = Math.Sin(i * step2) * calcRange;
-                    y = Math.Cos(i * step2) * calcRange;
-                    Vector3D point = new Vector3D(x, y, z);
-
-                    //MyVisualScriptLogicProvider.AddGPS("", "", Epicenter + point, Color.Red);
-                    lineList.Add(new LineD(Epicenter, Epicenter+point));
-                }
+                return;
             }
 
-            foreach (LineD line in lineList)
+            BlockDesc desc = new BlockDesc(block, distance);
+
+            foreach (Paring pair in parings)
             {
-                LinePair pair = new LinePair(line, new List<BlockDesc>());
-                pairList.Add(pair);
+                Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
+                LineD line = new LineD(Epicenter, translatedPoint);
+
+                if (bounds.Intersects(ref line))
+                {
+                    pair.BlockList.Add(desc);
+                }
             }
         }
 
         private void SortLists()
         {
-            for (int i = 0; i < pairList.Count; i++)
+            for (int i = 0; i < parings.Length; i++)
             {
-                LinePair pair = pairList[i];
-                List<BlockDesc> blockList = pair.blockList;
-                pairList[i] = new LinePair(pairList[i].line, blockList.OrderBy(p => p.distance).ToList());
+                Paring pair = parings[i];
+                parings[i] = new Paring(parings[i].Point, pair.BlockList.OrderBy(p => p.DistanceSqud).ToList());
             }
 
         }
 
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
-            MyLog.Default.Info($"Count: {pairList.Count}, Damage: {damage}");
-            foreach (LinePair pair in pairList)
+            MyLog.Default.Info($"Count: {parings.Length}, Damage: {damage}");
+            foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
-                //double tempDmg = lineDmg;
-                for (int i = 0; i < pair.blockList.Count && tempDmg > 0; i++)
+                for (int i = 0; i < pair.BlockList.Count && tempDmg > 0; i++)
                 {
-                    IMySlimBlock block = pair.blockList[i].block;
+                    IMySlimBlock block = pair.BlockList[i].Block;
 
                     if (!AccumulatedDamage.ContainsKey(block))
                     {
@@ -141,56 +132,8 @@ namespace ProjectilesImproved.Effects
                         tempDmg = 0;
                     }
 
-                    MyLog.Default.Info($"Integrity: {pair.blockList[i].block.Integrity}, Damage Done: {AccumulatedDamage[block]}, OverKill: {tempDmg}");
+                    MyLog.Default.Info($"Integrity: {pair.BlockList[i].Block.Integrity}, Damage Done: {AccumulatedDamage[block]}, OverKill: {tempDmg}");
                 }
-            }
-        }
-
-        private void BlockEater(IMySlimBlock block, IMyCubeGrid grid)
-        {
-            LineD checkLine;
-            BoundingBoxD bounds;
-            block.GetWorldBoundingBox(out bounds);
-
-            double distance = (grid.GridIntegerToWorld(block.Position) - Epicenter).LengthSquared();
-            if (distance > Radius * Radius)
-            {
-                return;
-            }
-
-            BlockDesc desc = new BlockDesc(block, distance);
-
-            foreach (LinePair pair in pairList)
-            {
-                checkLine = pair.line;
-                if (bounds.Intersects(ref checkLine))
-                {
-                    pair.blockList.Add(desc);
-                }
-            }
-        }
-
-        public struct BlockDesc
-        {
-            public double distance;
-            public IMySlimBlock block;
-
-            public BlockDesc(IMySlimBlock blovk, double dist)
-            {
-                distance = dist;
-                block = blovk;
-            }
-        }
-
-        public struct LinePair
-        {
-            public List<BlockDesc> blockList;
-            public LineD line;
-
-            public LinePair(LineD pairedLine, List<BlockDesc> list)
-            {
-                blockList = list;
-                line = pairedLine;
             }
         }
     }
