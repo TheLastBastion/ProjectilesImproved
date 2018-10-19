@@ -39,7 +39,7 @@ namespace ProjectilesImproved.Effects
             parings = ExplosionShapeGenerator.Instance.ShapeLookup[bullet.AmmoId.SubtypeId];
 
             hitPositionMatrix = new MatrixD(bullet.PositionMatrix);
-            hitPositionMatrix.Translation = hit.Position;
+            hitPositionMatrix.Translation = hit.Position + (hitPositionMatrix.Forward * Radius);
             Epicenter = hitPositionMatrix.Translation;
             MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
 
@@ -94,7 +94,7 @@ namespace ProjectilesImproved.Effects
             foreach (Paring pair in parings)
             {
                 Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
-                //MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
+                MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
 
                 Vector3D localized = translatedPoint - Epicenter;
 
