@@ -90,7 +90,7 @@ namespace ProjectilesImproved.Effects
             {
                 FormatedEntity entity = entities[i];
 
-                MyLog.Default.Info($"[{i}] Potential Damage: {entity.PotentialDamage}"); 
+                //MyLog.Default.Info($"[{i}] Potential Damage: {entity.PotentialDamage}"); 
 
                 for (int j = 0; j < entities.Count; j++)
                 {
@@ -100,11 +100,11 @@ namespace ProjectilesImproved.Effects
                     FormatedEntity blocker = entities[j];
 
                     double? nullable = blocker.Box.Intersects(entity.Ray);
-                    MyLog.Default.Info($"[{i}] to [{j}] Intersect: {nullable.HasValue} blocker HP: {blocker.Entity.Integrity}");
+                    //MyLog.Default.Info($"[{i}] to [{j}] Intersect: {nullable.HasValue} blocker HP: {blocker.Entity.Integrity}");
                     if (nullable.HasValue)
                     {
                         entity.Shielding += blocker.Entity.Integrity;
-                        MyLog.Default.Info($"[{i}] Shilding: {entity.Shielding}");
+                        //MyLog.Default.Info($"[{i}] Shilding: {entity.Shielding}");
                     }
                 }
             }
