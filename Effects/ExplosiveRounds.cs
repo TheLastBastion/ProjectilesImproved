@@ -31,6 +31,7 @@ namespace ProjectilesImproved.Effects
         Dictionary<IMySlimBlock, float> AccumulatedDamage = new Dictionary<IMySlimBlock, float>();
         MatrixD hitPositionMatrix;
         float radiusSquared;
+        private Stopwatch watch = new Stopwatch();
 
         public override void Execute(IHitInfo hit, BulletBase bullet)
         {
@@ -53,11 +54,18 @@ namespace ProjectilesImproved.Effects
                     IMyCubeGrid grid = ent as IMyCubeGrid;
 
                     List<IMySlimBlock> blocks = new List<IMySlimBlock>(); //I'm like, 80% sure this will work right
-                    //grid.GetBlocks(blocks);
-                    blocks = grid.GetBlocksInsideSphere(ref sphere);
 
-                    Stopwatch watch = new Stopwatch();
                     watch.Start();
+                    grid.GetBlocks(blocks);
+                    watch.Stop();
+                    MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+
+                    watch.Restart();
+                    blocks = grid.GetBlocksInsideSphere(ref sphere);
+                    watch.Stop();
+                    MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+
+                    watch.Restart();
                     foreach (IMySlimBlock block in blocks)
                     {
                         BlockEater(block);
@@ -81,10 +89,10 @@ namespace ProjectilesImproved.Effects
         private void BlockEater(IMySlimBlock block)
         {
             double distance = (block.CubeGrid.GridIntegerToWorld(block.Position) - Epicenter).LengthSquared();
-            if (distance > radiusSquared)
-            {
-                return;
-            }
+            //if (distance > radiusSquared)
+            //{
+            //    return;
+            //}
 
             //LineD checkLine;
             BoundingBoxD bounds;
@@ -110,11 +118,11 @@ namespace ProjectilesImproved.Effects
 
         private void SortLists()
         {
-            Stopwatch watch = new Stopwatch();
             watch.Start();
             for (int i = 0; i < parings.Length; i++)
             {
                 Paring pair = parings[i];
+                //pair.BlockList = pair.BlockList.OrderBy(p => p.DistanceSqud).ToList();
                 parings[i] = new Paring(parings[i].Point, pair.BlockList.OrderBy(p => p.DistanceSqud).ToList());
             }
             watch.Stop();
