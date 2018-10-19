@@ -108,7 +108,7 @@ namespace ProjectilesImproved.Effects
             BoundingBoxD bounds;
             block.GetWorldBoundingBox(out bounds);
 
-            double distance = (bounds.Center - Epicenter).LengthSquared();
+            double distance = (bounds.Center - epicenter).LengthSquared();
             if (distance > radiusSquared)
             {
                 return;
@@ -121,9 +121,9 @@ namespace ProjectilesImproved.Effects
                 Vector3D translatedPoint = Vector3D.Transform(pair.Point, sphereTransformMatrix);
                 //MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
 
-                Vector3D localized = translatedPoint - Epicenter;
+                Vector3D localized = translatedPoint - epicenter;
 
-                RayD ray = new RayD(Epicenter, localized);
+                RayD ray = new RayD(epicenter, localized);
 
                 if (bounds.Intersects(ray).HasValue)
                 {
@@ -141,12 +141,12 @@ namespace ProjectilesImproved.Effects
             {
                 Vector3D translatedPoint = Vector3D.Transform(pair.Point, sphereTransformMatrix);
 
-                Vector3D localized = translatedPoint - Epicenter;
-                RayD ray = new RayD(Epicenter, localized);
+                Vector3D localized = translatedPoint - epicenter;
+                RayD ray = new RayD(epicenter, localized);
 
                 if (bounds.Intersects(ray).HasValue)
                 {
-                    double distance = (bounds.Center - Epicenter).LengthSquared();
+                    double distance = (bounds.Center - epicenter).LengthSquared();
                     BlockDesc desc = new BlockDesc(block, distance);
 
                     pair.BlockList.Add(desc);
