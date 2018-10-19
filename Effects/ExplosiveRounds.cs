@@ -57,11 +57,19 @@ namespace ProjectilesImproved.Effects
 
                     watch.Start();
                     grid.GetBlocks(blocks);
+                    foreach (IMySlimBlock block in blocks)
+                    {
+                        BlockEaterAllBlocks(block);
+                    }
                     watch.Stop();
                     MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
                     watch.Restart();
                     blocks = grid.GetBlocksInsideSphere(ref sphere);
+                    foreach (IMySlimBlock block in blocks)
+                    {
+                        BlockEater(block);
+                    }
                     watch.Stop();
                     MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
@@ -86,9 +94,8 @@ namespace ProjectilesImproved.Effects
             bullet.HasExpired = true;
         }
 
-        private void BlockEater(IMySlimBlock block)
+        private void BlockEaterAllBlocks(IMySlimBlock block)
         {
-            double distance = (block.CubeGrid.GridIntegerToWorld(block.Position) - Epicenter).LengthSquared();
             //if (distance > radiusSquared)
             //{
             //    return;
@@ -97,6 +104,43 @@ namespace ProjectilesImproved.Effects
             //LineD checkLine;
             BoundingBoxD bounds;
             block.GetWorldBoundingBox(out bounds);
+
+            double distance = (bounds.Center - Epicenter).LengthSquared();
+            if (distance > radiusSquared)
+            {
+                return;
+            }
+
+            BlockDesc desc = new BlockDesc(block, distance);
+
+            foreach (Paring pair in parings)
+            {
+                Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
+                //MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
+
+                Vector3D localized = translatedPoint - Epicenter;
+
+                RayD ray = new RayD(Epicenter, localized);
+
+                if (bounds.Intersects(ray).HasValue)
+                {
+                    pair.BlockList.Add(desc);
+                }
+            }
+        }
+
+        private void BlockEater(IMySlimBlock block)
+        {
+            //if (distance > radiusSquared)
+            //{
+            //    return;
+            //}
+
+            //LineD checkLine;
+            BoundingBoxD bounds;
+            block.GetWorldBoundingBox(out bounds);
+
+            double distance = (bounds.Center - Epicenter).LengthSquared();
 
             BlockDesc desc = new BlockDesc(block, distance);
 
@@ -133,9 +177,7 @@ namespace ProjectilesImproved.Effects
 
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
-            Stopwatch watch = new Stopwatch();
             watch.Start();
-
             foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
