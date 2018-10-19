@@ -55,7 +55,7 @@ namespace ProjectilesImproved.Effects
 
                     List<IMySlimBlock> blocks = new List<IMySlimBlock>(); //I'm like, 80% sure this will work right
 
-                    watch.Start();
+                    watch.Restart();
                     grid.GetBlocks(blocks);
                     foreach (IMySlimBlock block in blocks)
                     {
@@ -154,7 +154,7 @@ namespace ProjectilesImproved.Effects
 
         private void SortLists()
         {
-            watch.Start();
+            watch.Restart();
             for (int i = 0; i < parings.Length; i++)
             {
                 Paring pair = parings[i];
@@ -169,7 +169,7 @@ namespace ProjectilesImproved.Effects
 
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter) //ok, so there's a problem with the specific way this is implemented, but if nobody notices... forget I said anything ;)
         {
-            watch.Start();
+            watch.Restart();
             foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
