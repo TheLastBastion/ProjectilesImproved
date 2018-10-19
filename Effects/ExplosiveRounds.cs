@@ -40,7 +40,7 @@ namespace ProjectilesImproved.Effects
 
             hitPositionMatrix = new MatrixD(bullet.PositionMatrix);
             hitPositionMatrix.Translation = hit.Position + (hitPositionMatrix.Forward * Radius);
-            Epicenter = hitPositionMatrix.Translation;
+            Epicenter = hit.Position;
             MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
