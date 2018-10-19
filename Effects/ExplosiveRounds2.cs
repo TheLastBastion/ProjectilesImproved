@@ -56,7 +56,7 @@ namespace ProjectilesImproved.Effects
                         BoundingBoxD box;
                         block.GetWorldBoundingBox(out box);
 
-                        Vector3D localized = ent.WorldAABB.Center - hit.Position;
+                        Vector3D localized = box.Center - hit.Position;
 
                         entities.Add(new FormatedEntity()
                         {
@@ -64,7 +64,7 @@ namespace ProjectilesImproved.Effects
                             Box = box,
                             Ray = new RayD(hit.Position, localized),
                             Shielding = 0,
-                            PotentialDamage = (float)(bullet.ProjectileMassDamage * (1 - (localized.LengthSquared() / RadiusSquared)))
+                            PotentialDamage = (float)(bullet.ProjectileMassDamage * (1 - localized.LengthSquared() / RadiusSquared))
                         });
                     }
                 }
@@ -78,7 +78,7 @@ namespace ProjectilesImproved.Effects
                         Box = ent.WorldAABB,
                         Ray = new RayD(hit.Position, localized),
                         Shielding = 0,
-                        PotentialDamage = (float)(bullet.ProjectileMassDamage * (1 - (localized.LengthSquared() / RadiusSquared)))
+                        PotentialDamage = (float)(bullet.ProjectileMassDamage * (1 - localized.LengthSquared() / RadiusSquared))
                     });
                 }
             }
