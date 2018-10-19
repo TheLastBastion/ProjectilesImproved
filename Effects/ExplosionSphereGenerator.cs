@@ -22,7 +22,7 @@ namespace ProjectilesImproved.Effects
         {
             //MyAmmoDefinition  MyDefinitionManager.Static.GetAllDefinitions<MyAmmoDefinition>();
 
-            writer(MyStringHash.GetOrCompute("OKI230mmAmmoPars"), 1, 0.5f, 45);
+            writer(MyStringHash.GetOrCompute("OKI230mmAmmoPars"), 5, 0.5f, 10);
             
         }
 

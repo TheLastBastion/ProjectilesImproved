@@ -19,7 +19,7 @@ namespace ProjectilesImproved.Effects
     public class ExplosiveRounds : EffectBase
     {
         [ProtoMember(2)]
-        public Vector3D Epicenter { get; set; }
+        public float Offset { get; set; }
 
         [ProtoMember(3)]
         public float Radius { get; set; }
@@ -29,8 +29,9 @@ namespace ProjectilesImproved.Effects
 
         Paring[] parings;
         Dictionary<IMySlimBlock, float> AccumulatedDamage = new Dictionary<IMySlimBlock, float>();
-        MatrixD hitPositionMatrix;
+        MatrixD sphereTransformMatrix;
         float radiusSquared;
+        Vector3D epicenter;
         private Stopwatch watch = new Stopwatch();
 
         public override void Execute(IHitInfo hit, BulletBase bullet)
@@ -39,10 +40,11 @@ namespace ProjectilesImproved.Effects
             // these are temp
             parings = ExplosionShapeGenerator.Instance.ShapeLookup[bullet.AmmoId.SubtypeId];
 
-            hitPositionMatrix = new MatrixD(bullet.PositionMatrix);
-            hitPositionMatrix.Translation = hit.Position + (hitPositionMatrix.Forward * Radius);
-            Epicenter = hit.Position;
-            //MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
+            Vector3D hitPosition = hit.Position - (bullet.PositionMatrix.Forward * Offset);
+            epicenter = hitPosition;
+
+            sphereTransformMatrix = new MatrixD(bullet.PositionMatrix);
+            sphereTransformMatrix.Translation = hitPosition + (sphereTransformMatrix.Forward * Radius);
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
@@ -116,7 +118,7 @@ namespace ProjectilesImproved.Effects
 
             foreach (Paring pair in parings)
             {
-                Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
+                Vector3D translatedPoint = Vector3D.Transform(pair.Point, sphereTransformMatrix);
                 //MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
 
                 Vector3D localized = translatedPoint - Epicenter;
@@ -137,7 +139,7 @@ namespace ProjectilesImproved.Effects
 
             foreach (Paring pair in parings)
             {
-                Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
+                Vector3D translatedPoint = Vector3D.Transform(pair.Point, sphereTransformMatrix);
 
                 Vector3D localized = translatedPoint - Epicenter;
                 RayD ray = new RayD(Epicenter, localized);
