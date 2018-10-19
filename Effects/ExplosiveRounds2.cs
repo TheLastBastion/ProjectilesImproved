@@ -37,7 +37,7 @@ namespace ProjectilesImproved.Effects
             RadiusSquared = Radius * Radius;
 
             watch.Start();
-            BoundingSphereD sphere = new BoundingSphereD(epicenter.Translation, Radius);
+            BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
             watch.Stop();
             MyLog.Default.Info($"Entities In Sphere: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
@@ -56,29 +56,29 @@ namespace ProjectilesImproved.Effects
                         BoundingBoxD box;
                         block.GetWorldBoundingBox(out box);
 
-                        Vector3D localized = ent.WorldAABB.Center - epicenter.Translation;
+                        Vector3D localized = ent.WorldAABB.Center - hit.Position;
 
                         entities.Add(new FormatedEntity()
                         {
                             Entity = block as IMyDestroyableObject,
                             Box = box,
-                            Ray = new RayD(epicenter.Translation, localized),
+                            Ray = new RayD(hit.Position, localized),
                             Shielding = 0,
-                            PotentialDamage = (float)(bullet.ProjectileMassDamage * (1- localized.LengthSquared() / RadiusSquared))
+                            PotentialDamage = (float)(bullet.ProjectileMassDamage * (1 - (localized.LengthSquared() / RadiusSquared)))
                         });
                     }
                 }
                 else if (ent is IMyDestroyableObject)
                 {
-                    Vector3D localized = ent.WorldAABB.Center - epicenter.Translation;
+                    Vector3D localized = ent.WorldAABB.Center - hit.Position;
 
                     entities.Add(new FormatedEntity()
                     {
                         Entity = ent as IMyDestroyableObject,
                         Box = ent.WorldAABB,
-                        Ray = new RayD(epicenter.Translation, localized),
+                        Ray = new RayD(hit.Position, localized),
                         Shielding = 0,
-                        PotentialDamage = (float)(bullet.ProjectileMassDamage * (1 - localized.LengthSquared() / RadiusSquared))
+                        PotentialDamage = (float)(bullet.ProjectileMassDamage * (1 - (localized.LengthSquared() / RadiusSquared)))
                     });
                 }
             }
@@ -122,6 +122,8 @@ namespace ProjectilesImproved.Effects
 
             MyLog.Default.Info($"----- Stop Explosion -----");
             MyLog.Default.Flush();
+
+            bullet.HasExpired = true;
         }
 
         public struct FormatedEntity
