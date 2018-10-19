@@ -64,6 +64,7 @@ namespace ProjectilesImproved.Effects
                     watch.Stop();
                     MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
+                    blocks.Clear();
                     watch.Restart();
                     blocks = grid.GetBlocksInsideSphere(ref sphere);
                     foreach (IMySlimBlock block in blocks)
@@ -131,30 +132,21 @@ namespace ProjectilesImproved.Effects
 
         private void BlockEater(IMySlimBlock block)
         {
-            //if (distance > radiusSquared)
-            //{
-            //    return;
-            //}
-
-            //LineD checkLine;
             BoundingBoxD bounds;
             block.GetWorldBoundingBox(out bounds);
-
-            double distance = (bounds.Center - Epicenter).LengthSquared();
-
-            BlockDesc desc = new BlockDesc(block, distance);
 
             foreach (Paring pair in parings)
             {
                 Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
-                //MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
 
                 Vector3D localized = translatedPoint - Epicenter;
-
                 RayD ray = new RayD(Epicenter, localized);
 
                 if (bounds.Intersects(ray).HasValue)
                 {
+                    double distance = (bounds.Center - Epicenter).LengthSquared();
+                    BlockDesc desc = new BlockDesc(block, distance);
+
                     pair.BlockList.Add(desc);
                 }
             }
