@@ -41,7 +41,7 @@ namespace ProjectilesImproved.Effects
             hitPositionMatrix = new MatrixD(bullet.PositionMatrix);
             hitPositionMatrix.Translation = hit.Position + (hitPositionMatrix.Forward * Radius);
             Epicenter = hit.Position;
-            MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
+            //MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
@@ -54,6 +54,7 @@ namespace ProjectilesImproved.Effects
 
                     List<IMySlimBlock> blocks = new List<IMySlimBlock>(); //I'm like, 80% sure this will work right
                     grid.GetBlocks(blocks);
+                    //grid.GetBlocksInsideSphere(ref sphere);
 
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
@@ -94,7 +95,7 @@ namespace ProjectilesImproved.Effects
             foreach (Paring pair in parings)
             {
                 Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
-                MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
+                //MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
 
                 Vector3D localized = translatedPoint - Epicenter;
 
