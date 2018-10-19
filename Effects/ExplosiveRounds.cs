@@ -53,8 +53,8 @@ namespace ProjectilesImproved.Effects
                     IMyCubeGrid grid = ent as IMyCubeGrid;
 
                     List<IMySlimBlock> blocks = new List<IMySlimBlock>(); //I'm like, 80% sure this will work right
-                    grid.GetBlocks(blocks);
-                    //grid.GetBlocksInsideSphere(ref sphere);
+                    //grid.GetBlocks(blocks);
+                    grid.GetBlocksInsideSphere(ref sphere);
 
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
