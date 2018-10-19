@@ -89,6 +89,9 @@ namespace ProjectilesImproved.Effects
             for (int i = 0; i < entities.Count; i++)
             {
                 FormatedEntity entity = entities[i];
+
+                MyLog.Default.Info($"[{i}] Potential Damage: {entity.PotentialDamage}"); 
+
                 for (int j = 0; j < entities.Count; j++)
                 {
                     if (entity.Shielding > entity.PotentialDamage) break;
@@ -97,9 +100,11 @@ namespace ProjectilesImproved.Effects
                     FormatedEntity blocker = entities[j];
 
                     double? nullable = blocker.Box.Intersects(entity.Ray);
+                    MyLog.Default.Info($"[{i}] to [{j}] Intersect: {nullable.HasValue} blocker HP: {blocker.Entity.Integrity}");
                     if (nullable.HasValue)
                     {
                         entity.Shielding += blocker.Entity.Integrity;
+                        MyLog.Default.Info($"[{i}] Shilding: {entity.Shielding}");
                     }
                 }
             }
