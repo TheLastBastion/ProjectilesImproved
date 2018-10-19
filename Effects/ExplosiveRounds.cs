@@ -30,16 +30,18 @@ namespace ProjectilesImproved.Effects
         Paring[] parings;
         Dictionary<IMySlimBlock, float> AccumulatedDamage = new Dictionary<IMySlimBlock, float>();
         MatrixD hitPositionMatrix;
+        float radiusSquared;
 
         public override void Execute(IHitInfo hit, BulletBase bullet)
         {
+            radiusSquared = Radius * Radius;
             // these are temp
-            Epicenter = hit.Position;
-            MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
             parings = ExplosionShapeGenerator.Instance.ShapeLookup[bullet.AmmoId.SubtypeId];
 
             hitPositionMatrix = new MatrixD(bullet.PositionMatrix);
             hitPositionMatrix.Translation = hit.Position;
+            Epicenter = hitPositionMatrix.Translation;
+            MyVisualScriptLogicProvider.AddGPS("", "", Epicenter, Color.Green);
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
@@ -60,7 +62,8 @@ namespace ProjectilesImproved.Effects
                         BlockEater(block);
                     }
                     watch.Stop();
-                    MyAPIGateway.Utilities.ShowNotification($"Block Eater Time: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms", 10000);
+                    MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+                    //MyAPIGateway.Utilities.ShowNotification($"Block Eater Time: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms", 10000);
                 }
                 else if (ent is IMyDestroyableObject)
                 {
@@ -77,7 +80,7 @@ namespace ProjectilesImproved.Effects
         private void BlockEater(IMySlimBlock block)
         {
             double distance = (block.CubeGrid.GridIntegerToWorld(block.Position) - Epicenter).LengthSquared();
-            if (distance > Radius * Radius)
+            if (distance > radiusSquared)
             {
                 return;
             }
@@ -91,10 +94,13 @@ namespace ProjectilesImproved.Effects
             foreach (Paring pair in parings)
             {
                 Vector3D translatedPoint = Vector3D.Transform(pair.Point, hitPositionMatrix);
-                MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
-                LineD line = new LineD(Epicenter, translatedPoint);
+                //MyVisualScriptLogicProvider.AddGPS("", "", translatedPoint, Color.Red);
 
-                if (bounds.Intersects(ref line))
+                Vector3D localized = translatedPoint - Epicenter;
+
+                RayD ray = new RayD(Epicenter, localized);
+
+                if (bounds.Intersects(ray).HasValue)
                 {
                     pair.BlockList.Add(desc);
                 }
@@ -111,7 +117,8 @@ namespace ProjectilesImproved.Effects
                 parings[i] = new Paring(parings[i].Point, pair.BlockList.OrderBy(p => p.DistanceSqud).ToList());
             }
             watch.Stop();
-            MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {((float)watch.ElapsedTicks/(float)Stopwatch.Frequency)*1000d}ms", 10000);
+            MyLog.Default.Info($"Sort Hit Objects: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+            //MyAPIGateway.Utilities.ShowNotification($"Sorting Time: {((float)watch.ElapsedTicks/(float)Stopwatch.Frequency)*1000d}ms", 10000);
 
         }
 
@@ -151,7 +158,8 @@ namespace ProjectilesImproved.Effects
             }
 
             watch.Stop();
-            MyAPIGateway.Utilities.ShowNotification($"Damageing Time: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms", 10000);
+            MyLog.Default.Info($"Damage Time: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+            //MyAPIGateway.Utilities.ShowNotification($"Damageing Time: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms", 10000);
         }
     }
 }
