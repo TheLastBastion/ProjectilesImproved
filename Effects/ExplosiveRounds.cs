@@ -54,7 +54,7 @@ namespace ProjectilesImproved.Effects
 
                     List<IMySlimBlock> blocks = new List<IMySlimBlock>(); //I'm like, 80% sure this will work right
                     //grid.GetBlocks(blocks);
-                    grid.GetBlocksInsideSphere(ref sphere);
+                    blocks = grid.GetBlocksInsideSphere(ref sphere);
 
                     Stopwatch watch = new Stopwatch();
                     watch.Start();
