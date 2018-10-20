@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using VRage.Game.ModAPI;
+using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
 
@@ -99,15 +100,19 @@ namespace ProjectilesImproved.Effects
     /// <summary>
     /// Holds extended block details for easy explosion compuations
     /// </summary>
-    public struct BlockDesc
+    public struct EntityDesc
     {
-        public double DistanceSqud;
-        public IMySlimBlock Block;
+        public bool Destroyed;
+        public float AccumulatedDamage;
+        public double DistanceSquared;
+        public IMyDestroyableObject Object;
 
-        public BlockDesc(IMySlimBlock block, double dist)
+        public EntityDesc(IMyDestroyableObject obj, double dist)
         {
-            DistanceSqud = dist;
-            Block = block;
+            DistanceSquared = dist;
+            Object = obj;
+            AccumulatedDamage = 0;
+            Destroyed = false;
         }
     }
 
@@ -118,16 +123,16 @@ namespace ProjectilesImproved.Effects
     {
         public RayD Ray;
         public Vector3D Point;
-        public List<BlockDesc> BlockList;
+        public List<int> BlockList;
 
         public Paring(Vector3D point)
         {
             Point = point;
-            BlockList = new List<BlockDesc>();
+            BlockList = new List<int>();
             Ray = default(RayD);
         }
 
-        public Paring(Vector3D point, List<BlockDesc> blocks)
+        public Paring(Vector3D point, List<int> blocks)
         {
             Point = point;
             BlockList = blocks;
@@ -138,7 +143,7 @@ namespace ProjectilesImproved.Effects
         {
             Point = point;
             Ray = ray;
-            BlockList = new List<BlockDesc>();
+            BlockList = new List<int>();
         }
     }
 }
