@@ -106,7 +106,7 @@ namespace ProjectilesImproved.Effects
 
             int iRadius = (int)(Radius / grid.GridSize);
             int iDiameter = iRadius * 2;
-            int iVolume = iRadius * iRadius * iRadius;
+            int iVolume = iDiameter * iDiameter * iDiameter;
 
             IMySlimBlock[] slims = new IMySlimBlock[iVolume];
 
