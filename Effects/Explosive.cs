@@ -67,27 +67,27 @@ namespace ProjectilesImproved.Effects
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+            List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
 
             foreach (IMyEntity ent in effectedEntities)
             {
                 if (ent is IMyCubeGrid)
                 {
-                    MyCubeGrid grid = ent as MyCubeGrid;
-                    HashSet<IMySlimBlock> blocks = new HashSet<IMySlimBlock>();
-
                     watch.Restart();
-                    grid.GetBlocks();
+                    IMyCubeGrid grid = ent as IMyCubeGrid;
+
+                    grid.GetBlocks(temp, BlockEater);
                     watch.Stop();
-                    MyLog.Default.Info($"Get Blocks: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+                    MyLog.Default.Info($"Verify Block: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
 
-                    watch.Restart();
-                    foreach (IMySlimBlock block in blocks)
-                    {
-                        BlockEater(block);
-                    }
-                    watch.Stop();
-                    MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+                    //watch.Restart();
+                    //foreach (IMySlimBlock block in blocks)
+                    //{
+                    //    BlockEater(block);
+                    //}
+                    //watch.Stop();
+                    //MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
                 }
                 else if (ent is IMyDestroyableObject)
                 {
@@ -101,7 +101,7 @@ namespace ProjectilesImproved.Effects
             bullet.HasExpired = true;
         }
 
-        private void BlockEater(IMySlimBlock block)
+        private bool BlockEater(IMySlimBlock block)
         {
             BoundingBoxD bounds;
             block.GetWorldBoundingBox(out bounds);
@@ -109,7 +109,7 @@ namespace ProjectilesImproved.Effects
             double distance = (bounds.Center - epicenter).LengthSquared();
             if (distance > radiusSquared)
             {
-                return;
+                return false;
             }
 
             foreach (Paring pair in parings)
@@ -119,6 +119,8 @@ namespace ProjectilesImproved.Effects
                     pair.BlockList.Add(new BlockDesc(block, distance));
                 }
             }
+
+            return false;
         }
 
         private void SortLists()
