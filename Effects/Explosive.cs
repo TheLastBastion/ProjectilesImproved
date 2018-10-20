@@ -183,7 +183,7 @@ namespace ProjectilesImproved.Effects
                     entity.AccumulatedDamage += tempDmg;
                     tempDmg = 0;
 
-                    MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}, Destroyed {entity.Destroyed}");
+                    //MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}, Destroyed {entity.Destroyed}");
 
                     if (entity.AccumulatedDamage > entity.Object.Integrity)
                     {
