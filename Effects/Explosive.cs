@@ -77,9 +77,7 @@ namespace ProjectilesImproved.Effects
 
                 if (ent is IMyCubeGrid)
                 {
-                    IMyCubeGrid grid = ent as IMyCubeGrid;
-
-                    List<IMySlimBlock> slims = GetBlocks(grid);
+                    List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
 
                     foreach (IMySlimBlock slim in slims)
                     {
@@ -91,10 +89,10 @@ namespace ProjectilesImproved.Effects
                         }
                     }
                 }
-                else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
-                {
-                    BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
-                }
+                //else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
+                //{
+                //    BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
+                //}
             }
             watch.Stop();
             MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
