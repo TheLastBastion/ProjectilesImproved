@@ -1,6 +1,5 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
-using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -45,6 +44,7 @@ namespace ProjectilesImproved.Effects
         MatrixD transformationMatrix;
         float radiusSquared;
         Vector3D epicenter;
+        BoundingSphereD sphere;
         private Stopwatch watch = new Stopwatch();
 
         public void Execute(IHitInfo hit, BulletBase bullet)
@@ -59,7 +59,7 @@ namespace ProjectilesImproved.Effects
             watch.Stop();
             MyLog.Default.Info($"Verify Block: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
-            BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
+            sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
             List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
 
@@ -69,10 +69,23 @@ namespace ProjectilesImproved.Effects
                 if (ent is IMyCubeGrid)
                 {
                     watch.Restart();
+
                     IMyCubeGrid grid = ent as IMyCubeGrid;
 
-                    grid.GetBlocks(temp, BlockEater);
-                    watch.Stop();
+                    //grid.GetBlocks(temp, BlockEater);
+                    //watch.Stop();
+
+
+                    IMySlimBlock[] slims = GetBlocks(grid);
+
+                    foreach (IMySlimBlock slim in slims)
+                    {
+                        if (slim != null)
+                        {
+                            BlockEater(slim);
+                        }
+                    }
+
                     MyLog.Default.Info($"Verify + Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
                 }
                 else if (ent is IMyDestroyableObject)
@@ -85,6 +98,43 @@ namespace ProjectilesImproved.Effects
             DamageBlocks((bullet.ProjectileMassDamage / parings.Length), bullet.AmmoId.SubtypeId, bullet.BlockId);
 
             bullet.HasExpired = true;
+        }
+
+        private IMySlimBlock[] GetBlocks(IMyCubeGrid grid)
+        {
+            Vector3I iEpicenter = grid.WorldToGridInteger(epicenter);
+
+            int iRadius = (int)(Radius / grid.GridSize);
+            int iDiameter = iRadius * 2;
+            int iVolume = iRadius * iRadius * iRadius;
+
+            IMySlimBlock[] slims = new IMySlimBlock[iVolume];
+
+            int xMin = iEpicenter.X - iRadius;
+            int xMax = iEpicenter.X + iRadius;
+            int yMin = iEpicenter.Y - iRadius;
+            int yMax = iEpicenter.Y + iRadius;
+            int zMin = iEpicenter.Z - iRadius;
+            int zMax = iEpicenter.Z + iRadius;
+
+            Vector3I loc = Vector3I.Zero;
+
+            int index = 0;
+            for (loc.X = xMin; loc.X < xMax; loc.X++)
+            {
+                for (loc.Y = yMin; loc.Y < yMax; loc.Y++)
+                {
+                    for (loc.Z = zMin; loc.Z < zMax; loc.Z++)
+                    {
+                        IMySlimBlock slim = grid.GetCubeBlock(loc);
+
+                        slims[index] = slim;
+                        index++;
+                    }
+                }
+            }
+
+            return slims;
         }
 
         private bool BlockEater(IMySlimBlock block)
