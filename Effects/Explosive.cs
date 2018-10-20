@@ -107,10 +107,10 @@ namespace ProjectilesImproved.Effects
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
         {
             Vector3I iEpicenter = grid.WorldToGridInteger(epicenter);
-            int iRadius = (int)(Radius / grid.GridSize);
+            int iRadius = (int)Math.Ceiling(Radius / grid.GridSize);
 
-            Vector3I Min = new Vector3I((int)Math.Floor((double)(iEpicenter.X - iRadius)), (int)Math.Floor((double)(iEpicenter.Y - iRadius)), (int)Math.Floor((double)(iEpicenter.Z - iRadius)));
-            Vector3I Max = new Vector3I((int)Math.Ceiling((double)(iEpicenter.X + iRadius)), (int)Math.Ceiling((double)(iEpicenter.Y + iRadius)), (int)Math.Ceiling((double)(iEpicenter.Z + iRadius)));
+            Vector3I Min = new Vector3I(iEpicenter.X - iRadius, iEpicenter.Y - iRadius, iEpicenter.Z - iRadius);
+            Vector3I Max = new Vector3I(iEpicenter.X + iRadius, iEpicenter.Y + iRadius, iEpicenter.Z + iRadius);
 
             List<IMySlimBlock> slims = new List<IMySlimBlock>(1+iRadius*iRadius*iRadius*2);
 
@@ -137,9 +137,7 @@ namespace ProjectilesImproved.Effects
                 return false;
             }
 
-            EntityDesc entity = new EntityDesc(obj, distance);
-
-            entities.Add(entity);
+            entities.Add(new EntityDesc(obj, distance));
             int index = entities.Count - 1;
 
             foreach (Paring pair in parings)
