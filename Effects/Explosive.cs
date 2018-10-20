@@ -176,6 +176,8 @@ namespace ProjectilesImproved.Effects
                 {
                     EntityDesc entity = entities[pair.BlockList[i]];
 
+                    MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}, Destroyed {entity.Destroyed}");
+
                     if (entity.Destroyed) continue;
 
                     entity.AccumulatedDamage += tempDmg;
@@ -183,7 +185,6 @@ namespace ProjectilesImproved.Effects
 
                     if (entity.AccumulatedDamage > entity.Object.Integrity)
                     {
-                        MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}");
                         tempDmg = entity.AccumulatedDamage - entity.Object.Integrity;
                         entity.AccumulatedDamage = entity.Object.Integrity;
                         entity.Destroyed = true;
