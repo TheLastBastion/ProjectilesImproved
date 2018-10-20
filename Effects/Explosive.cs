@@ -76,7 +76,7 @@ namespace ProjectilesImproved.Effects
                     //watch.Stop();
 
 
-                    IMySlimBlock[] slims = GetBlocks(grid);
+                    List<IMySlimBlock> slims = GetBlocks(grid);
 
                     foreach (IMySlimBlock slim in slims)
                     {
@@ -100,36 +100,43 @@ namespace ProjectilesImproved.Effects
             bullet.HasExpired = true;
         }
 
-        private IMySlimBlock[] GetBlocks(IMyCubeGrid grid)
+        private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
         {
             Vector3I iEpicenter = grid.WorldToGridInteger(epicenter);
 
             int iRadius = (int)(Radius / grid.GridSize);
             int iDiameter = iRadius * 2;
-            int iVolume = iDiameter * iDiameter * iDiameter;
 
-            IMySlimBlock[] slims = new IMySlimBlock[iVolume];
+            Vector3I gridMin = new Vector3I(grid.PositionComp.LocalAABB.Min / grid.GridSize);
+            Vector3I gridMax = new Vector3I(grid.PositionComp.LocalAABB.Max / grid.GridSize);
 
-            int xMin = iEpicenter.X - iRadius;
-            int xMax = iEpicenter.X + iRadius;
-            int yMin = iEpicenter.Y - iRadius;
-            int yMax = iEpicenter.Y + iRadius;
-            int zMin = iEpicenter.Z - iRadius;
-            int zMax = iEpicenter.Z + iRadius;
+            Vector3I Min = new Vector3I(iEpicenter.X - iRadius, iEpicenter.Y - iRadius, iEpicenter.Z - iRadius);
+            Vector3I Max = new Vector3I(iEpicenter.X + iRadius, iEpicenter.Y + iRadius, iEpicenter.Z + iRadius);
+
+            if (Min.X < gridMin.X) Min.X = gridMin.X;
+            if (Min.Y < gridMin.Y) Min.Y = gridMin.Y;
+            if (Min.Z < gridMin.Z) Min.Z = gridMin.Z;
+
+            if (Max.X > gridMax.X) Max.X = gridMax.X;
+            if (Max.Y > gridMax.Y) Max.Y = gridMax.Y;
+            if (Max.Z > gridMax.Z) Max.Z = gridMax.Z;
+
+            int iVolume = (Max - Min).Volume();
+
+            List<IMySlimBlock> slims = new List<IMySlimBlock>(iVolume);
 
             Vector3I loc = Vector3I.Zero;
-
-            int index = 0;
-            for (loc.X = xMin; loc.X < xMax; loc.X++)
+            for (loc.X = Min.X; loc.X < Max.X; loc.X++)
             {
-                for (loc.Y = yMin; loc.Y < yMax; loc.Y++)
+                for (loc.Y = Min.Y; loc.Y < Max.Y; loc.Y++)
                 {
-                    for (loc.Z = zMin; loc.Z < zMax; loc.Z++)
+                    for (loc.Z = Min.Z; loc.Z < Max.Z; loc.Z++)
                     {
-                        IMySlimBlock slim = grid.GetCubeBlock(loc);
+                        if (loc.RectangularLength() <= iRadius)
+                        {
+                            slims.Add(grid.GetCubeBlock(loc));
+                        }
 
-                        slims[index] = slim;
-                        index++;
                     }
                 }
             }
