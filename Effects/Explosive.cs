@@ -39,22 +39,13 @@ namespace ProjectilesImproved.Effects
         [ProtoMember(5)]
         public bool AffectVoxels { get; set; }
 
-        Paring[] parings;
         Dictionary<IMySlimBlock, float> AccumulatedDamage = new Dictionary<IMySlimBlock, float>();
+
+        Paring[] parings;
         MatrixD transformationMatrix;
         float radiusSquared;
         Vector3D epicenter;
         private Stopwatch watch = new Stopwatch();
-
-        //public Explosive()
-        //{
-        //    if (ExplosionShapeGenerator.Instance == null)
-        //    {
-        //        ExplosionShapeGenerator.Instance = new ExplosionShapeGenerator();
-        //    }
-
-        //    ExplosionShapeGenerator.Instance.Generate()
-        //}
 
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
@@ -63,10 +54,14 @@ namespace ProjectilesImproved.Effects
             transformationMatrix = new MatrixD(bullet.PositionMatrix);
             transformationMatrix.Translation = epicenter + (transformationMatrix.Forward * Radius);
 
+            watch.Restart();
             parings = ExplosionShapeGenerator.GetParings(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter);
+            watch.Stop();
+            MyLog.Default.Info($"Verify Block: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+            List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
 
 
             foreach (IMyEntity ent in effectedEntities)
@@ -75,20 +70,10 @@ namespace ProjectilesImproved.Effects
                 {
                     watch.Restart();
                     IMyCubeGrid grid = ent as IMyCubeGrid;
-                    List<IMySlimBlock> blocks = new List<IMySlimBlock>(); // this is only needed to get around keens function
 
-                    grid.GetBlocks(blocks);
+                    grid.GetBlocks(temp, BlockEater);
                     watch.Stop();
-                    MyLog.Default.Info($"Verify Block: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
-
-
-                    watch.Restart();
-                    foreach (IMySlimBlock block in blocks)
-                    {
-                        BlockEater(block);
-                    }
-                    watch.Stop();
-                    MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+                    MyLog.Default.Info($"Verify + Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
                 }
                 else if (ent is IMyDestroyableObject)
                 {
@@ -127,12 +112,18 @@ namespace ProjectilesImproved.Effects
         private void SortLists()
         {
             watch.Restart();
-            for (int i = 0; i < parings.Length; i++)
+
+            MyAPIGateway.Parallel.For(0, parings.Length, (i) =>
             {
                 Paring pair = parings[i];
                 pair.BlockList = pair.BlockList.OrderBy(p => p.DistanceSqud).ToList();
-                //parings[i] = new Paring(parings[i].Point, pair.BlockList.OrderBy(p => p.DistanceSqud).ToList());
-            }
+            });
+
+            //for (int i = 0; i < parings.Length; i++)
+            //{
+            //    Paring pair = parings[i];
+            //    pair.BlockList = pair.BlockList.OrderBy(p => p.DistanceSqud).ToList();
+            //}
             watch.Stop();
             MyLog.Default.Info($"Sort Hit Objects: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
