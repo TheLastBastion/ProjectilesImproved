@@ -51,11 +51,14 @@ namespace ProjectilesImproved.Effects
         BoundingSphereD sphere;
         private Stopwatch watch = new Stopwatch();
         MyStringHash id;
+        long attackerId;
 
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
+            entities.Clear();
             bullet.HasExpired = true;
             id = bullet.AmmoId.SubtypeId;
+            attackerId = bullet.BlockId;
 
             radiusSquared = Radius * Radius;
             epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
@@ -192,7 +195,7 @@ namespace ProjectilesImproved.Effects
             {
                 if (ent.AccumulatedDamage > 0)
                 {
-                    ent.Object.DoDamage(ent.AccumulatedDamage, id, false);
+                    ent.Object.DoDamage(ent.AccumulatedDamage, id, true, null, attackerId);
                 }
             }
 
