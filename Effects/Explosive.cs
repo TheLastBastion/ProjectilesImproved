@@ -167,6 +167,8 @@ namespace ProjectilesImproved.Effects
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter)
         {
             watch.Restart();
+            MyLog.Default.Info($"Entities: {entities.Count}");
+
             foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
@@ -181,6 +183,7 @@ namespace ProjectilesImproved.Effects
 
                     if (entity.AccumulatedDamage > entity.Object.Integrity)
                     {
+                        MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}");
                         tempDmg = entity.AccumulatedDamage - entity.Object.Integrity;
                         entity.AccumulatedDamage = entity.Object.Integrity;
                         entity.Destroyed = true;
