@@ -71,10 +71,10 @@ namespace ProjectilesImproved.Effects
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
             List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
 
-
+            watch.Restart();
             foreach (IMyEntity ent in effectedEntities)
             {
-                watch.Restart();
+
                 if (ent is IMyCubeGrid)
                 {
                     IMyCubeGrid grid = ent as IMyCubeGrid;
@@ -91,14 +91,13 @@ namespace ProjectilesImproved.Effects
                         }
                     }
                 }
-                else if (ent is IMyDestroyableObject)
+                else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
                 {
                     BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
                 }
-
-                watch.Stop();
-                MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
             }
+            watch.Stop();
+            MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
             SortLists();
             DamageBlocks((bullet.ProjectileMassDamage / parings.Length), bullet.AmmoId.SubtypeId, bullet.BlockId);
@@ -167,23 +166,18 @@ namespace ProjectilesImproved.Effects
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter)
         {
             watch.Restart();
-
-            EntityDesc entity;
-            int index;
             foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
                 for (int i = 0; i < pair.BlockList.Count && tempDmg > 0; i++)
                 {
-                    index = pair.BlockList[i];
-                    entity = entities[index];
+                    int index = pair.BlockList[i];
+                    EntityDesc entity = entities[index];
 
                     if (entity.Destroyed) continue;
 
                     entity.AccumulatedDamage += tempDmg;
                     tempDmg = 0;
-
-                    //MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}, Destroyed {entity.Destroyed}");
 
                     if (entity.AccumulatedDamage > entity.Object.Integrity)
                     {
@@ -200,7 +194,7 @@ namespace ProjectilesImproved.Effects
             {
                 if (ent.AccumulatedDamage > 0)
                 {
-                    ent.Object.DoDamage(ent.AccumulatedDamage, id, true);
+                    ent.Object.DoDamage(ent.AccumulatedDamage, id, false);
                 }
             }
 
