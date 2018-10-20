@@ -55,53 +55,56 @@ namespace ProjectilesImproved.Effects
 
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
-            entities.Clear();
-            bullet.HasExpired = true;
-            id = bullet.AmmoId.SubtypeId;
-            attackerId = bullet.BlockId;
-
-            radiusSquared = Radius * Radius;
-            epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
-            transformationMatrix = new MatrixD(bullet.PositionMatrix);
-            transformationMatrix.Translation = epicenter + (transformationMatrix.Forward * Radius);
-
-            watch.Restart();
-            parings = ExplosionShapeGenerator.GetParings(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter);
-            watch.Stop();
-            MyLog.Default.Info($"Pull Rays: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
-
-            sphere = new BoundingSphereD(hit.Position, Radius);
-            List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-            List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
-
-            watch.Restart();
-            foreach (IMyEntity ent in effectedEntities)
+            MyAPIGateway.Parallel.StartBackground(() =>
             {
+                entities.Clear();
+                bullet.HasExpired = true;
+                id = bullet.AmmoId.SubtypeId;
+                attackerId = bullet.BlockId;
 
-                if (ent is IMyCubeGrid)
+                radiusSquared = Radius * Radius;
+                epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
+                transformationMatrix = new MatrixD(bullet.PositionMatrix);
+                transformationMatrix.Translation = epicenter + (transformationMatrix.Forward * Radius);
+
+                watch.Restart();
+                parings = ExplosionShapeGenerator.GetParings(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter);
+                watch.Stop();
+                MyLog.Default.Info($"Pull Rays: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+
+                sphere = new BoundingSphereD(hit.Position, Radius);
+                List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+                List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
+
+                watch.Restart();
+                foreach (IMyEntity ent in effectedEntities)
                 {
-                    List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
 
-                    foreach (IMySlimBlock slim in slims)
+                    if (ent is IMyCubeGrid)
                     {
-                        if (slim != null)
+                        List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
+
+                        foreach (IMySlimBlock slim in slims)
                         {
-                            BoundingBoxD bounds;
-                            slim.GetWorldBoundingBox(out bounds);
-                            BlockEater(slim, bounds);
+                            if (slim != null)
+                            {
+                                BoundingBoxD bounds;
+                                slim.GetWorldBoundingBox(out bounds);
+                                BlockEater(slim, bounds);
+                            }
                         }
                     }
+                    else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
+                    {
+                        BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
+                    }
                 }
-                //else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
-                //{
-                //    BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
-                //}
-            }
-            watch.Stop();
-            MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+                watch.Stop();
+                MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
-            SortLists();
-            DamageBlocks((bullet.ProjectileMassDamage / parings.Length), bullet.AmmoId.SubtypeId, bullet.BlockId);
+                SortLists();
+                DamageBlocks((bullet.ProjectileMassDamage / parings.Length), bullet.AmmoId.SubtypeId, bullet.BlockId);
+            });
         }
 
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
