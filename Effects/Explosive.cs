@@ -67,7 +67,7 @@ namespace ProjectilesImproved.Effects
 
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-            List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
+
 
             foreach (IMyEntity ent in effectedEntities)
             {
@@ -75,19 +75,20 @@ namespace ProjectilesImproved.Effects
                 {
                     watch.Restart();
                     IMyCubeGrid grid = ent as IMyCubeGrid;
+                    List<IMySlimBlock> blocks = new List<IMySlimBlock>(); // this is only needed to get around keens function
 
-                    grid.GetBlocks(temp, BlockEater);
+                    grid.GetBlocks(blocks);
                     watch.Stop();
                     MyLog.Default.Info($"Verify Block: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
 
-                    //watch.Restart();
-                    //foreach (IMySlimBlock block in blocks)
-                    //{
-                    //    BlockEater(block);
-                    //}
-                    //watch.Stop();
-                    //MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+                    watch.Restart();
+                    foreach (IMySlimBlock block in blocks)
+                    {
+                        BlockEater(block);
+                    }
+                    watch.Stop();
+                    MyLog.Default.Info($"Block Eater: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
                 }
                 else if (ent is IMyDestroyableObject)
                 {
