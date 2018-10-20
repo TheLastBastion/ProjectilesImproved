@@ -103,22 +103,21 @@ namespace ProjectilesImproved.Effects
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
         {
             Vector3I iEpicenter = grid.WorldToGridInteger(epicenter);
-
             int iRadius = (int)(Radius / grid.GridSize);
 
-            //Vector3I gridMin = new Vector3I(grid.PositionComp.LocalAABB.Min / grid.GridSize);
-            //Vector3I gridMax = new Vector3I(grid.PositionComp.LocalAABB.Max / grid.GridSize);
+            Vector3I gridMin = new Vector3I(grid.PositionComp.LocalAABB.Min / grid.GridSize);
+            Vector3I gridMax = new Vector3I(grid.PositionComp.LocalAABB.Max / grid.GridSize);
 
             Vector3I Min = new Vector3I(iEpicenter.X - iRadius, iEpicenter.Y - iRadius, iEpicenter.Z - iRadius);
             Vector3I Max = new Vector3I(iEpicenter.X + iRadius, iEpicenter.Y + iRadius, iEpicenter.Z + iRadius);
 
-            //if (Min.X < gridMin.X) Min.X = gridMin.X;
-            //if (Min.Y < gridMin.Y) Min.Y = gridMin.Y;
-            //if (Min.Z < gridMin.Z) Min.Z = gridMin.Z;
+            if (Min.X < gridMin.X) Min.X = gridMin.X;
+            if (Min.Y < gridMin.Y) Min.Y = gridMin.Y;
+            if (Min.Z < gridMin.Z) Min.Z = gridMin.Z;
 
-            //if (Max.X > gridMax.X) Max.X = gridMax.X;
-            //if (Max.Y > gridMax.Y) Max.Y = gridMax.Y;
-            //if (Max.Z > gridMax.Z) Max.Z = gridMax.Z;
+            if (Max.X > gridMax.X) Max.X = gridMax.X;
+            if (Max.Y > gridMax.Y) Max.Y = gridMax.Y;
+            if (Max.Z > gridMax.Z) Max.Z = gridMax.Z;
 
             int iVolume = (Max - Min).Volume();
 
@@ -131,7 +130,7 @@ namespace ProjectilesImproved.Effects
                 {
                     for (loc.Z = Min.Z; loc.Z < Max.Z; loc.Z++)
                     {
-                        if (loc.RectangularLength() <= iRadius)
+                        if ((iEpicenter-loc).RectangularLength() <= iRadius)
                         {
                             slims.Add(grid.GetCubeBlock(loc));
                         }
