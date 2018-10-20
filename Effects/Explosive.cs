@@ -167,21 +167,21 @@ namespace ProjectilesImproved.Effects
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter)
         {
             watch.Restart();
-            MyLog.Default.Info($"Entities: {entities.Count}");
 
+            EntityDesc entity;
             foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
                 for (int i = 0; i < pair.BlockList.Count && tempDmg > 0; i++)
                 {
-                    EntityDesc entity = entities[pair.BlockList[i]];
-
-                    MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}, Destroyed {entity.Destroyed}");
+                    entity = entities[pair.BlockList[i]];
 
                     if (entity.Destroyed) continue;
 
                     entity.AccumulatedDamage += tempDmg;
                     tempDmg = 0;
+
+                    MyLog.Default.Info($"Accumulated: {entity.AccumulatedDamage}, Health: {entity.Object.Integrity}, Destroyed {entity.Destroyed}");
 
                     if (entity.AccumulatedDamage > entity.Object.Integrity)
                     {
@@ -192,11 +192,11 @@ namespace ProjectilesImproved.Effects
                 }
             }
 
-            foreach (EntityDesc entity in entities)
+            foreach (EntityDesc ent in entities)
             {
-                if (entity.AccumulatedDamage > 0)
+                if (ent.AccumulatedDamage > 0)
                 {
-                    entity.Object.DoDamage(entity.AccumulatedDamage, id, true);
+                    ent.Object.DoDamage(ent.AccumulatedDamage, id, true);
                 }
             }
 
