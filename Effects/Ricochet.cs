@@ -7,9 +7,9 @@ using VRageMath;
 
 namespace ProjectilesImproved.Effects
 {
-    public class Ricochet : EffectBase
+    public class Ricochet : IEffect
     {
-        public override void Execute(IHitInfo hit, BulletBase bullet)
+        public void Execute(IHitInfo hit, BulletBase bullet)
         {
             float hitEntityHealth = 5000; // default value if voxel or something
 

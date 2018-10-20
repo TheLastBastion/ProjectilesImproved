@@ -9,43 +9,53 @@ using VRageMath;
 namespace ProjectilesImproved.Effects
 {
     [ProtoContract]
-    public class EffectBase
+    public class EffectBase : IEffect
     {
-        //[ProtoMember(1)]
-        //public string Id;
-
         [ProtoMember(1)]
-        public EffectBase NextEffect;
+        public Ricochet Ricochet { get; set; }
 
-        public virtual void Execute(IHitInfo hit, BulletBase bullet)
+        [ProtoMember(2)]
+        public Explosive Explosive { get; set; }
+
+        public void Execute(IHitInfo hit, BulletBase bullet)
         {
-            if (hit.HitEntity is IMyDestroyableObject)
+
+            if (Ricochet != null)
             {
-                IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
-
-                hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
-
-                bullet.LastPositionFraction = hit.Fraction;
-                bullet.HasExpired = true;
+                Ricochet.Execute(hit, bullet);
             }
-            else if (hit.HitEntity is IMyCubeGrid)
+            else if (Explosive != null)
             {
-                IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3I? hitPos = grid.RayCastBlocks(bullet.Start, bullet.End);
-                if (hitPos.HasValue)
+                Explosive.Execute(hit, bullet);
+            }
+            else
+            {
+                if (hit.HitEntity is IMyDestroyableObject)
                 {
-                    IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
-                    block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                    IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
+                    (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
 
-                    block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
+                    hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
                     bullet.LastPositionFraction = hit.Fraction;
                     bullet.HasExpired = true;
                 }
-            }
+                else if (hit.HitEntity is IMyCubeGrid)
+                {
+                    IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
+                    Vector3I? hitPos = grid.RayCastBlocks(bullet.Start, bullet.End);
+                    if (hitPos.HasValue)
+                    {
+                        IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
+                        block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
 
-            NextEffect?.Execute(hit, bullet);
+                        block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
+
+                        bullet.LastPositionFraction = hit.Fraction;
+                        bullet.HasExpired = true;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using ProjectilesImproved.Effects;
 using ProtoBuf;
 using Sandbox.Definitions;
-using Sandbox.Game;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
@@ -73,6 +72,9 @@ namespace ProjectilesImproved.Bullets
         [ProtoMember(15)]
         public Vector3 ProjectileTrailColor = Vector3.Zero;
 
+        [ProtoMember(16)]
+        public EffectBase Effects { get; set; }
+
         public bool IsInitialized = false;
 
         public bool HasExpired = false;
@@ -83,7 +85,7 @@ namespace ProjectilesImproved.Bullets
 
         public MyAmmoMagazineDefinition Magazine;
 
-        public EffectBase OnHitEffects;
+        //public EffectBase OnHitEffects;
 
         public Vector3D PreviousPosition;
         public Vector3D Start;
@@ -128,15 +130,16 @@ namespace ProjectilesImproved.Bullets
             if (ProjectileTrailColor == Vector3.Zero)
                 ProjectileTrailColor = Ammo.ProjectileTrailColor;
 
-            if (OnHitEffects == null)
+
+            if (Effects == null)
             {
                 if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
                 {
-                    OnHitEffects = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
+                    Effects = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
                 }
                 else
                 {
-                    OnHitEffects = new EffectBase();
+                    Effects = new EffectBase();
                 }
             }
 
@@ -231,7 +234,7 @@ namespace ProjectilesImproved.Bullets
                 //MyLog.Default.Info($"Fraction: {hit.Fraction}, Frames: {CollisionCheckFrames}, FramesToWait: {framesToWait}, Current Collision Counter: {CollisionCheckCounter}");
                 if (framesToWait < 1)
                 {
-                    OnHitEffects.Execute(hit, this);
+                    Effects.Execute(hit, this);
                 }
                 else
                 {

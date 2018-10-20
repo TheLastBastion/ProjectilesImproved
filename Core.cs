@@ -35,9 +35,9 @@ namespace ProjectilesImproved
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
 
-            ExplosionShapeGenerator.Instance = new ExplosionShapeGenerator();
             IsInitialized = true;
             OnLoadComplete?.Invoke();
+            ExplosionShapeGenerator.Initialize();
         }
 
         public static void SpawnProjectile(BulletBase data)
