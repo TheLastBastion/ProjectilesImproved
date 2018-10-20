@@ -169,12 +169,14 @@ namespace ProjectilesImproved.Effects
             watch.Restart();
 
             EntityDesc entity;
+            int index;
             foreach (Paring pair in parings)
             {
                 float tempDmg = damage;
                 for (int i = 0; i < pair.BlockList.Count && tempDmg > 0; i++)
                 {
-                    entity = entities[pair.BlockList[i]];
+                    index = pair.BlockList[i];
+                    entity = entities[index];
 
                     if (entity.Destroyed) continue;
 
@@ -189,6 +191,8 @@ namespace ProjectilesImproved.Effects
                         entity.AccumulatedDamage = entity.Object.Integrity;
                         entity.Destroyed = true;
                     }
+
+                    entities[index] = entity;
                 }
             }
 
