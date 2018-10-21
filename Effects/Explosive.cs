@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using VRage.Game;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.ModAPI;
@@ -121,6 +122,11 @@ namespace ProjectilesImproved.Effects
             Vector3I Min = new Vector3I(center.X - iRadius, center.Y - iRadius, center.Z - iRadius);
             Vector3I Max = new Vector3I(center.X + iRadius, center.Y + iRadius, center.Z + iRadius);
 
+            BoundingBoxD box = new BoundingBoxD(Min * grid.GridSize, Max * grid.GridSize);
+            MatrixD matrix = grid.WorldMatrix;
+            Color c = Color.Red;
+            MySimpleObjectDraw.DrawTransparentBox(ref matrix, ref box, ref c, MySimpleObjectRasterizer.SolidAndWireframe, 1);
+
             if (Min.X < grid.Min.X) Min.X = grid.Min.X;
             if (Min.Y < grid.Min.Y) Min.Y = grid.Min.Y;
             if (Min.Z < grid.Min.Z) Min.Z = grid.Min.Z;
@@ -182,7 +188,7 @@ namespace ProjectilesImproved.Effects
         {
             foreach (EntityDesc entity in orderedEntities)
             {
-                //if (entity.Rays.Count == 0) continue;
+                if (entity.Rays.Count == 0) continue;
 
                 foreach (RayE ray in entity.Rays)
                 {
