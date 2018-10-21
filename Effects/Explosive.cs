@@ -92,7 +92,6 @@ namespace ProjectilesImproved.Effects
                         {
                             BoundingBoxD bounds;
                             slim.GetWorldBoundingBox(out bounds);
-                            MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red, 5);
                             BlockEater(slim, bounds);
                         }
                     }
@@ -160,7 +159,6 @@ namespace ProjectilesImproved.Effects
 
             bool[] octants = bounds.GetOctants(epicenter);
             EntityDesc entity = new EntityDesc(obj, distance);
-            entities.Add(entity);
 
             RayD ray = new RayD();
             for (int i = 0; i < 8; i++)
@@ -179,14 +177,19 @@ namespace ProjectilesImproved.Effects
                     }
                 }
             }
+
+            if (entity.Rays.Count > 0)
+            {
+                entities.Add(entity);
+                int value = 255 * (entity.Rays.Count / ExplosionRays.Length);
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, value, value, 255)), 5);
+            }
         }
 
         private void DamageBlocks(MyStringHash ammoId, long shooter)
         {
             foreach (EntityDesc entity in orderedEntities)
             {
-                if (entity.Rays.Count == 0) continue;
-
                 foreach (RayE ray in entity.Rays)
                 {
                     entity.AccumulatedDamage += ray.Damage;
