@@ -182,6 +182,10 @@ namespace ProjectilesImproved.Effects
             {
                 MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Green, 5);
             }
+            else
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red, 5);
+            }
 
 
             if (entity.Rays.Count > 0)
