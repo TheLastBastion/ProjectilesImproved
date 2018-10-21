@@ -178,21 +178,21 @@ namespace ProjectilesImproved.Effects
                 }
             }
 
-            if (octants[7])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Green, 5);
-            }
-            else
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red, 5);
-            }
+            //if (octants[7])
+            //{
+            //    MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Green, 5);
+            //}
+            //else
+            //{
+            //    MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red, 5);
+            //}
 
 
             if (entity.Rays.Count > 0)
             {
                 entities.Add(entity);
-                //int value = 255 * (entity.Rays.Count / ExplosionRays.Length);
-                //MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, value, value, 255)), 5);
+                int value = (entity.Rays.Count / ExplosionRays[0].Length);
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, value, value, 255)), 5);
             }
         }
 
