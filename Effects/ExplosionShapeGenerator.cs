@@ -116,10 +116,10 @@ namespace ProjectilesImproved.Effects
                     ray.Position = Vector3D.Transform(ray.Position, transformMatrix);
                     ray.Direction = Vector3D.Transform(ray.Direction, transformMatrix);
 
-                    if (i == 0 || i == 7)
-                    {
-                        MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, Color.Brown, 60);
-                    }
+                    //if (i == 0 || i == 4)
+                    //{
+                    //    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, Color.Brown, 60);
+                    //}
 
                     values[i][j] = ray;
                 }

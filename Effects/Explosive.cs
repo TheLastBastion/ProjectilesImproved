@@ -219,6 +219,8 @@ namespace ProjectilesImproved.Effects
                             tempDmg = tempDmg - desc.Object.Integrity;
                             desc.AccumulatedDamage += todoDmg;
                         }
+
+                        entities[ray.BlockList[j]] = desc;
                     }
 
                     foreach (EntityDesc desc in entities)
