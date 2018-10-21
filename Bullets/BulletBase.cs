@@ -138,16 +138,22 @@ namespace ProjectilesImproved.Bullets
                 {
                     EffectBase b = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
 
-                    Effects.Explosive = new Explosive()
+                    if (b.Explosive != null)
                     {
-                        Radius = b.Explosive.Radius,
-                        Angle = b.Explosive.Angle,
-                        Resolution = b.Explosive.Resolution,
-                        Offset = b.Explosive.Offset,
-                        AffectVoxels = b.Explosive.AffectVoxels
-                    };
+                        Effects.Explosive = new Explosive()
+                        {
+                            Radius = b.Explosive.Radius,
+                            Angle = b.Explosive.Angle,
+                            Resolution = b.Explosive.Resolution,
+                            Offset = b.Explosive.Offset,
+                            AffectVoxels = b.Explosive.AffectVoxels
+                        };
+                    }
 
-                    Effects.Ricochet = new Ricochet();
+                    if (b.Ricochet != null)
+                    {
+                        Effects.Ricochet = new Ricochet();
+                    }
                 }
             }
 
