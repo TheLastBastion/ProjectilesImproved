@@ -33,78 +33,73 @@ namespace ProjectilesImproved.Effects
         [ProtoMember(3)]
         public float Angle { get; set; }
 
+        /// <summary>
+        /// This is how far back the explosion should start from the hit position
+        /// </summary>
         [ProtoMember(4)]
         public float Offset { get; set; }
 
+        /// <summary>
+        /// deform voxels?
+        /// </summary>
         [ProtoMember(5)]
         public bool AffectVoxels { get; set; }
 
-        //Dictionary<IMySlimBlock, float> AccumulatedDamage = new Dictionary<IMySlimBlock, float>();
-
         ExplosionRay[][] explosionRays;
-
-        List<EntityDesc> entities = new List<EntityDesc>();
 
         MatrixD transformationMatrix;
         float radiusSquared;
         Vector3D epicenter;
         BoundingSphereD sphere;
         private Stopwatch watch = new Stopwatch();
-        MyStringHash id;
-        long attackerId;
 
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
-            //MyAPIGateway.Parallel.StartBackground(() =>
-            //{
-                entities.Clear();
-                bullet.HasExpired = true;
-                id = bullet.AmmoId.SubtypeId;
-                attackerId = bullet.BlockId;
+            bullet.HasExpired = true;
 
-                radiusSquared = Radius * Radius;
-                epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
-                transformationMatrix = new MatrixD(bullet.PositionMatrix);
-                transformationMatrix.Translation = epicenter + (transformationMatrix.Forward * Radius); // cause the sphere generates funny
+            radiusSquared = Radius * Radius;
+            epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
+            transformationMatrix = new MatrixD(bullet.PositionMatrix);
+            transformationMatrix.Translation = epicenter + (transformationMatrix.Forward * Radius); // cause the sphere generates funny
 
-                watch.Restart();
-                explosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter);
-                watch.Stop();
-                MyLog.Default.Info($"Pull Rays: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+            //watch.Restart();
+            explosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter);
+            //watch.Stop();
+            //MyLog.Default.Info($"Pull Rays: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
-                sphere = new BoundingSphereD(hit.Position, Radius);
-                List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-                List<IMySlimBlock> temp = new List<IMySlimBlock>(); // this is only needed to get around keens function
+            //sphere = new BoundingSphereD(hit.Position, Radius);
+            //List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
 
-                watch.Restart();
-                foreach (IMyEntity ent in effectedEntities)
+            BoundingBoxD box = new BoundingBoxD(hit.Position - Radius, hit.Position + Radius);
+            List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetElementsInBox(ref box);
+
+            watch.Restart();
+            foreach (IMyEntity ent in effectedEntities)
+            {
+                if (ent is IMyCubeGrid)
                 {
+                    List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
 
-                    if (ent is IMyCubeGrid)
+                    foreach (IMySlimBlock slim in slims)
                     {
-                        List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
-
-                        foreach (IMySlimBlock slim in slims)
+                        if (slim != null)
                         {
-                            if (slim != null)
-                            {
-                                BoundingBoxD bounds;
-                                slim.GetWorldBoundingBox(out bounds);
-                                BlockEater(slim, bounds);
-                            }
+                            BoundingBoxD bounds;
+                            slim.GetWorldBoundingBox(out bounds);
+                            BlockEater(slim, bounds);
                         }
                     }
-                    else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
-                    {
-                        BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
-                    }
                 }
-                watch.Stop();
-                MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+                else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
+                {
+                    BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
+                }
+            }
+            watch.Stop();
+            MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
 
-                SortLists();
-                //DamageBlocks((bullet.ProjectileMassDamage / parings.Length), bullet.AmmoId.SubtypeId, bullet.BlockId);
-            //});
+            SortLists();
+            DamageBlocks(bullet.ProjectileMassDamage / explosionRays.Length, bullet.AmmoId.SubtypeId, bullet.BlockId);
         }
 
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
@@ -151,10 +146,8 @@ namespace ProjectilesImproved.Effects
                 return;
             }
 
-            entities.Add(new EntityDesc(obj, distance));
-
-            int index = entities.Count - 1;
             bool[] octants = bounds.GetOctants(epicenter);
+            EntityDesc ent = new EntityDesc(obj, distance);
             RayD ray = new RayD();
 
             for (int i = 0; i < 8; i++)
@@ -168,7 +161,7 @@ namespace ProjectilesImproved.Effects
 
                     if (ray.Intersects(bounds).HasValue)
                     {
-                        rayData.BlockList.Add(index);
+                        rayData.BlockList.Add(ent);
                     }
                 }
             }
@@ -182,8 +175,7 @@ namespace ProjectilesImproved.Effects
                 for (int j = 0; j < explosionRays[i].Length; j++)
                 {
                     ExplosionRay pair = explosionRays[i][j];
-                    //pair.BlockList.Sort(i => entities[i].DistanceSquared);
-                    pair.BlockList = pair.BlockList.OrderBy(p => entities[p].DistanceSquared).ToList();
+                    pair.BlockList = pair.BlockList.OrderBy(p => p.DistanceSquared).ToList();
                 }
             }
             watch.Stop();
@@ -191,43 +183,29 @@ namespace ProjectilesImproved.Effects
 
         }
 
-        //private void DamageBlocks(float damage, MyStringHash ammoId, long shooter)
-        //{
-        //    watch.Restart();
-        //    foreach (ExplosionRay pair in explosionRays)
-        //    {
-        //        float tempDmg = damage;
-        //        for (int i = 0; i < pair.BlockList.Count && tempDmg > 0; i++)
-        //        {
-        //            int index = pair.BlockList[i];
-        //            EntityDesc entity = entities[index];
+        private void DamageBlocks(float damage, MyStringHash ammoId, long shooter)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                foreach (ExplosionRay ray in explosionRays[i])
+                {
+                    float tempDmg = damage;
+                    for (int j = 0; j < ray.BlockList.Count && tempDmg > 0; j++)
+                    {
+                        if (tempDmg < ray.BlockList[j].Object.Integrity)
+                        {
+                            ray.BlockList[j].Object.DoDamage(tempDmg, ammoId, false, null, shooter);
+                        }
+                        else
+                        {
+                            float todoDmg = tempDmg;
+                            tempDmg = tempDmg - ray.BlockList[j].Object.Integrity;
+                            ray.BlockList[j].Object.DoDamage(todoDmg, ammoId, false, null, shooter);
+                        }
 
-        //            if (entity.Destroyed) continue;
-
-        //            entity.AccumulatedDamage += tempDmg;
-        //            tempDmg = 0;
-
-        //            if (entity.AccumulatedDamage > entity.Object.Integrity)
-        //            {
-        //                tempDmg = entity.AccumulatedDamage - entity.Object.Integrity;
-        //                entity.AccumulatedDamage = entity.Object.Integrity;
-        //                entity.Destroyed = true;
-        //            }
-
-        //            entities[index] = entity;
-        //        }
-        //    }
-
-        //    foreach (EntityDesc ent in entities)
-        //    {
-        //        if (ent.AccumulatedDamage > 0)
-        //        {
-        //            ent.Object.DoDamage(ent.AccumulatedDamage, id, true, null, attackerId);
-        //        }
-        //    }
-
-        //    watch.Stop();
-        //    MyLog.Default.Info($"Damage Time: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
-        //}
+                    }
+                }
+            }
+        }
     }
 }

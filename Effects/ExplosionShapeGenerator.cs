@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
@@ -148,16 +149,16 @@ namespace ProjectilesImproved.Effects
     {
         public Vector3D Position;
         public Vector3D Direction;
-        public List<int> BlockList;
+        public List<EntityDesc> BlockList;
 
         public ExplosionRay(Vector3D point, Vector3D direction)
         {
             Position = point;
             Direction = direction;
-            BlockList = new List<int>();
+            BlockList = new List<EntityDesc>();
         }
 
-        public ExplosionRay(Vector3D point, Vector3D direction, List<int> blocks)
+        public ExplosionRay(Vector3D point, Vector3D direction, List<EntityDesc> blocks)
         {
             Position = point;
             Direction = direction;
