@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
+using Sandbox.Game;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
@@ -91,6 +92,7 @@ namespace ProjectilesImproved.Effects
                         {
                             BoundingBoxD bounds;
                             slim.GetWorldBoundingBox(out bounds);
+                            MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red, 5);
                             BlockEater(slim, bounds);
                         }
                     }
@@ -121,11 +123,6 @@ namespace ProjectilesImproved.Effects
 
             Vector3I Min = new Vector3I(center.X - iRadius, center.Y - iRadius, center.Z - iRadius);
             Vector3I Max = new Vector3I(center.X + iRadius, center.Y + iRadius, center.Z + iRadius);
-
-            BoundingBoxD box = new BoundingBoxD(Min * grid.GridSize, Max * grid.GridSize);
-            MatrixD matrix = grid.WorldMatrix;
-            Color c = Color.Red;
-            MySimpleObjectDraw.DrawTransparentBox(ref matrix, ref box, ref c, MySimpleObjectRasterizer.SolidAndWireframe, 1);
 
             if (Min.X < grid.Min.X) Min.X = grid.Min.X;
             if (Min.Y < grid.Min.Y) Min.Y = grid.Min.Y;
