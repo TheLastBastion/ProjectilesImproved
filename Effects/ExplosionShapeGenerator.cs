@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
@@ -19,7 +18,7 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public Dictionary<MyStringHash, Paring[]> ShapeLookup = new Dictionary<MyStringHash, Paring[]>();
+        public Dictionary<MyStringHash, ExplosionRay[][]> ShapeLookup = new Dictionary<MyStringHash, ExplosionRay[][]>();
 
         public ExplosionShapeGenerator()
         {
@@ -44,13 +43,21 @@ namespace ProjectilesImproved.Effects
                 resolution = 0.25f; // this will only need to change if a micro grid size is made
             }
 
-            List<Paring> parings = new List<Paring>();
+            List<List<ExplosionRay>> rays = new List<List<ExplosionRay>>();
+            rays.Add(new List<ExplosionRay>());
+            rays.Add(new List<ExplosionRay>());
+            rays.Add(new List<ExplosionRay>());
+            rays.Add(new List<ExplosionRay>());
+            rays.Add(new List<ExplosionRay>());
+            rays.Add(new List<ExplosionRay>());
+            rays.Add(new List<ExplosionRay>());
+            rays.Add(new List<ExplosionRay>());
 
             double x = 0;
             double y = 0;
             double z = 0;
             double calcRange = 0;
-            float radiusSqud = radius * radius;
+            float radiusSquared = radius * radius;
 
             double step = resolution / radius;
             int steps = (int)Math.Ceiling(maxAngle * 2 * Math.PI / 360 / step);
@@ -66,31 +73,49 @@ namespace ProjectilesImproved.Effects
                 {
                     x = Math.Sin(i * step2) * calcRange;
                     y = Math.Cos(i * step2) * calcRange;
-                    parings.Add(new Paring(new Vector3D(x, y, z)));
+
+                    Vector3D position = new Vector3D(x, y, z);
+                    Vector3D direction = Vector3D.Normalize(position);
+                    int octant = direction.GetOctant();
+
+                    rays[octant].Add(new ExplosionRay(position, direction));
                 }
+            }
+
+            ExplosionRay[][] rayArray = new ExplosionRay[8][];
+
+            for (int i = 0; i < 8; i++)
+            {
+                rayArray[i] = rays[i].ToArray();
             }
 
             if (!ShapeLookup.ContainsKey(id))
             {
-                ShapeLookup.Add(id, parings.ToArray());
+                ShapeLookup.Add(id, rayArray);
             }
             else
             {
-                ShapeLookup[id] = parings.ToArray();
+                ShapeLookup[id] = rayArray;
             }
         }
 
-        public static Paring[] GetParings(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter)
+        public static ExplosionRay[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter)
         {
-            Paring[] originals = Instance.ShapeLookup[id];
-            Paring[] values = new Paring[originals.Length];
+            ExplosionRay[][] octants = Instance.ShapeLookup[id];
+            ExplosionRay[][] values = new ExplosionRay[8][];
 
-            Paring original;
-            for (int i = 0; i < originals.Length; i++)
+            for (int i = 0; i < 8; i++)
             {
-                original = originals[i];
-                Vector3D translatedPoint = Vector3D.Transform(original.Point, transformMatrix);
-                values[i] = new Paring(translatedPoint, new RayD(epicenter, translatedPoint - epicenter));
+                values[i] = new ExplosionRay[octants[i].Length];
+
+                for (int j = 0; j < octants[i].Length; j++)
+                {
+                    ExplosionRay ray = new ExplosionRay(octants[i][j]);
+                    ray.Position = Vector3D.Transform(ray.Position, transformMatrix);
+                    ray.Direction = Vector3D.Transform(ray.Direction, transformMatrix);
+
+                    values[i][j] = ray;
+                }
             }
 
             return values;
@@ -119,31 +144,32 @@ namespace ProjectilesImproved.Effects
     /// <summary>
     /// Holds all blocks that intersect a line
     /// </summary>
-    public struct Paring
+    public class ExplosionRay
     {
-        public RayD Ray;
-        public Vector3D Point;
+        public Vector3D Position;
+        public Vector3D Direction;
         public List<int> BlockList;
 
-        public Paring(Vector3D point)
+        public ExplosionRay(Vector3D point, Vector3D direction)
         {
-            Point = point;
+            Position = point;
+            Direction = direction;
             BlockList = new List<int>();
-            Ray = default(RayD);
         }
 
-        public Paring(Vector3D point, List<int> blocks)
+        public ExplosionRay(Vector3D point, Vector3D direction, List<int> blocks)
         {
-            Point = point;
+            Position = point;
+            Direction = direction;
             BlockList = blocks;
-            Ray = default(RayD);
         }
 
-        public Paring(Vector3D point, RayD ray)
+        public ExplosionRay(ExplosionRay ray)
         {
-            Point = point;
-            Ray = ray;
-            BlockList = new List<int>();
+            Position = ray.Position;
+            Direction = ray.Direction;
+            BlockList = ray.BlockList;
         }
+
     }
 }
