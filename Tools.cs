@@ -28,25 +28,25 @@ namespace ProjectilesImproved
             Vector3D max = box.Max - epicenter;
             Vector3D pos = min;
 
-            octants[min.GetOctant()] = true;
-            octants[max.GetOctant()] = true;
+            octants[min.GetOctant()] = true; // -1 -1 -1
+            octants[max.GetOctant()] = true; // 1 1 1
 
-            pos.X = max.X;
+            pos.X = max.X; // 1 -1 -1
             octants[pos.GetOctant()] = true;
 
-            pos.Y = max.Y;
+            pos.Y = max.Y; // 1 1 -1
             octants[pos.GetOctant()] = true;
 
-            pos.X = min.X;
+            pos.X = min.X; // -1 1 -1
             octants[pos.GetOctant()] = true;
 
-            pos.Z = max.Z;
+            pos.Z = max.Z; // -1 1 1
             octants[pos.GetOctant()] = true;
 
-            pos.Y = min.Y;
+            pos.Y = min.Y; // -1 -1 1
             octants[pos.GetOctant()] = true;
 
-            pos.X = max.X;
+            pos.X = max.X; // 1 -1 1
             octants[pos.GetOctant()] = true;
 
             return octants;
