@@ -58,15 +58,5 @@ namespace ProjectilesImproved
             v.Y = y;
             v.Z = z;
         }
-
-        //public static bool Intersects(this BoundingBoxD box, Vector3D position, Vector3D direction)
-        //{
-
-
-
-        //    return false;
-        //}
-
-        //public static 
     }
 }

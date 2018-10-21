@@ -1,7 +1,5 @@
-﻿using Sandbox.Game;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
@@ -20,7 +18,7 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public Dictionary<MyStringHash, ExplosionRay[][]> ShapeLookup = new Dictionary<MyStringHash, ExplosionRay[][]>();
+        public Dictionary<MyStringHash, RayE[][]> ShapeLookup = new Dictionary<MyStringHash, RayE[][]>();
 
         public ExplosionShapeGenerator()
         {
@@ -45,15 +43,15 @@ namespace ProjectilesImproved.Effects
                 resolution = 0.25f; // this will only need to change if a micro grid size is made
             }
 
-            List<List<ExplosionRay>> rays = new List<List<ExplosionRay>>();
-            rays.Add(new List<ExplosionRay>());
-            rays.Add(new List<ExplosionRay>());
-            rays.Add(new List<ExplosionRay>());
-            rays.Add(new List<ExplosionRay>());
-            rays.Add(new List<ExplosionRay>());
-            rays.Add(new List<ExplosionRay>());
-            rays.Add(new List<ExplosionRay>());
-            rays.Add(new List<ExplosionRay>());
+            List<List<RayE>> rays = new List<List<RayE>>();
+            rays.Add(new List<RayE>());
+            rays.Add(new List<RayE>());
+            rays.Add(new List<RayE>());
+            rays.Add(new List<RayE>());
+            rays.Add(new List<RayE>());
+            rays.Add(new List<RayE>());
+            rays.Add(new List<RayE>());
+            rays.Add(new List<RayE>());
 
             double x = 0;
             double y = 0;
@@ -80,11 +78,11 @@ namespace ProjectilesImproved.Effects
                     Vector3D direction = Vector3D.Normalize(position);
                     int octant = direction.GetOctant();
 
-                    rays[octant].Add(new ExplosionRay(position, direction));
+                    rays[octant].Add(new RayE(position, direction));
                 }
             }
 
-            ExplosionRay[][] rayArray = new ExplosionRay[8][];
+            RayE[][] rayArray = new RayE[8][];
 
             for (int i = 0; i < 8; i++)
             {
@@ -101,20 +99,23 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public static ExplosionRay[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter)
+        public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
         {
-            ExplosionRay[][] octants = Instance.ShapeLookup[id];
-            ExplosionRay[][] values = new ExplosionRay[8][];
+            RayE[][] octants = Instance.ShapeLookup[id];
+            RayE[][] values = new RayE[8][];
+
+            float RayEamage = damagePool / octants.Length;
 
             for (int i = 0; i < 8; i++)
             {
-                values[i] = new ExplosionRay[octants[i].Length];
+                values[i] = new RayE[octants[i].Length];
 
                 for (int j = 0; j < octants[i].Length; j++)
                 {
-                    ExplosionRay ray = new ExplosionRay(octants[i][j]);
-                    ray.Position = Vector3D.Transform(ray.Position, transformMatrix);
-                    ray.Direction = Vector3D.Transform(ray.Direction, transformMatrix);
+                    RayE baseRay = octants[i][j];
+                    RayE ray = new RayE();
+                    ray.Position = Vector3D.Transform(baseRay.Position, transformMatrix);
+                    ray.Direction = Vector3D.Transform(baseRay.Direction, transformMatrix);
 
                     //if (i == 0 || i == 4)
                     //{
@@ -132,50 +133,48 @@ namespace ProjectilesImproved.Effects
     /// <summary>
     /// Holds extended block details for easy explosion compuations
     /// </summary>
-    public struct EntityDesc
+    public class EntityDesc
     {
-        public bool Destroyed;
         public float AccumulatedDamage;
         public double DistanceSquared;
         public IMyDestroyableObject Object;
+        public List<RayE> Rays = new List<RayE>();
 
         public EntityDesc(IMyDestroyableObject obj, double dist)
         {
             DistanceSquared = dist;
             Object = obj;
-            AccumulatedDamage = 0;
-            Destroyed = false;
         }
     }
 
     /// <summary>
     /// Holds all blocks that intersect a line
     /// </summary>
-    public class ExplosionRay
+    public struct RayE
     {
         public Vector3D Position;
         public Vector3D Direction;
-        public List<int> BlockList;
+        public float Damage;
 
-        public ExplosionRay(Vector3D point, Vector3D direction)
+        public RayE(Vector3D point, Vector3D direction)
         {
             Position = point;
             Direction = direction;
-            BlockList = new List<int>();
+            Damage = 0;
         }
 
-        public ExplosionRay(Vector3D point, Vector3D direction, List<int> blocks)
+        public RayE(Vector3D point, Vector3D direction, float damage)
         {
             Position = point;
             Direction = direction;
-            BlockList = blocks;
+            Damage = damage;
         }
 
-        public ExplosionRay(ExplosionRay ray)
+        public RayE(RayE ray, float damage)
         {
             Position = ray.Position;
             Direction = ray.Direction;
-            BlockList = ray.BlockList;
+            Damage = damage;
         }
 
     }

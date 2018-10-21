@@ -45,13 +45,15 @@ namespace ProjectilesImproved.Effects
         [ProtoMember(5)]
         public bool AffectVoxels { get; set; }
 
-        ExplosionRay[][] explosionRays;
-
-        private MatrixD transformationMatrix;
-        private float radiusSquared;
-        private Vector3D epicenter;
-
+        private RayE[][] ExplosionRays;
         private List<EntityDesc> entities = new List<EntityDesc>();
+        private IOrderedEnumerable<EntityDesc> orderedEntities;
+
+        private Vector3D epicenter;
+        private MatrixD transformationMatrix;
+
+        private float radiusSquared;
+
         private Stopwatch watch = new Stopwatch();
 
         public void Execute(IHitInfo hit, BulletBase bullet)
@@ -64,22 +66,14 @@ namespace ProjectilesImproved.Effects
             transformationMatrix.Translation = epicenter + (transformationMatrix.Forward * Radius); // cause the sphere generates funny
 
             watch.Restart();
-            explosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter);
+            ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter, bullet.ProjectileMassDamage);
             watch.Stop();
             MyLog.Default.Info($"Pull Rays: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
             watch.Restart();
             List<IMyEntity> effectedEntities;
-            if (Radius > 15)
-            {
-                BoundingBoxD box = new BoundingBoxD(hit.Position - Radius, hit.Position + Radius);
-                effectedEntities = MyAPIGateway.Entities.GetElementsInBox(ref box);
-            }
-            else
-            {
-                BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
-                effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-            }
+            BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
+            effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
             watch.Stop();
             MyLog.Default.Info($"Get Entity Objects: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
@@ -109,12 +103,12 @@ namespace ProjectilesImproved.Effects
             MyLog.Default.Info($"Entity Ray Casting: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
             watch.Restart();
-            SortLists();
+            orderedEntities = entities.OrderBy(e => e.DistanceSquared);
             watch.Stop();
             MyLog.Default.Info($"Sort Hit Objects: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
             watch.Restart();
-            DamageBlocks(bullet.ProjectileMassDamage / explosionRays.Length, bullet.AmmoId.SubtypeId, bullet.BlockId);
+            DamageBlocks(bullet.AmmoId.SubtypeId, bullet.BlockId);
             watch.Stop();
             MyLog.Default.Info($"Damage Time: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
         }
@@ -162,75 +156,65 @@ namespace ProjectilesImproved.Effects
             }
 
             bool[] octants = bounds.GetOctants(epicenter);
-            EntityDesc ent = new EntityDesc(obj, distance);
-            entities.Add(ent);
-            int index = entities.Count - 1;
+            EntityDesc entity = new EntityDesc(obj, distance);
+            entities.Add(entity);
 
             RayD ray = new RayD();
-
             for (int i = 0; i < 8; i++)
             {
                 if (!octants[i]) continue;
 
-                foreach (ExplosionRay rayData in explosionRays[i])
+                for (int j = 0; j < ExplosionRays[i].Length; j++)
                 {
-                    ray.Position = rayData.Position;
-                    ray.Direction = rayData.Direction;
+                    RayE data = ExplosionRays[i][j];
+                    ray.Position = data.Position;
+                    ray.Direction = data.Direction;
 
-                    if (ray.Intersects(bounds).HasValue)
+                    if (bounds.Intersects(ray).HasValue)
                     {
-                        rayData.BlockList.Add(index);
+                        entity.AccumulatedDamage += data.Damage;
+                        entity.Rays.Add(ExplosionRays[i][j]);
                     }
                 }
             }
         }
 
-        private void SortLists()
+        private void DamageBlocks(MyStringHash ammoId, long shooter)
         {
-            for (int i = 0; i < explosionRays.Length; i++)
+            foreach (EntityDesc entity in orderedEntities)
             {
-                for (int j = 0; j < explosionRays[i].Length; j++)
+                float damageToBeDone;
+                if (entity.AccumulatedDamage < entity.Object.Integrity)
                 {
-                    ExplosionRay pair = explosionRays[i][j];
-                    pair.BlockList = pair.BlockList.OrderBy(p => entities[p].DistanceSquared).ToList();
-                }
-            }
-        }
+                    damageToBeDone = entity.AccumulatedDamage;
 
-        private void DamageBlocks(float damage, MyStringHash ammoId, long shooter)
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                foreach (ExplosionRay ray in explosionRays[i])
-                {
-                    float tempDmg = damage;
-                    for (int j = 0; j < ray.BlockList.Count && tempDmg > 0; j++)
+                    for (int i = 0; i < entity.Rays.Count; i++)
                     {
+                        RayE ray = entity.Rays[i];
+                        ray.Damage = 0;
+                    }
+                }
+                else
+                {
+                    damageToBeDone = entity.Object.Integrity;
 
-                        EntityDesc desc = entities[ray.BlockList[j]];
+                    float todoDamage = entity.AccumulatedDamage / entity.Rays.Count;
+                    for (int i = 0; i < entity.Rays.Count; i++)
+                    {
+                        RayE ray = entity.Rays[i];
 
-                        if (tempDmg < desc.Object.Integrity)
+                        if (ray.Damage > todoDamage)
                         {
-                            desc.AccumulatedDamage += tempDmg;
+                            ray.Damage -= todoDamage;
                         }
                         else
                         {
-                            float todoDmg = tempDmg;
-                            tempDmg = tempDmg - desc.Object.Integrity;
-                            desc.AccumulatedDamage += todoDmg;
-                        }
-
-                        entities[ray.BlockList[j]] = desc;
-                    }
-
-                    foreach (EntityDesc desc in entities)
-                    {
-                        if (desc.AccumulatedDamage > 0)
-                        {
-                            desc.Object.DoDamage(desc.AccumulatedDamage, ammoId, true, null, shooter);
+                            todoDamage += (todoDamage - ray.Damage) / (entity.Rays.Count - (i + 1));
                         }
                     }
                 }
+
+                entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
             }
         }
     }
