@@ -133,13 +133,21 @@ namespace ProjectilesImproved.Bullets
 
             if (Effects == null)
             {
+                Effects = new EffectBase();
                 if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
                 {
-                    Effects = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
-                }
-                else
-                {
-                    Effects = new EffectBase();
+                    EffectBase b = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
+
+                    Effects.Explosive = new Explosive()
+                    {
+                        Radius = b.Explosive.Radius,
+                        Angle = b.Explosive.Angle,
+                        Resolution = b.Explosive.Resolution,
+                        Offset = b.Explosive.Offset,
+                        AffectVoxels = b.Explosive.AffectVoxels
+                    };
+
+                    Effects.Ricochet = new Ricochet();
                 }
             }
 

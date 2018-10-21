@@ -149,16 +149,16 @@ namespace ProjectilesImproved.Effects
     {
         public Vector3D Position;
         public Vector3D Direction;
-        public List<EntityDesc> BlockList;
+        public List<int> BlockList;
 
         public ExplosionRay(Vector3D point, Vector3D direction)
         {
             Position = point;
             Direction = direction;
-            BlockList = new List<EntityDesc>();
+            BlockList = new List<int>();
         }
 
-        public ExplosionRay(Vector3D point, Vector3D direction, List<EntityDesc> blocks)
+        public ExplosionRay(Vector3D point, Vector3D direction, List<int> blocks)
         {
             Position = point;
             Direction = direction;

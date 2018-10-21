@@ -47,10 +47,11 @@ namespace ProjectilesImproved.Effects
 
         ExplosionRay[][] explosionRays;
 
-        MatrixD transformationMatrix;
-        float radiusSquared;
-        Vector3D epicenter;
-        BoundingSphereD sphere;
+        private MatrixD transformationMatrix;
+        private float radiusSquared;
+        private Vector3D epicenter;
+
+        private List<EntityDesc> entities = new List<EntityDesc>();
         private Stopwatch watch = new Stopwatch();
 
         public void Execute(IHitInfo hit, BulletBase bullet)
@@ -62,16 +63,37 @@ namespace ProjectilesImproved.Effects
             transformationMatrix = new MatrixD(bullet.PositionMatrix);
             transformationMatrix.Translation = epicenter + (transformationMatrix.Forward * Radius); // cause the sphere generates funny
 
-            //watch.Restart();
+            watch.Restart();
             explosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter);
-            //watch.Stop();
-            //MyLog.Default.Info($"Pull Rays: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+            watch.Stop();
+            MyLog.Default.Info($"Pull Rays: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
-            //sphere = new BoundingSphereD(hit.Position, Radius);
-            //List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+            watch.Restart();
+            BoundingBoxD boxtest = new BoundingBoxD(hit.Position - Radius, hit.Position + Radius);
+            MyAPIGateway.Entities.GetElementsInBox(ref boxtest);
+            watch.Stop();
+            MyLog.Default.Info($"Sphere elements: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
-            BoundingBoxD box = new BoundingBoxD(hit.Position - Radius, hit.Position + Radius);
-            List<IMyEntity> effectedEntities = MyAPIGateway.Entities.GetElementsInBox(ref box);
+            watch.Restart();
+            BoundingSphereD spheretest = new BoundingSphereD(hit.Position, Radius);
+            MyAPIGateway.Entities.GetEntitiesInSphere(ref spheretest);
+            watch.Stop();
+            MyLog.Default.Info($"Cube elements: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
+
+            watch.Restart();
+            List<IMyEntity> effectedEntities;
+            if (Radius > 15)
+            {
+                BoundingBoxD box = new BoundingBoxD(hit.Position - Radius, hit.Position + Radius);
+                effectedEntities = MyAPIGateway.Entities.GetElementsInBox(ref box);
+            }
+            else
+            {
+                BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
+                effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+            }
+            watch.Stop();
+            MyLog.Default.Info($"Get Entity Objects: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
             watch.Restart();
             foreach (IMyEntity ent in effectedEntities)
@@ -96,10 +118,17 @@ namespace ProjectilesImproved.Effects
                 }
             }
             watch.Stop();
-            MyLog.Default.Info($"Entity Ray Casting: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
+            MyLog.Default.Info($"Entity Ray Casting: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
+            watch.Restart();
             SortLists();
+            watch.Stop();
+            MyLog.Default.Info($"Sort Hit Objects: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
+
+            watch.Restart();
             DamageBlocks(bullet.ProjectileMassDamage / explosionRays.Length, bullet.AmmoId.SubtypeId, bullet.BlockId);
+            watch.Stop();
+            MyLog.Default.Info($"Damage Time: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
         }
 
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
@@ -148,6 +177,9 @@ namespace ProjectilesImproved.Effects
 
             bool[] octants = bounds.GetOctants(epicenter);
             EntityDesc ent = new EntityDesc(obj, distance);
+            entities.Add(ent);
+            int index = entities.Count - 1;
+
             RayD ray = new RayD();
 
             for (int i = 0; i < 8; i++)
@@ -161,7 +193,7 @@ namespace ProjectilesImproved.Effects
 
                     if (ray.Intersects(bounds).HasValue)
                     {
-                        rayData.BlockList.Add(ent);
+                        rayData.BlockList.Add(index);
                     }
                 }
             }
@@ -169,18 +201,14 @@ namespace ProjectilesImproved.Effects
 
         private void SortLists()
         {
-            watch.Restart();
             for (int i = 0; i < explosionRays.Length; i++)
             {
                 for (int j = 0; j < explosionRays[i].Length; j++)
                 {
                     ExplosionRay pair = explosionRays[i][j];
-                    pair.BlockList = pair.BlockList.OrderBy(p => p.DistanceSquared).ToList();
+                    pair.BlockList = pair.BlockList.OrderBy(p => entities[p].DistanceSquared).ToList();
                 }
             }
-            watch.Stop();
-            MyLog.Default.Info($"Sort Hit Objects: {((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d}ms");
-
         }
 
         private void DamageBlocks(float damage, MyStringHash ammoId, long shooter)
@@ -192,17 +220,27 @@ namespace ProjectilesImproved.Effects
                     float tempDmg = damage;
                     for (int j = 0; j < ray.BlockList.Count && tempDmg > 0; j++)
                     {
-                        if (tempDmg < ray.BlockList[j].Object.Integrity)
+
+                        EntityDesc desc = entities[ray.BlockList[j]];
+
+                        if (tempDmg < desc.Object.Integrity)
                         {
-                            ray.BlockList[j].Object.DoDamage(tempDmg, ammoId, false, null, shooter);
+                            desc.AccumulatedDamage += tempDmg;
                         }
                         else
                         {
                             float todoDmg = tempDmg;
-                            tempDmg = tempDmg - ray.BlockList[j].Object.Integrity;
-                            ray.BlockList[j].Object.DoDamage(todoDmg, ammoId, false, null, shooter);
+                            tempDmg = tempDmg - desc.Object.Integrity;
+                            desc.AccumulatedDamage += todoDmg;
                         }
+                    }
 
+                    foreach (EntityDesc desc in entities)
+                    {
+                        if (desc.AccumulatedDamage > 0)
+                        {
+                            desc.Object.DoDamage(desc.AccumulatedDamage, ammoId, true, null, shooter);
+                        }
                     }
                 }
             }
