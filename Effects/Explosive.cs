@@ -182,6 +182,8 @@ namespace ProjectilesImproved.Effects
         {
             foreach (EntityDesc entity in orderedEntities)
             {
+                //if (entity.Rays.Count == 0) continue;
+
                 foreach (RayE ray in entity.Rays)
                 {
                     entity.AccumulatedDamage += ray.Damage;
@@ -218,7 +220,7 @@ namespace ProjectilesImproved.Effects
                     }
                 }
 
-                MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToBe: {damageToBeDone}, RayCount: {entity.Rays.Count} Entities: {entities.Count}");
+                MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToBe: {damageToBeDone}, RayCount: {entity.Rays.Count} distance: {entity.DistanceSquared}");
                 MyLog.Default.Flush();
                 entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
             }
