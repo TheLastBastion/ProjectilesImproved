@@ -172,7 +172,6 @@ namespace ProjectilesImproved.Effects
 
                     if (bounds.Intersects(ray).HasValue)
                     {
-                        entity.AccumulatedDamage += data.Damage;
                         entity.Rays.Add(ExplosionRays[i][j]);
                     }
                 }
@@ -183,6 +182,12 @@ namespace ProjectilesImproved.Effects
         {
             foreach (EntityDesc entity in orderedEntities)
             {
+
+                foreach (RayE ray in entity.Rays)
+                {
+                    entity.AccumulatedDamage += ray.Damage;
+                }
+
                 float damageToBeDone;
                 if (entity.AccumulatedDamage < entity.Object.Integrity)
                 {
