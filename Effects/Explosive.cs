@@ -69,18 +69,6 @@ namespace ProjectilesImproved.Effects
             MyLog.Default.Info($"Pull Rays: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
             watch.Restart();
-            BoundingBoxD boxtest = new BoundingBoxD(hit.Position - Radius, hit.Position + Radius);
-            MyAPIGateway.Entities.GetElementsInBox(ref boxtest);
-            watch.Stop();
-            MyLog.Default.Info($"Sphere elements: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
-
-            watch.Restart();
-            BoundingSphereD spheretest = new BoundingSphereD(hit.Position, Radius);
-            MyAPIGateway.Entities.GetEntitiesInSphere(ref spheretest);
-            watch.Stop();
-            MyLog.Default.Info($"Cube elements: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
-
-            watch.Restart();
             List<IMyEntity> effectedEntities;
             if (Radius > 15)
             {
@@ -146,9 +134,7 @@ namespace ProjectilesImproved.Effects
             if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y;
             if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z;
 
-            int iVolume = (Max - Min).Volume();
-
-            List<IMySlimBlock> slims = new List<IMySlimBlock>(1 + iVolume);
+            List<IMySlimBlock> slims = new List<IMySlimBlock>();
 
             Vector3I loc = Vector3I.Zero;
             slims.Add(grid.GetCubeBlock(center));

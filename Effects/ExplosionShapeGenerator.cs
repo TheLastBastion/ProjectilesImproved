@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sandbox.Game;
+using System;
 using System.Collections.Generic;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -114,6 +115,11 @@ namespace ProjectilesImproved.Effects
                     ExplosionRay ray = new ExplosionRay(octants[i][j]);
                     ray.Position = Vector3D.Transform(ray.Position, transformMatrix);
                     ray.Direction = Vector3D.Transform(ray.Direction, transformMatrix);
+
+                    if (i == 0 || i == 7)
+                    {
+                        MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, Color.Brown, 60);
+                    }
 
                     values[i][j] = ray;
                 }
