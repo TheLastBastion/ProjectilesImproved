@@ -1,4 +1,5 @@
-﻿using VRageMath;
+﻿using System;
+using VRageMath;
 
 namespace ProjectilesImproved
 {
@@ -50,6 +51,47 @@ namespace ProjectilesImproved
             octants[pos.GetOctant()] = true;
 
             return octants;
+        }
+
+        public static bool GaugeIntersects(this BoundingBoxD box, RayD ray)
+        {
+            if (!Vector3D.IsUnit(ref ray.Direction))
+            {
+                ray.Direction.Normalize();
+            }
+
+            // r.dir is unit direction vector of ray
+            Vector3D dirfrac = new Vector3D(1.0f / ray.Direction.X, 1.0f / ray.Direction.Y, 1.0f / ray.Direction.Z);
+
+            // lb is the corner of AABB with minimal coordinates - left bottom, rt is maximal corner
+            // r.org is origin of ray
+            double t1 = (box.Min.X - ray.Position.X) * dirfrac.X;
+            double t2 = (box.Max.X - ray.Position.X) * dirfrac.X;
+            double t3 = (box.Min.Y - ray.Position.Y) * dirfrac.Y;
+            double t4 = (box.Max.Y - ray.Position.Y) * dirfrac.Y;
+            double t5 = (box.Min.Z - ray.Position.Z) * dirfrac.Z;
+            double t6 = (box.Max.Z - ray.Position.Z) * dirfrac.Z;
+
+
+
+            double tmin = Math.Max(Math.Max(Math.Min(t1, t2), Math.Min(t3, t4)), Math.Min(t5, t6));
+            double tmax = Math.Min(Math.Min(Math.Max(t1, t2), Math.Max(t3, t4)), Math.Max(t5, t6));
+
+            // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
+            //if (tmax < 0)
+            //{
+            //    t = tmax;
+            //    return false;
+            //}
+
+            // if tmin > tmax, ray doesn't intersect AABB
+            if (tmin > tmax)
+            {
+                //t = tmax;
+                return false;
+            }
+            //t = tmin;
+            return true;
         }
 
         public static void Set(this Vector3I v, int x, int y, int z)

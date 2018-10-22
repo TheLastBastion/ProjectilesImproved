@@ -171,7 +171,7 @@ namespace ProjectilesImproved.Effects
                     ray.Position = data.Position;
                     ray.Direction = data.Direction;
 
-                    if (bounds.Intersects(ray).HasValue)
+                    if (bounds.GaugeIntersects(ray))
                     {
                         entity.Rays.Add(ExplosionRays[i][j]);
                     }
