@@ -44,15 +44,17 @@ namespace ProjectilesImproved.Effects
                 resolution = 0.25f; // this will only need to change if a micro grid size is made
             }
 
-            List<List<RayE>> rays = new List<List<RayE>>();
-            rays.Add(new List<RayE>());
-            rays.Add(new List<RayE>());
-            rays.Add(new List<RayE>());
-            rays.Add(new List<RayE>());
-            rays.Add(new List<RayE>());
-            rays.Add(new List<RayE>());
-            rays.Add(new List<RayE>());
-            rays.Add(new List<RayE>());
+            List<List<RayE>> rays = new List<List<RayE>>
+            {
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>()
+            };
 
             double x = 0;
             double y = 0;
@@ -75,7 +77,7 @@ namespace ProjectilesImproved.Effects
                     x = Math.Sin(i * step2) * calcRange;
                     y = Math.Cos(i * step2) * calcRange;
 
-                    Vector3D position = new Vector3D(x, y, z);
+                    Vector3D position = new Vector3D(x, y, z-radius);
 
                     MyLog.Default.Info(z.ToString());
 
