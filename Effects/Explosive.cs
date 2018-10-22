@@ -78,7 +78,7 @@ namespace ProjectilesImproved.Effects
                 foreach (RayE ray in ExplosionRays[i])
                 {
 
-                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, colors[i]);
+                    MyVisualScriptLogicProvider.AddGPS($"{ray.Position.Z}", "", ray.Position, colors[i]);
                     //MyVisualScriptLogicProvider.AddGPS("", "", ray.Position + (ray.Direction), colors[i]);
                 }
             }
