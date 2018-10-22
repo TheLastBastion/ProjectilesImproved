@@ -35,31 +35,31 @@ namespace ProjectilesImproved
             octants[min.GetOctant()] = true; // -1 -1 -1
             MyLog.Default.Info($"X: {min.X}, Y: {min.Y}, Z: {min.Z}, Oct: {min.GetOctant()}");
             octants[max.GetOctant()] = true; // 1 1 1
-            MyLog.Default.Info($"X: {max.X}, Y: {max.Y}, Z: {max.Z}, Oct: {min.GetOctant()}");
+            MyLog.Default.Info($"X: {max.X}, Y: {max.Y}, Z: {max.Z}, Oct: {max.GetOctant()}");
 
             pos.X = max.X; // 1 -1 -1
             octants[pos.GetOctant()] = true;
-            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {pos.GetOctant()}");
 
             pos.Y = max.Y; // 1 1 -1
             octants[pos.GetOctant()] = true;
-            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {pos.GetOctant()}");
 
             pos.X = min.X; // -1 1 -1
             octants[pos.GetOctant()] = true;
-            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {pos.GetOctant()}");
 
             pos.Z = max.Z; // -1 1 1
             octants[pos.GetOctant()] = true;
-            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {pos.GetOctant()}");
 
             pos.Y = min.Y; // -1 -1 1
             octants[pos.GetOctant()] = true;
-            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {pos.GetOctant()}");
 
             pos.X = max.X; // 1 -1 1
             octants[pos.GetOctant()] = true;
-            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {pos.GetOctant()}");
 
             return octants;
         }
