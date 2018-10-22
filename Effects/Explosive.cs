@@ -79,7 +79,7 @@ namespace ProjectilesImproved.Effects
                 {
 
                     MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, colors[i]);
-                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position + (ray.Direction), colors[i]);
+                    //MyVisualScriptLogicProvider.AddGPS("", "", ray.Position + (ray.Direction), colors[i]);
                 }
             }
 
