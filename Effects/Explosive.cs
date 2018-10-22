@@ -56,6 +56,8 @@ namespace ProjectilesImproved.Effects
 
         private float radiusSquared;
 
+        Color[] colors = new Color[] { Color.Green, Color.Blue, Color.Orange, Color.Black, Color.HotPink, Color.Red, Color.Brown, Color.Gray };
+
         private Stopwatch watch = new Stopwatch();
 
         public void Execute(IHitInfo hit, BulletBase bullet)
@@ -69,6 +71,18 @@ namespace ProjectilesImproved.Effects
 
             watch.Restart();
             ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter, bullet.ProjectileMassDamage);
+
+
+            for (int i = 0; i < 8; i++)
+            {
+                foreach (RayE ray in ExplosionRays[i])
+                {
+
+                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, colors[i]);
+                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position + (ray.Direction), colors[i]);
+                }
+            }
+
             watch.Stop();
             MyLog.Default.Info($"Pull Rays: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
 
@@ -187,9 +201,42 @@ namespace ProjectilesImproved.Effects
             //    MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red, 5);
             //}
 
+            if (octants[0])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Green);
+            }
+            else if (octants[1])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Blue);
+            }
+            else if (octants[2])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Orange);
+            }
+            else if (octants[3])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Black);
+            }
+            else if (octants[4])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.HotPink);
+            }
+            else if (octants[5])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red);
+            }
+            else if (octants[6])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Brown);
+            }
+            else if (octants[7])
+            {
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Gray);
+            }
 
-            float value = 255f * (entity.Rays.Count / 5f);
-            MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
+
+            //float value = 255f * (entity.Rays.Count / 5f);
+            //MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
 
             if (entity.Rays.Count > 0)
             {

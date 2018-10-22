@@ -101,7 +101,6 @@ namespace ProjectilesImproved.Effects
 
         public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
         {
-            //return Instance.ShapeLookup[id];
             RayE[][] octants = Instance.ShapeLookup[id];
             RayE[][] values = new RayE[8][];
 
@@ -114,15 +113,12 @@ namespace ProjectilesImproved.Effects
                 for (int j = 0; j < octants[i].Length; j++)
                 {
                     RayE baseRay = octants[i][j];
-                    RayE ray = new RayE();
-                    ray.Position = Vector3D.Transform(baseRay.Position, transformMatrix);
-                    ray.Direction = Vector3D.Transform(baseRay.Direction, transformMatrix);
-                    ray.Damage = RayDamage;
-
-                    //if (i == 0 || i == 4)
-                    //{
-                    //    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, Color.Brown, 60);
-                    //}
+                    RayE ray = new RayE
+                    {
+                        Position = Vector3D.Transform(baseRay.Position, transformMatrix),
+                        Direction = Vector3D.Transform(baseRay.Direction, transformMatrix),
+                        Damage = RayDamage
+                    };
 
                     values[i][j] = ray;
                 }
