@@ -125,7 +125,7 @@ namespace ProjectilesImproved.Effects
                         Damage = RayDamage
                     };
 
-                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, colors[i]);
+                    //MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, colors[i]);
                     MyVisualScriptLogicProvider.AddGPS("", "", ray.Direction, colors[i]);
 
 
