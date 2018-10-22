@@ -104,7 +104,7 @@ namespace ProjectilesImproved.Effects
 
         public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
         {
-            Color[] colors = new Color[] { Color.Green, Color.Blue, Color.Orange, Color.Black, Color.HotPink, Color.Red, Color.Brown, Color.Gray };
+            Color[] colors = new Color[] { Color.Green, Color.Blue, Color.Orange, Color.Black, Color.HotPink, Color.Red, Color.LightGreen, Color.Gray };
 
             RayE[][] octants = Instance.ShapeLookup[id];
             RayE[][] values = new RayE[8][];

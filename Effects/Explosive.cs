@@ -214,7 +214,7 @@ namespace ProjectilesImproved.Effects
             }
             else if (octants[6])
             {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Brown);
+                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.LightGreen);
             }
             else if (octants[7])
             {
