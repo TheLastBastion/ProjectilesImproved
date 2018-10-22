@@ -105,7 +105,7 @@ namespace ProjectilesImproved.Effects
             RayE[][] octants = Instance.ShapeLookup[id];
             RayE[][] values = new RayE[8][];
 
-            float RayEamage = damagePool / octants.Length;
+            float RayDamage = damagePool / octants.Length;
 
             for (int i = 0; i < 8; i++)
             {
@@ -116,7 +116,8 @@ namespace ProjectilesImproved.Effects
                     RayE baseRay = octants[i][j];
                     RayE ray = new RayE();
                     ray.Position = Vector3D.Transform(baseRay.Position, transformMatrix);
-                    ray.Direction = baseRay.Direction; //= Vector3D.Transform(baseRay.Direction, transformMatrix);
+                    ray.Direction = Vector3D.Transform(baseRay.Direction, transformMatrix);
+                    ray.Damage = RayDamage;
 
                     //if (i == 0 || i == 4)
                     //{
