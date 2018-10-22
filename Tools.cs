@@ -1,4 +1,5 @@
 ﻿using System;
+using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved
@@ -29,26 +30,36 @@ namespace ProjectilesImproved
             Vector3D max = box.Max - epicenter;
             Vector3D pos = min;
 
+            MyLog.Default.Info($"--- Start Box ---");
+
             octants[min.GetOctant()] = true; // -1 -1 -1
+            MyLog.Default.Info($"X: {min.X}, Y: {min.Y}, Z: {min.Z}, Oct: {min.GetOctant()}");
             octants[max.GetOctant()] = true; // 1 1 1
+            MyLog.Default.Info($"X: {max.X}, Y: {max.Y}, Z: {max.Z}, Oct: {min.GetOctant()}");
 
             pos.X = max.X; // 1 -1 -1
             octants[pos.GetOctant()] = true;
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
 
             pos.Y = max.Y; // 1 1 -1
             octants[pos.GetOctant()] = true;
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
 
             pos.X = min.X; // -1 1 -1
             octants[pos.GetOctant()] = true;
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
 
             pos.Z = max.Z; // -1 1 1
             octants[pos.GetOctant()] = true;
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
 
             pos.Y = min.Y; // -1 -1 1
             octants[pos.GetOctant()] = true;
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
 
             pos.X = max.X; // 1 -1 1
             octants[pos.GetOctant()] = true;
+            MyLog.Default.Info($"X: {pos.X}, Y: {pos.Y}, Z: {pos.Z}, Oct: {min.GetOctant()}");
 
             return octants;
         }
