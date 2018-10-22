@@ -101,6 +101,7 @@ namespace ProjectilesImproved.Effects
 
         public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
         {
+            return Instance.ShapeLookup[id];
             RayE[][] octants = Instance.ShapeLookup[id];
             RayE[][] values = new RayE[8][];
 
