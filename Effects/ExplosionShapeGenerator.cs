@@ -76,7 +76,7 @@ namespace ProjectilesImproved.Effects
 
                     Vector3D position = new Vector3D(x, y, z);
                     Vector3D direction = Vector3D.Normalize(position);
-                    int octant = direction.GetOctant();
+                    int octant = position.GetOctant();
 
                     rays[octant].Add(new RayE(position, direction));
                 }
