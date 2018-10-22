@@ -76,7 +76,7 @@ namespace ProjectilesImproved.Effects
 
                     Vector3D position = new Vector3D(x, y, z);
 
-                    MyLog.Default.Info(position.ToString());
+                    MyLog.Default.Info(x.ToString());
 
                     Vector3D direction = Vector3D.Normalize(position);
                     int octant = position.GetOctant();
