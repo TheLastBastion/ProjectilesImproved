@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sandbox.Game;
+using System;
 using System.Collections.Generic;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
@@ -76,7 +77,7 @@ namespace ProjectilesImproved.Effects
 
                     Vector3D position = new Vector3D(x, y, z);
 
-                    MyLog.Default.Info(x.ToString());
+                    MyLog.Default.Info(z.ToString());
 
                     Vector3D direction = Vector3D.Normalize(position);
                     int octant = position.GetOctant();
@@ -104,6 +105,8 @@ namespace ProjectilesImproved.Effects
 
         public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
         {
+            Color[] colors = new Color[] { Color.Green, Color.Blue, Color.Orange, Color.Black, Color.HotPink, Color.Red, Color.Brown, Color.Gray };
+
             RayE[][] octants = Instance.ShapeLookup[id];
             RayE[][] values = new RayE[8][];
 
@@ -122,6 +125,9 @@ namespace ProjectilesImproved.Effects
                         Direction = Vector3D.Transform(baseRay.Direction, transformMatrix),
                         Damage = RayDamage
                     };
+
+
+                    MyVisualScriptLogicProvider.AddGPS($"{baseRay.Position.Z}", "", ray.Position, colors[i]);
 
                     values[i][j] = ray;
                 }
