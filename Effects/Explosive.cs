@@ -188,7 +188,7 @@ namespace ProjectilesImproved.Effects
             //}
 
 
-            int value = 255f * (float)(entity.Rays.Count / 5);
+            float value = 255f * (entity.Rays.Count / 5f);
             MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
 
             if (entity.Rays.Count > 0)
