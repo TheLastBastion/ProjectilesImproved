@@ -25,8 +25,8 @@ namespace ProjectilesImproved
         {
             bool[] octants = new bool[8];
 
-            Vector3D min = box.Min - epicenter;
-            Vector3D max = box.Max - epicenter;
+            Vector3D min = epicenter - box.Min;
+            Vector3D max = epicenter - box.Max;
             Vector3D pos = min;
 
             octants[min.GetOctant()] = true; // -1 -1 -1
