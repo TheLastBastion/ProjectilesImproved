@@ -78,9 +78,6 @@ namespace ProjectilesImproved.Effects
                     y = Math.Cos(i * step2) * calcRange;
 
                     Vector3D position = new Vector3D(x, y, z-radius);
-
-                    MyLog.Default.Info(z.ToString());
-
                     Vector3D direction = Vector3D.Normalize(position);
                     int octant = position.GetOctant();
 
@@ -128,8 +125,9 @@ namespace ProjectilesImproved.Effects
                         Damage = RayDamage
                     };
 
+                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, colors[i]);
+                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Direction, colors[i]);
 
-                    MyVisualScriptLogicProvider.AddGPS($"{baseRay.Position.Z}", "", ray.Position, colors[i]);
 
                     values[i][j] = ray;
                 }
