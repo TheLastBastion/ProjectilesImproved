@@ -116,7 +116,7 @@ namespace ProjectilesImproved.Effects
                     RayE baseRay = octants[i][j];
                     RayE ray = new RayE();
                     ray.Position = Vector3D.Transform(baseRay.Position, transformMatrix);
-                    ray.Direction = epicenter - ray.Position;//Vector3D.Transform(baseRay.Direction, transformMatrix);
+                    ray.Direction = ray.Position - epicenter;//Vector3D.Transform(baseRay.Direction, transformMatrix);
 
                     //if (i == 0 || i == 4)
                     //{
