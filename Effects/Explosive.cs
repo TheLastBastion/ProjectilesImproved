@@ -158,7 +158,7 @@ namespace ProjectilesImproved.Effects
                 return;
             }
 
-            bool[] octants = bounds.GetOctants(epicenter);
+            bool[] octants = bounds.GetOctants(epicenter, transformationMatrix);
             EntityDesc entity = new EntityDesc(obj, distance);
 
             RayD ray = new RayD();
