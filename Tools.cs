@@ -31,42 +31,6 @@ namespace ProjectilesImproved
             Vector3D max = box.Max - epicenter;
             Vector3D pos = min;
 
-            MyLog.Default.Info($"--- Start Box ---");
-
-            octants[min.GetOctant()] = true; // -1 -1 -1
-            octants[max.GetOctant()] = true; // 1 1 1
-
-            pos.X = max.X; // 1 -1 -1
-            octants[pos.GetOctant()] = true;
-
-            pos.Y = max.Y; // 1 1 -1
-            octants[pos.GetOctant()] = true;
-
-            pos.X = min.X; // -1 1 -1
-            octants[pos.GetOctant()] = true;
-
-            pos.Z = max.Z; // -1 1 1
-            octants[pos.GetOctant()] = true;
-
-            pos.Y = min.Y; // -1 -1 1
-            octants[pos.GetOctant()] = true;
-
-            pos.X = max.X; // 1 -1 1
-            octants[pos.GetOctant()] = true;
-
-            return octants;
-        }
-
-        public static bool[] GetOctants(this BoundingBoxD box, Vector3D epicenter, MatrixD matrix)
-        {
-            bool[] octants = new bool[8];
-
-            Vector3D min = Vector3D.Transform(box.Min, matrix) - epicenter;
-            Vector3D max = Vector3D.Transform(box.Max, matrix) - epicenter;
-            Vector3D pos = min;
-
-            MyLog.Default.Info($"--- Start Box ---");
-
             octants[min.GetOctant()] = true; // -1 -1 -1
             octants[max.GetOctant()] = true; // 1 1 1
 

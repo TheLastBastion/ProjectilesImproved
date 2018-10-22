@@ -10,7 +10,7 @@ namespace ProjectilesImproved
         {
             { MyStringHash.GetOrCompute("OKI230mmAmmoPars"), new EffectBase()
                 {
-                    Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
+                    Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 100, Offset = 0, AffectVoxels = true },
                 }
             },
         };
