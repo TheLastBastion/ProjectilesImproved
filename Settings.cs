@@ -19,7 +19,17 @@ namespace ProjectilesImproved
         {
             { MyStringHash.GetOrCompute("OKI230mmAmmoPars"), new EffectBase()
                 {
-                    Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 100, Offset = 0, AffectVoxels = true },
+                    Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
+                }
+            },
+            { MyStringHash.GetOrCompute("OKI23mmAmmoPars"), new EffectBase()
+                {
+                    Explosive = new Explosive() { Radius = 1, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
+                }
+            },
+            { MyStringHash.GetOrCompute("OKI50mmAmmoPars"), new EffectBase()
+                {
+                    Explosive = new Explosive() { Radius = 2, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
             },
         };
