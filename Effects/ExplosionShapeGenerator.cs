@@ -82,7 +82,7 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
+        public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float Radius, float damagePool)
         {
             RayE[] baseRays = Instance.ShapeLookup[id];
             List<List<RayE>> rays = new List<List<RayE>>
@@ -106,12 +106,7 @@ namespace ProjectilesImproved.Effects
                     Position =  Vector3D.Transform(baseRay.Position, transformMatrix),
                     Damage = RayDamage
                 };
-                ray.Direction = (ray.Position - transformMatrix.Translation) / 5;
-
-                if (Settings.DebugMode)
-                {
-                    MyLog.Default.Info($"Is Unit Vector: {Vector3D.IsUnit(ref ray.Direction)}");
-                }
+                ray.Direction = (ray.Position - transformMatrix.Translation) / Radius;
 
                 int octant = ray.Direction.GetOctant();
                 rays[octant].Add(ray);
