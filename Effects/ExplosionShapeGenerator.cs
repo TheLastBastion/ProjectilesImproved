@@ -109,7 +109,7 @@ namespace ProjectilesImproved.Effects
                 };
                 ray.Direction.Rotate(transformMatrix);
 
-                int octant = ray.Position.GetOctant();
+                int octant = ray.Direction.GetOctant();
                 rays[octant].Add(ray);
                 if (Settings.DebugMode_ShowSphereOctants)
                 {
