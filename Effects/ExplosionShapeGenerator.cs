@@ -104,17 +104,17 @@ namespace ProjectilesImproved.Effects
                 RayE ray = new RayE
                 {
                     Position =  Vector3D.Transform(baseRay.Position, transformMatrix),
-                    Direction = baseRay.Direction,
                     Damage = RayDamage
                 };
-                ray.Direction.Rotate(transformMatrix);
+                ray.Direction = ray.Position - transformMatrix.Translation;
+                //ray.Direction.Rotate(transformMatrix);
 
                 int octant = ray.Direction.GetOctant();
                 rays[octant].Add(ray);
                 if (Settings.DebugMode_ShowSphereOctants)
                 {
                     MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, Settings.DebugOctantColors[octant]);
-                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Position + (ray.Direction * 0.25f), Settings.DebugOctantColors[octant]);
+                    //MyVisualScriptLogicProvider.AddGPS("", "", ray.Position + (ray.Direction * 0.25f), Settings.DebugOctantColors[octant]);
                 } 
             }
 
