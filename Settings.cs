@@ -8,8 +8,8 @@ namespace ProjectilesImproved
     public class Settings
     {
         public const bool DebugMode = true;
-        public const bool DebugMode_ShowBlockOctants = true;
-        public const bool DebugMode_ShowSphereOctants = true;
+        public const bool DebugMode_ShowBlockOctants = false;
+        public const bool DebugMode_ShowSphereOctants = false;
         public const bool DebugMode_ShowBlockRayIntersects = false;
 
 

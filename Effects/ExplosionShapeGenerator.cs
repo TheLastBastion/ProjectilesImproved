@@ -106,8 +106,12 @@ namespace ProjectilesImproved.Effects
                     Position =  Vector3D.Transform(baseRay.Position, transformMatrix),
                     Damage = RayDamage
                 };
-                ray.Direction = ray.Position - transformMatrix.Translation;
-                //ray.Direction.Rotate(transformMatrix);
+                ray.Direction = (ray.Position - transformMatrix.Translation) / 5;
+
+                if (Settings.DebugMode)
+                {
+                    MyLog.Default.Info($"Is Unit Vector: {Vector3D.IsUnit(ref ray.Direction)}");
+                }
 
                 int octant = ray.Direction.GetOctant();
                 rays[octant].Add(ray);
