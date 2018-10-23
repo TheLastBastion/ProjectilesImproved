@@ -96,6 +96,16 @@ namespace ProjectilesImproved
             return true;
         }
 
+        public static void Rotate(this Vector3D v, MatrixD matrix)
+        {
+            double x = v.X * matrix.M11 + v.Y * matrix.M21 + v.Z * matrix.M31;
+            double y = v.X * matrix.M12 + v.Y * matrix.M22 + v.Z * matrix.M32;
+            double z = v.X * matrix.M13 + v.Y * matrix.M23 + v.Z * matrix.M33;
+            v.X = x;
+            v.Y = y;
+            v.Z = z;
+        }
+
         public static void Set(this Vector3I v, int x, int y, int z)
         {
             v.X = x;

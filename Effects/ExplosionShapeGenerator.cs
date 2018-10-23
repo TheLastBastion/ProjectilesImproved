@@ -104,9 +104,10 @@ namespace ProjectilesImproved.Effects
                 RayE ray = new RayE
                 {
                     Position = Vector3D.Transform(baseRay.Position, transformMatrix),
-                    Direction = Vector3D.Transform(baseRay.Direction, transformMatrix),
+                    Direction = baseRay.Direction,
                     Damage = RayDamage
                 };
+                ray.Direction.Rotate(transformMatrix);
 
                 int octant = ray.Direction.GetOctant();
                 rays[octant].Add(ray);
