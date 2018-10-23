@@ -82,7 +82,7 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, float damagePool)
+        public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
         {
             RayE[] baseRays = Instance.ShapeLookup[id];
             List<List<RayE>> rays = new List<List<RayE>>
@@ -103,7 +103,7 @@ namespace ProjectilesImproved.Effects
             {
                 RayE ray = new RayE
                 {
-                    Position = Vector3D.Transform(baseRay.Position, transformMatrix),
+                    Position = epicenter+baseRay.Position,
                     Direction = baseRay.Direction,
                     Damage = RayDamage
                 };
