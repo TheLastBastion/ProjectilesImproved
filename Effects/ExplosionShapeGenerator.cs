@@ -19,7 +19,7 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public Dictionary<MyStringHash, RayE[][]> ShapeLookup = new Dictionary<MyStringHash, RayE[][]>();
+        public Dictionary<MyStringHash, RayE[]> ShapeLookup = new Dictionary<MyStringHash, RayE[]>();
 
         public ExplosionShapeGenerator()
         {
@@ -44,18 +44,7 @@ namespace ProjectilesImproved.Effects
                 resolution = 0.25f; // this will only need to change if a micro grid size is made
             }
 
-            List<List<RayE>> rays = new List<List<RayE>>
-            {
-                new List<RayE>(),
-                new List<RayE>(),
-                new List<RayE>(),
-                new List<RayE>(),
-                new List<RayE>(),
-                new List<RayE>(),
-                new List<RayE>(),
-                new List<RayE>()
-            };
-
+            List<RayE> rays = new List<RayE>();
             double x = 0;
             double y = 0;
             double z = 0;
@@ -79,61 +68,62 @@ namespace ProjectilesImproved.Effects
 
                     Vector3D position = new Vector3D(x, y, z-radius);
                     Vector3D direction = Vector3D.Normalize(position);
-                    int octant = position.GetOctant();
-
-                    rays[octant].Add(new RayE(position, direction));
+                    rays.Add(new RayE(position, direction));
                 }
-            }
-
-            RayE[][] rayArray = new RayE[8][];
-
-            for (int i = 0; i < 8; i++)
-            {
-                rayArray[i] = rays[i].ToArray();
             }
 
             if (!ShapeLookup.ContainsKey(id))
             {
-                ShapeLookup.Add(id, rayArray);
+                ShapeLookup.Add(id, rays.ToArray());
             }
             else
             {
-                ShapeLookup[id] = rayArray;
+                ShapeLookup[id] = rays.ToArray();
             }
         }
 
         public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float damagePool)
         {
-            Color[] colors = new Color[] { Color.Green, Color.Blue, Color.Orange, Color.Black, Color.HotPink, Color.Red, Color.LightGreen, Color.Gray };
-
-            RayE[][] octants = Instance.ShapeLookup[id];
-            RayE[][] values = new RayE[8][];
-
-            float RayDamage = damagePool / octants.Length;
-
-            for (int i = 0; i < 8; i++)
+            RayE[] baseRays = Instance.ShapeLookup[id];
+            List<List<RayE>> rays = new List<List<RayE>>
             {
-                values[i] = new RayE[octants[i].Length];
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>(),
+                new List<RayE>()
+            };
 
-                for (int j = 0; j < octants[i].Length; j++)
+            float RayDamage = damagePool / baseRays.Length;
+
+            foreach (RayE baseRay in baseRays)
+            {
+                RayE ray = new RayE
                 {
-                    RayE baseRay = octants[i][j];
-                    RayE ray = new RayE
-                    {
-                        Position = Vector3D.Transform(baseRay.Position, transformMatrix),
-                        Direction = Vector3D.Transform(baseRay.Direction, transformMatrix),
-                        Damage = RayDamage
-                    };
+                    Position = Vector3D.Transform(baseRay.Position, transformMatrix),
+                    Direction = Vector3D.Transform(baseRay.Direction, transformMatrix),
+                    Damage = RayDamage
+                };
 
-                    //MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, colors[i]);
-                    MyVisualScriptLogicProvider.AddGPS("", "", ray.Direction, colors[i]);
-
-
-                    values[i][j] = ray;
-                }
+                int octant = ray.Direction.GetOctant();
+                rays[octant].Add(ray);
+                if (Settings.DebugMode_ShowSphereOctants) MyVisualScriptLogicProvider.AddGPS("", "", ray.Direction*0.25f, Settings.DebugOctantColors[octant]);
             }
 
-            return values;
+            return new RayE[8][]
+            {
+                rays[0].ToArray(),
+                rays[1].ToArray(),
+                rays[2].ToArray(),
+                rays[3].ToArray(),
+                rays[4].ToArray(),
+                rays[5].ToArray(),
+                rays[6].ToArray(),
+                rays[7].ToArray(),
+            };
         }
     }
 

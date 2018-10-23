@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using VRage.Game;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.ModAPI;
@@ -179,55 +178,26 @@ namespace ProjectilesImproved.Effects
                 }
             }
 
-            //if (octants[7])
-            //{
-            //    MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Green, 5);
-            //}
-            //else
-            //{
-            //    MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red, 5);
-            //}
-
-            if (octants[0])
+            if (Settings.DebugMode_ShowBlockOctants)
             {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Green);
+                for (int i = 0; i < 8; i++)
+                {
+                    if (octants[i])
+                    {
+                        MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Settings.DebugOctantColors[i]);
+                    }
+                }
             }
-            else if (octants[1])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Blue);
-            }
-            else if (octants[2])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Orange);
-            }
-            else if (octants[3])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Black);
-            }
-            else if (octants[4])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.HotPink);
-            }
-            else if (octants[5])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Red);
-            }
-            else if (octants[6])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.LightGreen);
-            }
-            else if (octants[7])
-            {
-                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Color.Gray);
-            }
-
-
-            //float value = 255f * (entity.Rays.Count / 5f);
-            //MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
 
             if (entity.Rays.Count > 0)
             {
                 entities.Add(entity);
+
+                if (Settings.DebugMode_ShowBlockRayIntersects)
+                {
+                    float value = 255f * (entity.Rays.Count / 5f);
+                    MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
+                }
 
             }
         }
@@ -272,8 +242,12 @@ namespace ProjectilesImproved.Effects
                     }
                 }
 
-                MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToBe: {damageToBeDone}, RayCount: {entity.Rays.Count} distance: {entity.DistanceSquared}");
-                MyLog.Default.Flush();
+                if (Settings.DebugMode)
+                {
+                    MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
+                    MyLog.Default.Flush();
+                }
+
                 entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
             }
         }
