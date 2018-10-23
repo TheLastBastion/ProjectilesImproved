@@ -111,7 +111,7 @@ namespace ProjectilesImproved.Effects
 
                 int octant = ray.Direction.GetOctant();
                 rays[octant].Add(ray);
-                if (Settings.DebugMode_ShowSphereOctants) MyVisualScriptLogicProvider.AddGPS("", "", transformMatrix.Translation+(ray.Direction*0.25f), Settings.DebugOctantColors[octant]);
+                if (Settings.DebugMode_ShowSphereOctants) MyVisualScriptLogicProvider.AddGPS("", "", ray.Position+(ray.Direction*0.25f), Settings.DebugOctantColors[octant]);
             }
 
             return new RayE[8][]
