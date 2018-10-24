@@ -82,15 +82,22 @@ namespace ProjectilesImproved.Effects
             {
                 if (ent is IMyCubeGrid)
                 {
+                    watch.Start("Get Blocks");
                     List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
+                    watch.Stop("Get Blocks");
 
                     foreach (IMySlimBlock slim in slims)
                     {
                         if (slim != null)
                         {
+                            watch.Start("Get Block Bounds");
                             BoundingBoxD bounds;
                             slim.GetWorldBoundingBox(out bounds);
+                            watch.Stop("Get Block Bounds");
+
+                            watch.Start("Block Eat");
                             BlockEater(slim, bounds);
+                            watch.Stop("Block Eat");
                         }
                     }
                 }
@@ -114,6 +121,9 @@ namespace ProjectilesImproved.Effects
             watch.Write("Pull Rays");
             watch.Write("Get World Entities");
             watch.Write("Ray Tracing");
+            watch.Write("Get Blocks");
+            watch.Write("Get Block Bounds");
+            watch.Write("Block Eat");
             watch.Write("Sort Hit Objects");
             watch.Write("Damage Time");
         }
