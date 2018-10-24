@@ -89,7 +89,7 @@ namespace ProjectilesImproved.Effects
                     double distance = (bounds.Center - epicenter).LengthSquared();
                     if (distance < radiusSquared)
                     {
-                        ValidateBlock(new EntityDesc(ent as IMyDestroyableObject, (bounds.Center - epicenter).LengthSquared(), bounds.GetOctants(epicenter), bounds));
+                        ValidateBlock(new EntityDesc(ent as IMyDestroyableObject, distance, bounds.GetOctants(epicenter), bounds));
                     }
                 }
             }
@@ -131,11 +131,13 @@ namespace ProjectilesImproved.Effects
             if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z;
 
             // put the first block in
-            IMySlimBlock slim = grid.GetCubeBlock(center);
             BoundingBoxD bounds;
-            slim.GetWorldBoundingBox(out bounds);
-            entities.Add(new EntityDesc(slim, 0, bounds.GetOctants(epicenter), bounds));
-
+            IMySlimBlock slim = grid.GetCubeBlock(center);
+            if (slim != null)
+            {
+                slim.GetWorldBoundingBox(out bounds);
+                entities.Add(new EntityDesc(slim, 0, bounds.GetOctants(epicenter), bounds));
+            }
 
             Vector3I loc = Vector3I.Zero;
             Vector3D locForLength;
