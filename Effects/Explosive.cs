@@ -245,11 +245,11 @@ namespace ProjectilesImproved.Effects
                     }
                 }
 
-                if (Settings.DebugMode)
-                {
-                    MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
-                    MyLog.Default.Flush();
-                }
+                //if (Settings.DebugMode)
+                //{
+                //    MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
+                //    MyLog.Default.Flush();
+                //}
 
                 entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
             }
