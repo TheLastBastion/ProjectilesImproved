@@ -142,7 +142,7 @@ namespace ProjectilesImproved.Effects
             if (Min.Z < grid.Min.Z) Min.Z = grid.Min.Z;
             if (Max.X > grid.Max.X) Max.X = grid.Max.X;
             if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y;
-            if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z;
+            if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z+1;
 
             List<IMySlimBlock> slims = new List<IMySlimBlock>();
 
