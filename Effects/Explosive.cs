@@ -126,6 +126,7 @@ namespace ProjectilesImproved.Effects
             watch.Write("Block Eat");
             watch.Write("Sort Hit Objects");
             watch.Write("Damage Time");
+            watch.ResetAll();
         }
 
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
