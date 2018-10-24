@@ -1,6 +1,5 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
-using Sandbox.Game;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
@@ -82,28 +81,16 @@ namespace ProjectilesImproved.Effects
             {
                 if (ent is IMyCubeGrid)
                 {
-                    watch.Start("Get Blocks");
-                    List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
-                    watch.Stop("Get Blocks");
-
-                    foreach (IMySlimBlock slim in slims)
-                    {
-                        if (slim != null)
-                        {
-                            watch.Start("Get Block Bounds");
-                            BoundingBoxD bounds;
-                            slim.GetWorldBoundingBox(out bounds);
-                            watch.Stop("Get Block Bounds");
-
-                            watch.Start("Block Eat");
-                            BlockEater(slim, bounds);
-                            watch.Stop("Block Eat");
-                        }
-                    }
+                    GetBlocks(ent as IMyCubeGrid);
                 }
                 else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
                 {
-                    BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
+                    BoundingBoxD bounds = ent.WorldAABB;
+                    double distance = (bounds.Center - epicenter).LengthSquared();
+                    if (distance < radiusSquared)
+                    {
+                        ValidateBlock(new EntityDesc(ent as IMyDestroyableObject, (bounds.Center - epicenter).LengthSquared(), bounds.GetOctants(epicenter), bounds));
+                    }
                 }
             }
             watch.Stop("Ray Tracing");
@@ -121,15 +108,14 @@ namespace ProjectilesImproved.Effects
             watch.Write("Pull Rays");
             watch.Write("Get World Entities");
             watch.Write("Ray Tracing");
-            watch.Write("Get Blocks");
-            watch.Write("Get Block Bounds");
-            watch.Write("Block Eat");
+            watch.Write("Intersects");
+            watch.Write("GaugeIntersects");
             watch.Write("Sort Hit Objects");
             watch.Write("Damage Time");
             watch.ResetAll();
         }
 
-        private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
+        private void GetBlocks(IMyCubeGrid grid)
         {
             Vector3I center = grid.WorldToGridInteger(epicenter);
             int iRadius = (int)Math.Ceiling(Radius / grid.GridSize);
@@ -141,43 +127,49 @@ namespace ProjectilesImproved.Effects
             if (Min.Y < grid.Min.Y) Min.Y = grid.Min.Y;
             if (Min.Z < grid.Min.Z) Min.Z = grid.Min.Z;
             if (Max.X > grid.Max.X) Max.X = grid.Max.X;
-            if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y+1;
+            if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y + 1;
             if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z;
 
-            List<IMySlimBlock> slims = new List<IMySlimBlock>();
+            // put the first block in
+            IMySlimBlock slim = grid.GetCubeBlock(center);
+            BoundingBoxD bounds;
+            slim.GetWorldBoundingBox(out bounds);
+            entities.Add(new EntityDesc(slim, 0, bounds.GetOctants(epicenter), bounds));
+
 
             Vector3I loc = Vector3I.Zero;
-            slims.Add(grid.GetCubeBlock(center));
-
+            Vector3D locForLength;
             for (loc.X = Min.X; loc.X < Max.X; loc.X++)
             {
                 for (loc.Y = Min.Y; loc.Y < Max.Y; loc.Y++)
                 {
                     for (loc.Z = Min.Z; loc.Z < Max.Z; loc.Z++)
                     {
-                        slims.Add(grid.GetCubeBlock(loc));
+                        locForLength = (center - loc) * grid.GridSize;
+                        double distance = locForLength.LengthSquared();
+                        if (distance < radiusSquared)
+                        {
+                            slim = grid.GetCubeBlock(loc);
+                            if (slim != null)
+                            {
+
+                                locForLength.Rotate(grid.WorldMatrix);
+
+                                slim.GetWorldBoundingBox(out bounds);
+                                ValidateBlock(new EntityDesc(slim, distance, locForLength.GetOctants(grid.GridSize), bounds));
+                            }
+                        }
                     }
                 }
             }
-
-            return slims;
         }
 
-        private void BlockEater(IMyDestroyableObject obj, BoundingBoxD bounds)
+        private void ValidateBlock(EntityDesc entity)
         {
-            double distance = (bounds.Center - epicenter).LengthSquared();
-            if (distance > radiusSquared)
-            {
-                return;
-            }
-
-            bool[] octants = bounds.GetOctants(epicenter);
-            EntityDesc entity = new EntityDesc(obj, distance);
-
             RayD ray = new RayD();
             for (int i = 0; i < 8; i++)
             {
-                if (!octants[i]) continue;
+                if (!entity.Octants[i]) continue;
 
                 for (int j = 0; j < ExplosionRays[i].Length; j++)
                 {
@@ -185,20 +177,17 @@ namespace ProjectilesImproved.Effects
                     ray.Position = data.Position;
                     ray.Direction = data.Direction;
 
-                    if (bounds.GaugeIntersects(ray))
+                    watch.Start("Intersects");
+                    entity.Bounds.Intersects(ray);
+                    watch.Stop("Intersects");
+
+                    watch.Start("GaugeIntersects");
+                    entity.Bounds.GaugeIntersects(ray);
+                    watch.Stop("GaugeIntersects");
+
+                    if (entity.Bounds.GaugeIntersects(ray))
                     {
                         entity.Rays.Add(ExplosionRays[i][j]);
-                    }
-                }
-            }
-
-            if (Settings.DebugMode_ShowBlockOctants)
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    if (octants[i])
-                    {
-                        MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Settings.DebugOctantColors[i]);
                     }
                 }
             }
@@ -206,13 +195,6 @@ namespace ProjectilesImproved.Effects
             if (entity.Rays.Count > 0)
             {
                 entities.Add(entity);
-
-                if (Settings.DebugMode_ShowBlockRayIntersects)
-                {
-                    float value = 255f * (entity.Rays.Count / 5f);
-                    MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
-                }
-
             }
         }
 

@@ -139,12 +139,18 @@ namespace ProjectilesImproved.Effects
         public float AccumulatedDamage;
         public double DistanceSquared;
         public IMyDestroyableObject Object;
-        public List<RayE> Rays = new List<RayE>();
+        public bool[] Octants;
+        public List<RayE> Rays;
+        public BoundingBoxD Bounds;
 
-        public EntityDesc(IMyDestroyableObject obj, double dist)
+        public EntityDesc(IMyDestroyableObject obj, double dist, bool[] octants, BoundingBoxD bounds)
         {
+            AccumulatedDamage = 0;
             DistanceSquared = dist;
             Object = obj;
+            Octants = octants;
+            Rays = new List<RayE>();
+            Bounds = bounds;
         }
     }
 

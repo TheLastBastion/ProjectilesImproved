@@ -20,31 +20,38 @@ namespace ProjectilesImproved
 
         public static bool[] GetOctants(this BoundingBoxD box, Vector3D epicenter)
         {
+            return GetOctants(box.Min - epicenter, box.Max - epicenter);
+        }
+
+        public static bool[] GetOctants(this Vector3D Min, float gridSize)
+        {
+            return GetOctants(Min, Min + gridSize);
+        }
+
+        public static bool[] GetOctants(Vector3D Min, Vector3D Max)
+        {
             bool[] octants = new bool[8];
+            Vector3D pos = Min;
 
-            Vector3D min = box.Min - epicenter;
-            Vector3D max = box.Max - epicenter;
-            Vector3D pos = min;
+            octants[Min.GetOctant()] = true; // -1 -1 -1
+            octants[Max.GetOctant()] = true; // 1 1 1
 
-            octants[min.GetOctant()] = true; // -1 -1 -1
-            octants[max.GetOctant()] = true; // 1 1 1
-
-            pos.X = max.X; // 1 -1 -1
+            pos.X = Max.X; // 1 -1 -1
             octants[pos.GetOctant()] = true;
 
-            pos.Y = max.Y; // 1 1 -1
+            pos.Y = Max.Y; // 1 1 -1
             octants[pos.GetOctant()] = true;
 
-            pos.X = min.X; // -1 1 -1
+            pos.X = Min.X; // -1 1 -1
             octants[pos.GetOctant()] = true;
 
-            pos.Z = max.Z; // -1 1 1
+            pos.Z = Max.Z; // -1 1 1
             octants[pos.GetOctant()] = true;
 
-            pos.Y = min.Y; // -1 -1 1
+            pos.Y = Min.Y; // -1 -1 1
             octants[pos.GetOctant()] = true;
 
-            pos.X = max.X; // 1 -1 1
+            pos.X = Max.X; // 1 -1 1
             octants[pos.GetOctant()] = true;
 
             return octants;
