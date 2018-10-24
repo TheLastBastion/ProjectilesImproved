@@ -160,10 +160,9 @@ namespace ProjectilesImproved
         {
             if (!Settings.DebugMode) return;
             if (!Analitics.ContainsKey(name)) return;
-            double toMs = Stopwatch.Frequency * 1000d;
 
             long[] list = Analitics[name];
-            MyLog.Default.Info($"[{name}] Avg: {(((double)list[Time] / (double)list[Runs])/toMs).ToString("n4")}ms, Total: {((double)list[Time] / toMs).ToString("n4")}ms, Runs: {list[Runs]}");
+            MyLog.Default.Info($"[{name}] Avg: {((((double)list[Time] / (double)list[Runs])/Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Total: {(((double)list[Time] / Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Runs: {list[Runs]}");
         }
     }
 }
