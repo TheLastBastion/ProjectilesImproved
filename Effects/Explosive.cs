@@ -59,6 +59,7 @@ namespace ProjectilesImproved.Effects
 
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
+            watch.Start("Explode");
             bullet.HasExpired = true;
 
             radiusSquared = Radius * Radius;
@@ -66,20 +67,17 @@ namespace ProjectilesImproved.Effects
             transformationMatrix = new MatrixD(bullet.PositionMatrix);
             transformationMatrix.Translation = epicenter;
 
-            watch.Restart();
+            watch.Start("Pull Rays");
             ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
+            watch.Stop("Pull Rays");
 
-            watch.Stop();
-            MyLog.Default.Info($"Pull Rays: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
-
-            watch.Restart();
+            watch.Start("Get World Entities");
             List<IMyEntity> effectedEntities;
             BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
             effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-            watch.Stop();
-            MyLog.Default.Info($"Get Entity Objects: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
+            watch.Stop("Get World Entities");
 
-            watch.Restart();
+            watch.Start("Ray Tracing");
             foreach (IMyEntity ent in effectedEntities)
             {
                 if (ent is IMyCubeGrid)
@@ -101,18 +99,23 @@ namespace ProjectilesImproved.Effects
                     BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
                 }
             }
-            watch.Stop();
-            MyLog.Default.Info($"Entity Ray Casting: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
+            watch.Stop("Ray Tracing");
 
-            watch.Restart();
+            watch.Start("Sort Hit Objects");
             orderedEntities = entities.OrderBy(e => e.DistanceSquared);
-            watch.Stop();
-            MyLog.Default.Info($"Sort Hit Objects: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
+            watch.Stop("Sort Hit Objects");
 
-            watch.Restart();
+            watch.Start("Damage Time");
             DamageBlocks(bullet.AmmoId.SubtypeId, bullet.BlockId);
-            watch.Stop();
-            MyLog.Default.Info($"Damage Time: {(((float)watch.ElapsedTicks / (float)Stopwatch.Frequency) * 1000d).ToString("n4")}ms");
+            watch.Stop("Damage Time");
+            watch.Stop("Explode");
+
+            watch.Write("Explode");
+            watch.Write("Pull Rays");
+            watch.Write("Get World Entities");
+            watch.Write("Ray Tracing");
+            watch.Write("Sort Hit Objects");
+            watch.Write("Damage Time");
         }
 
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
