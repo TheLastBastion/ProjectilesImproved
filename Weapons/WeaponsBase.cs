@@ -113,22 +113,34 @@ namespace ProjectilesImproved.Weapons
                 MyAPIGateway.TerminalControls.GetActions<IMySmallGatlingGun>(out actions);
             }
 
-            MyLog.Default.Info($"============ Terminal Actions ==============");
+            //MyLog.Default.Info($"============ Terminal Actions ==============");
 
             foreach (IMyTerminalAction a in actions)
             {
-                MyLog.Default.Info($"{a.Id}");
+                //MyLog.Default.Info($"{a.Id}");
 
                 if (a.Id == "Shoot")
                 {
                     a.Action = (block) =>
                     {
                         WeaponsBase weps = block.GameLogic as WeaponsBase;
-                        MyAPIGateway.Utilities.ShowNotification($"shoot", 1000);
+                        MyAPIGateway.Utilities.ShowNotification($"shoot", 500);
                         weps.terminalShooting = !weps.terminalShooting;
                     };
 
                     a.Writer = WeaponsFiringWriter;
+                }
+                else if (a.Id == "ShootOnce")
+                {
+                    a.Action = (block) =>
+                    {
+                        WeaponsBase weapon = (block.GameLogic as WeaponsBase);
+                        if (weapon.cooldownTime == 0 && weapon.timeTillNextShot >= 1)
+                        {
+                            FireWeapon();
+                        }
+                    };
+
                 }
                 if (a.Id == "Shoot_On")
                 {
@@ -143,7 +155,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is WeaponsBase}", 1000);
+                        MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is WeaponsBase}", 500);
                         (block.GameLogic as WeaponsBase).terminalShooting = false;
                     };
 
@@ -161,11 +173,11 @@ namespace ProjectilesImproved.Weapons
                 MyAPIGateway.TerminalControls.GetControls<IMySmallGatlingGun>(out controls);
             }
 
-            MyLog.Default.Info($"============ Terminal Controls ==============");
+            //MyLog.Default.Info($"============ Terminal Controls ==============");
 
             foreach (IMyTerminalControl c in controls)
             {
-                MyLog.Default.Info($"{c.Id}");
+                //MyLog.Default.Info($"{c.Id}");
 
                 if (c.Id == "Shoot")
                 {
@@ -183,7 +195,7 @@ namespace ProjectilesImproved.Weapons
                 }
             }
 
-            MyLog.Default.Flush();
+            //MyLog.Default.Flush();
         }
 
         private void WeaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
@@ -200,7 +212,7 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
-            //MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
+            MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
             if (timeTillNextShot < 1)
             {
                 timeTillNextShot += weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire * FireRateMultiplayer;
@@ -222,8 +234,12 @@ namespace ProjectilesImproved.Weapons
                 return;
             }
 
+            FireWeapon();
             //MyAPIGateway.Utilities.ShowNotification($"Mouse: {gun.IsShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME)} Terminal: {terminalShooting} Next: {timeTillNextShot.ToString("n3")} BurstShot: {currentShotInBurst}/{gun.GunBase.ShotsInBurst} BackKick: {gun.GunBase.CurrentAmmoDefinition.BackkickForce}", 1); // {weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire}
+        }
 
+        private void FireWeapon()
+        {
             if (timeTillNextShot >= 1)
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
