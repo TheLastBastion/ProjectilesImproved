@@ -85,8 +85,6 @@ namespace ProjectilesImproved.Bullets
 
         public MyAmmoMagazineDefinition Magazine;
 
-        //public EffectBase OnHitEffects;
-
         public Vector3D PreviousPosition;
         public Vector3D Start;
         public Vector3D End;
@@ -187,6 +185,8 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void Draw()
         {
+            if (MyAPIGateway.Utilities.IsDedicated) return;
+
             float scaleFactor = MyParticlesManager.Paused ? 1f : MyUtils.GetRandomFloat(1f, 2f);
             float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (ProjectileTrailScale + 0.5f);
             thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
@@ -205,7 +205,7 @@ namespace ProjectilesImproved.Bullets
         /// </summary>
         public virtual void PreCollitionDetection()
         {
-            Start = PositionMatrix.Translation;// + ((LifeTimeTicks == 1) ? Vector3D.Zero : (PositionMatrix.Backward * VelocityPerTickLength));
+            Start = PositionMatrix.Translation;
             if (DoShortRaycast)
             {
                 End = PositionMatrix.Translation + VelocityPerTick;
@@ -223,10 +223,6 @@ namespace ProjectilesImproved.Bullets
         public virtual void CollisionDetection()
         {
             IHitInfo hit = null;
-
-            //MyVisualScriptLogicProvider.AddGPS("", "", Start, Color.Orange, 60);
-            //MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green, 60);
-
             if (UseLongRaycast)
             {
                 MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
@@ -245,7 +241,6 @@ namespace ProjectilesImproved.Bullets
             if (hit != null && hit.Position != null)
             {
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
-                //MyLog.Default.Info($"Fraction: {hit.Fraction}, Frames: {CollisionCheckFrames}, FramesToWait: {framesToWait}, Current Collision Counter: {CollisionCheckCounter}");
                 if (framesToWait < 1)
                 {
                     Effects.Execute(hit, this);
@@ -255,10 +250,6 @@ namespace ProjectilesImproved.Bullets
                     CollisionCheckCounter = CollisionCheckWaitFrames() - framesToWait;
                     DoShortRaycast = true;
                 }
-
-                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position, Color.Red);
-                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position+hit.Normal*0.5f, Color.Yellow);
-                //MyVisualScriptLogicProvider.AddGPS("", "", hit.Position+hit.Normal, Color.Pink);
             }
         }
 
@@ -292,8 +283,6 @@ namespace ProjectilesImproved.Bullets
                 else
                 {
                     CollisionCheckFrames = 1 + (int)Math.Ceiling((ProjectileSpeed / MaxSpeedLimit) * 0.5f);
-                    //MyLog.Default.Info($"CollisionCheckFrames: {CollisionCheckFrames}, Speed: {Ammo.SpeedVar}, DesiredSpeed: {Ammo.DesiredSpeed}, MaxSpeedLimit {MaxSpeedLimit}, Math: {(Ammo.DesiredSpeed / MaxSpeedLimit)}, With Reduction: {(Ammo.DesiredSpeed / MaxSpeedLimit) * 0.5f}");
-                    //MyLog.Default.Flush();
                 }
             }
 

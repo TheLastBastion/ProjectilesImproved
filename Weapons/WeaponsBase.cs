@@ -54,7 +54,7 @@ namespace ProjectilesImproved.Weapons
             block = Entity as IMyFunctionalBlock;
             cube = Entity as IMyCubeBlock;
             gun = Entity as IMyGunObject<MyGunBase>;
-            IsFixedGun = Entity is IMySmallGatlingGun; // || Entity is IMySmallMissileLauncher || Entity is IMySmallMissileLauncherReload;
+            IsFixedGun = Entity is IMySmallGatlingGun;
 
             soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
 
@@ -113,12 +113,8 @@ namespace ProjectilesImproved.Weapons
                 MyAPIGateway.TerminalControls.GetActions<IMySmallGatlingGun>(out actions);
             }
 
-            //MyLog.Default.Info($"============ Terminal Actions ==============");
-
             foreach (IMyTerminalAction a in actions)
             {
-                //MyLog.Default.Info($"{a.Id}");
-
                 if (a.Id == "Shoot")
                 {
                     a.Action = (block) =>
@@ -173,12 +169,8 @@ namespace ProjectilesImproved.Weapons
                 MyAPIGateway.TerminalControls.GetControls<IMySmallGatlingGun>(out controls);
             }
 
-            //MyLog.Default.Info($"============ Terminal Controls ==============");
-
             foreach (IMyTerminalControl c in controls)
             {
-                //MyLog.Default.Info($"{c.Id}");
-
                 if (c.Id == "Shoot")
                 {
                     IMyTerminalControlOnOffSwitch onoff = c as IMyTerminalControlOnOffSwitch;
@@ -194,8 +186,6 @@ namespace ProjectilesImproved.Weapons
                     };
                 }
             }
-
-            //MyLog.Default.Flush();
         }
 
         private void WeaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
@@ -235,7 +225,6 @@ namespace ProjectilesImproved.Weapons
             }
 
             FireWeapon();
-            //MyAPIGateway.Utilities.ShowNotification($"Mouse: {gun.IsShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME)} Terminal: {terminalShooting} Next: {timeTillNextShot.ToString("n3")} BurstShot: {currentShotInBurst}/{gun.GunBase.ShotsInBurst} BackKick: {gun.GunBase.CurrentAmmoDefinition.BackkickForce}", 1); // {weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire}
         }
 
         private void FireWeapon()
@@ -281,7 +270,7 @@ namespace ProjectilesImproved.Weapons
                 }
 
                 var forceVector = -positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.BackkickForce;
-                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, block.GetPosition(), null);
+                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, block.WorldAABB.Center, null);
             }
         }
 

@@ -26,6 +26,11 @@ namespace ProjectilesImproved
             if (!NetworkAPI.IsInitialized)
             {
                 NetworkAPI.Init(ModID, ModName);
+
+                if (Network.NetworkType == NetworkTypes.Client)
+                {
+                    Network.RegisterNetworkCommand("spawn", RecieveServerSpawn);
+                }
             }
 
             MyAPIGateway.Session.OnSessionReady += OnStartInit;
@@ -43,6 +48,7 @@ namespace ProjectilesImproved
         public static void SpawnProjectile(BulletBase data)
         {
             ActiveProjectiles.Add(data);
+            ((Server)NetworkAPI.Instance).SendCommandToPlayersInRange(data.PositionMatrix.Translation, 10000, "spawn", data: MyAPIGateway.Utilities.SerializeToBinary(data), isReliable: true);
         }
 
         public override void UpdateAfterSimulation()
@@ -76,6 +82,11 @@ namespace ProjectilesImproved
                 bullet.Draw();
                 bullet.Update();
             }
+        }
+
+        private void RecieveServerSpawn(ulong steamId, string command, byte[] data)
+        {
+            ActiveProjectiles.Add(MyAPIGateway.Utilities.SerializeFromBinary<BulletBase>(data));
         }
     }
 }
