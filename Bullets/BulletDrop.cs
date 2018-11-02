@@ -1,8 +1,10 @@
-﻿using Sandbox.Game;
+﻿using ProtoBuf;
+using Sandbox.Game;
 using VRageMath;
 
 namespace ProjectilesImproved.Bullets
 {
+    [ProtoContract]
     public class BulletDrop : BulletBase
     {
         public override void Update()
@@ -10,7 +12,8 @@ namespace ProjectilesImproved.Bullets
             ExternalForceData forceData = WorldPlanets.GetExternalForces(PositionMatrix.Translation);
 
             Velocity = Velocity + (forceData.Gravity * Settings.GravityMultiplyer);
-            PositionMatrix.Forward = Vector3D.Normalize(Velocity);
+            PositionMatrix.Forward = Vector3D.Normalize(Velocity - InitialGridVelocity);
+
             PositionMatrix.Translation += VelocityPerTick;
             DistanceTraveled += VelocityPerTick.LengthSquared();
 
@@ -18,8 +21,6 @@ namespace ProjectilesImproved.Bullets
             {
                 HasExpired = true;
             }
-
-            //MyVisualScriptLogicProvider.AddGPS("", "", PositionMatrix.Translation, Color.Green);
         }
     }
 }

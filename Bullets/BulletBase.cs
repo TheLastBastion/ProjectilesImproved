@@ -49,30 +49,33 @@ namespace ProjectilesImproved.Bullets
         public Vector3D Velocity;
 
         [ProtoMember(9)]
-        public int LifeTimeTicks;
+        public Vector3D InitialGridVelocity;
 
         [ProtoMember(10)]
-        public float ProjectileMassDamage = -1;
-
-        [ProtoMember(13)]
-        public float ProjectileHealthDamage = -1;
+        public int LifeTimeTicks;
 
         [ProtoMember(11)]
-        public float ProjectileSpeed = -1;
+        public float ProjectileMassDamage = -1;
 
         [ProtoMember(12)]
-        public float ProjectileHitImpulse = -1;
+        public float ProjectileHealthDamage = -1;
 
         [ProtoMember(13)]
-        public float ProjectileTrailScale = -1;
+        public float ProjectileSpeed = -1;
 
         [ProtoMember(14)]
-        public float MaxTrajectory = -1;
+        public float ProjectileHitImpulse = -1;
 
         [ProtoMember(15)]
-        public Vector3 ProjectileTrailColor = Vector3.Zero;
+        public float ProjectileTrailScale = -1;
 
         [ProtoMember(16)]
+        public float MaxTrajectory = -1;
+
+        [ProtoMember(17)]
+        public Vector3 ProjectileTrailColor = Vector3.Zero;
+
+        [ProtoMember(18)]
         public EffectBase Effects { get; set; }
 
         public bool IsInitialized = false;
