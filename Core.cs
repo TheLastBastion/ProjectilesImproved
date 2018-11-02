@@ -51,7 +51,7 @@ namespace ProjectilesImproved
             //((Server)NetworkAPI.Instance).SendCommandToPlayersInRange(data.PositionMatrix.Translation, 10000, "spawn", data: MyAPIGateway.Utilities.SerializeToBinary(data), isReliable: true);
         }
 
-        public override void UpdateAfterSimulation()
+        public override void UpdateBeforeSimulation()
         {
             MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
 
