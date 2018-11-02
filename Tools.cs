@@ -8,6 +8,9 @@ namespace ProjectilesImproved
 {
     public static class Tools
     {
+
+        public const float Tick = 1f / 60f;
+
         /// <summary>
         /// Gets the octant this vector occupies 
         /// </summary>
