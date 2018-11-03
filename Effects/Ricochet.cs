@@ -23,6 +23,9 @@ namespace ProjectilesImproved.Effects
         [ProtoMember(3)]
         public float MaxDamageTransfer { get; set; }
 
+        [ProtoMember(4)]
+        public float RicochetChance { get; set; }
+
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
@@ -47,10 +50,10 @@ namespace ProjectilesImproved.Effects
             float HitAngle = (90f - NotHitAngle);
             float NotHitFraction = NotHitAngle / 90f;
 
-            if (HitAngle < DeflectionAngle)
-            {
-                MyLog.Default.Info($"{HitAngle} < {DeflectionAngle}");
+            float random = (float)Tools.Random.NextDouble();
 
+            if (HitAngle < DeflectionAngle && RicochetChance > random)
+            {
                 // Apply impulse
                 float impulse = bullet.ProjectileHitImpulse * NotHitFraction * MaxVelocityTransfer;
                 if (hit.HitEntity.Physics != null)
@@ -93,8 +96,6 @@ namespace ProjectilesImproved.Effects
 
                 bullet.HasExpired = true;
             }
-
-            MyLog.Default.Info($"Damage {bullet.ProjectileMassDamage}, Velocity {bullet.Velocity.Length()}, Angle: {HitAngle}, NotAngle: {NotHitAngle}");
         }
     }
 }

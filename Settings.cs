@@ -28,7 +28,7 @@ namespace ProjectilesImproved
                 {
                     HasBulletDrop = true,
                     BulletDropMultiplyer = 2f,
-                    Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0f, MaxVelocityTransfer = 0f },
+                    Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 1f },
                 }
             },
             { MyStringHash.GetOrCompute("OKI50mmAmmoPars"), new EffectBase()
@@ -38,7 +38,7 @@ namespace ProjectilesImproved
             {
                 MyStringHash.GetOrCompute("LargeCaliber"), new EffectBase()
                 {
-                    Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0f, MaxVelocityTransfer = 0f },
+                    Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 } 
             }
         };
