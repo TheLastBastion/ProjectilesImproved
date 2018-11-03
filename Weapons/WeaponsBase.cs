@@ -231,13 +231,13 @@ namespace ProjectilesImproved.Weapons
             if (timeTillNextShot >= 1)
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
-
                 Vector3D bonus = (block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
 
                 bonus.Rotate(muzzleMatrix);
+                muzzleMatrix.Translation += bonus;
 
                 MatrixD positionMatrix = Matrix.CreateWorld(
-                    muzzleMatrix.Translation + bonus,// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
+                    muzzleMatrix.Translation,// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
