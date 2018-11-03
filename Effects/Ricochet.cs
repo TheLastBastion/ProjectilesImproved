@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
+using Sandbox.ModAPI;
 using System;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -43,8 +44,6 @@ namespace ProjectilesImproved.Effects
             Vector3D relativeV = bullet.Velocity - hitObjectVelocity;
 
             float HitAngle0to90 = (float)Tools.AngleBetween(-Vector3D.Normalize(relativeV), hit.Normal);
-
-            //float HitAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal);
             float NotHitAngle = (1 - HitAngle0to90);
 
             if ((HitAngle0to90 * 90) < DeflectionAngle)
@@ -59,9 +58,9 @@ namespace ProjectilesImproved.Effects
 
                 // apply partial damage
                 float damage = bullet.ProjectileMassDamage * NotHitAngle * MaxDamageTransfer;
-                if (obj != null)
+                if (obj != null && MyAPIGateway.Session.IsServer)
                 {
-                    obj.DoDamage(damage, bullet.AmmoId.SubtypeId, false);
+                    obj.DoDamage(damage, bullet.AmmoId.SubtypeId, true);
                 }
                 bullet.ProjectileMassDamage -= damage;
 
