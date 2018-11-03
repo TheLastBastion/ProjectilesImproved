@@ -199,7 +199,7 @@ namespace ProjectilesImproved.Weapons
             }
         }
 
-        public override void UpdateBeforeSimulation()
+        public override void UpdateAfterSimulation()
         {
             MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
             if (timeTillNextShot < 1)
@@ -233,7 +233,7 @@ namespace ProjectilesImproved.Weapons
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
 
                 MatrixD positionMatrix = Matrix.CreateWorld(
-                    muzzleMatrix.Translation;// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
+                    muzzleMatrix.Translation,// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
