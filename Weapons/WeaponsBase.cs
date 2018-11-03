@@ -232,7 +232,7 @@ namespace ProjectilesImproved.Weapons
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
 
-                Vector3D bonus = (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick);
+                Vector3D bonus = (block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
 
                 bonus.Rotate(muzzleMatrix);
 
