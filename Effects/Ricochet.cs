@@ -43,13 +43,14 @@ namespace ProjectilesImproved.Effects
             }
             Vector3D relativeV = bullet.Velocity - hitObjectVelocity;
 
-            float HitAngle0to90 = (float)Tools.AngleBetween(-Vector3D.Normalize(relativeV), hit.Normal);
-            float NotHitAngle = (1 - HitAngle0to90);
+            float NotHitAngle = (float)Tools.AngleBetween(-Vector3D.Normalize(relativeV), hit.Normal);
+            float HitAngle = (90f - NotHitAngle);
+            float NotHitFraction = NotHitAngle / 90f;
 
-            if ((HitAngle0to90 * 90) < DeflectionAngle)
+            if (HitAngle < DeflectionAngle)
             {
                 // Apply impulse
-                float impulse = bullet.ProjectileHitImpulse * NotHitAngle * MaxVelocityTransfer;
+                float impulse = bullet.ProjectileHitImpulse * NotHitFraction * MaxVelocityTransfer;
                 if (hit.HitEntity.Physics != null)
                 {
                     hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Velocity * impulse * -hit.Normal, hit.Position, null);
@@ -57,7 +58,7 @@ namespace ProjectilesImproved.Effects
                 bullet.ProjectileHitImpulse -= impulse;
 
                 // apply partial damage
-                float damage = bullet.ProjectileMassDamage * NotHitAngle * MaxDamageTransfer;
+                float damage = bullet.ProjectileMassDamage * NotHitFraction * MaxDamageTransfer;
                 if (obj != null && MyAPIGateway.Session.IsServer)
                 {
                     obj.DoDamage(damage, bullet.AmmoId.SubtypeId, true);
@@ -65,7 +66,7 @@ namespace ProjectilesImproved.Effects
                 bullet.ProjectileMassDamage -= damage;
 
                 // reduce velocity
-                bullet.Velocity -= bullet.Velocity * NotHitAngle * MaxVelocityTransfer;
+                bullet.Velocity -= bullet.Velocity * NotHitFraction * MaxVelocityTransfer;
 
                 // calculate new direction
                 bullet.ResetCollisionCheck();
@@ -88,7 +89,7 @@ namespace ProjectilesImproved.Effects
                 bullet.HasExpired = true;
             }
 
-            MyLog.Default.Info($"Damage {bullet.ProjectileMassDamage}, Velocity {bullet.Velocity.Length()}, Angle: {HitAngle0to90} : {HitAngle0to90*90}, NotAngle: {NotHitAngle} : {NotHitAngle * 90}");
+            MyLog.Default.Info($"Damage {bullet.ProjectileMassDamage}, Velocity {bullet.Velocity.Length()}, Angle: {HitAngle}, NotAngle: {NotHitAngle}");
         }
     }
 }
