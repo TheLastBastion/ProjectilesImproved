@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
+using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -30,6 +31,8 @@ namespace ProjectilesImproved.Effects
             }
             else
             {
+                if (MyAPIGateway.Utilities.IsDedicated) return;
+
                 if (hit.HitEntity is IMyDestroyableObject)
                 {
                     IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
@@ -38,7 +41,6 @@ namespace ProjectilesImproved.Effects
                     hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
                     bullet.LastPositionFraction = hit.Fraction;
-                    bullet.HasExpired = true;
                 }
                 else if (hit.HitEntity is IMyCubeGrid)
                 {
@@ -52,9 +54,10 @@ namespace ProjectilesImproved.Effects
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
                         bullet.LastPositionFraction = hit.Fraction;
-                        bullet.HasExpired = true;
                     }
                 }
+
+                bullet.HasExpired = true;
             }
         }
     }

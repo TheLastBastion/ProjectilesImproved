@@ -214,7 +214,7 @@ namespace ProjectilesImproved.Weapons
                 return;
             }
 
-            if (!IsShooting || !MyAPIGateway.Multiplayer.IsServer || cube?.CubeGrid?.Physics == null) return;
+            if (!IsShooting || cube?.CubeGrid?.Physics == null) return;
 
             if (gun.IsShooting) terminalShooting = false; // turns off auto shoot if user begins to fire
 
