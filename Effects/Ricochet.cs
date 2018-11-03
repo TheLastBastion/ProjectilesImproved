@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
+using System;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -39,9 +40,11 @@ namespace ProjectilesImproved.Effects
             {
                 hitObjectVelocity = hit.HitEntity.Physics.LinearVelocity;
             }
-            Vector3 relativeV = bullet.Velocity - hitObjectVelocity;
+            Vector3D relativeV = bullet.Velocity - hitObjectVelocity;
 
-            float HitAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal);
+            float HitAngle0to90 = (float)Tools.AngleBetween(-Vector3D.Normalize(relativeV), hit.Normal);
+
+            //float HitAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal);
             float NotHitAngle = (1 - HitAngle0to90);
 
             if ((HitAngle0to90 * 90) < DeflectionAngle)

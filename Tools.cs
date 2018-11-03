@@ -174,5 +174,23 @@ namespace ProjectilesImproved
             long[] list = Analitics[name];
             MyLog.Default.Info($"[{name}] Avg: {((((double)list[Time] / (double)list[Runs])/Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Total: {(((double)list[Time] / Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Runs: {list[Runs]}");
         }
+
+        public static double AngleBetween(Vector3D norm1, Vector3D norm2)
+        {
+            float ratio = Vector3.Dot(norm1, norm2);
+
+            double theta;
+
+            if (ratio < 0)
+            {
+                theta = Math.PI - 2.0 * Math.Asin((-norm1 - norm2).Length() / 2.0);
+            }
+            else
+            {
+                theta = 2.0 * Math.Asin((norm1 - norm2).Length() / 2.0);
+            }
+
+            return theta * 180 / Math.PI;
+        }
     }
 }
