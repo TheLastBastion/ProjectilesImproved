@@ -80,7 +80,7 @@ namespace ProjectilesImproved.Effects
             }
             else
             {
-                if (obj != null)
+                if (obj != null && MyAPIGateway.Session.IsServer)
                 {
                     obj.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true);
                 }
