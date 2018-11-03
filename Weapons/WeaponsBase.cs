@@ -237,7 +237,7 @@ namespace ProjectilesImproved.Weapons
                 muzzleMatrix.Translation += bonus;
 
                 MatrixD positionMatrix = Matrix.CreateWorld(
-                    muzzleMatrix.Translation,// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
+                    muzzleMatrix.Translation + (muzzleMatrix.Forward * 0.2),// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
