@@ -31,7 +31,7 @@ namespace ProjectilesImproved.Effects
             }
             else
             {
-                if (MyAPIGateway.Utilities.IsDedicated) return;
+                if (!MyAPIGateway.Session.IsServer) return;
 
                 if (hit.HitEntity is IMyDestroyableObject)
                 {
