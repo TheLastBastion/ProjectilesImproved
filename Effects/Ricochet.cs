@@ -29,7 +29,7 @@ namespace ProjectilesImproved.Effects
             if (hit.HitEntity is IMyCubeGrid)
             {
                 IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, bullet.PositionMatrix.Forward * 0.5);
+                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position+(bullet.PositionMatrix.Forward * 0.5));
                 if (hitPos.HasValue)
                 {
                     obj = grid.GetCubeBlock(hitPos.Value);
