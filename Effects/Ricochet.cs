@@ -27,7 +27,7 @@ namespace ProjectilesImproved.Effects
             if (hit.HitEntity is IMyCubeGrid)
             {
                 IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, bullet.PositionMatrix.Forward*0.5);
+                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, bullet.PositionMatrix.Forward * 0.5);
                 if (hitPos.HasValue)
                 {
                     obj = grid.GetCubeBlock(hitPos.Value);
@@ -42,11 +42,10 @@ namespace ProjectilesImproved.Effects
             Vector3 relativeV = bullet.Velocity - hitObjectVelocity;
 
             float HitAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal);
+            float NotHitAngle = (1 - HitAngle0to90);
 
-            if ((HitAngle0to90*90) < DeflectionAngle)
+            if ((HitAngle0to90 * 90) < DeflectionAngle)
             {
-                float NotHitAngle = (1 - HitAngle0to90);
-
                 // Apply impulse
                 float impulse = bullet.ProjectileHitImpulse * NotHitAngle * MaxVelocityTransfer;
                 if (hit.HitEntity.Physics != null)
@@ -86,6 +85,8 @@ namespace ProjectilesImproved.Effects
 
                 bullet.HasExpired = true;
             }
+
+            MyLog.Default.Info($"Damage {bullet.ProjectileMassDamage}, Velocity {bullet.Velocity.Length()}, Angle: {HitAngle0to90} : {HitAngle0to90*90}, NotAngle: {NotHitAngle} : {NotHitAngle * 90}");
         }
     }
 }
