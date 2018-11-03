@@ -233,7 +233,7 @@ namespace ProjectilesImproved.Weapons
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
 
                 MatrixD positionMatrix = Matrix.CreateWorld(
-                    muzzleMatrix.Translation,// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
+                    muzzleMatrix.Translation + (block.CubeGrid.Physics.LinearVelocity * Tools.Tick),// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
@@ -245,7 +245,7 @@ namespace ProjectilesImproved.Weapons
                     MagazineId = gun.GunBase.CurrentAmmoMagazineId,
                     AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
                     InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
-                    Velocity = block.CubeGrid.Physics.LinearVelocity + positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed,
+                    Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
                     PositionMatrix = positionMatrix
                 };
 
