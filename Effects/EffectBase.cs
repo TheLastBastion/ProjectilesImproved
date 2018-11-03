@@ -41,7 +41,7 @@ namespace ProjectilesImproved.Effects
                 else if (hit.HitEntity is IMyCubeGrid)
                 {
                     IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                    IMySlimBlock block = grid.GetCubeBlock(grid.WorldToGridInteger(hit.Position + (bullet.PositionMatrix.Forward * 0.02)));
+                    IMySlimBlock block = grid.GetCubeBlock(grid.WorldToGridInteger(hit.Position + (bullet.PositionMatrix.Forward * 0.002)));
 
                     if (block != null)
                     {
