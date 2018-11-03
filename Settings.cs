@@ -28,24 +28,22 @@ namespace ProjectilesImproved
                 {
                     HasBulletDrop = true,
                     BulletDropMultiplyer = 2f,
-                    //Ricochet = new Ricochet(),
-                    //Explosive = new Explosive() { Radius = 1, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
+                    Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0f, MaxVelocityTransfer = 0f },
                 }
             },
             { MyStringHash.GetOrCompute("OKI50mmAmmoPars"), new EffectBase()
                 {
-                    //Explosive = new Explosive() { Radius = 2, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
             },
             {
                 MyStringHash.GetOrCompute("LargeCaliber"), new EffectBase()
                 {
-
+                    Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0f, MaxVelocityTransfer = 0f },
                 } 
             }
         };
 
-        public const float GravityMultiplyer = 0.4f;
+        //public const float GravityMultiplyer = 0.4f;
 
 
     }

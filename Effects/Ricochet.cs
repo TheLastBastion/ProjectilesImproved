@@ -1,4 +1,5 @@
 ﻿using ProjectilesImproved.Bullets;
+using ProtoBuf;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -7,25 +8,29 @@ using VRageMath;
 
 namespace ProjectilesImproved.Effects
 {
+    [ProtoContract]
     public class Ricochet : IEffect
     {
+
+        [ProtoMember(1)]
+        public float DeflectionAngle { get; set; }
+
+        [ProtoMember(2)]
+        public float MaxVelocityTransfer { get; set; }
+
+        [ProtoMember(3)]
+        public float MaxDamageTransfer { get; set; }
+
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
-            float hitEntityHealth = 5000; // default value if voxel or something
-
             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-            if (obj != null)
-            {
-                hitEntityHealth = obj.Integrity;
-            }
-            else if (hit.HitEntity is IMyCubeGrid)
+            if (hit.HitEntity is IMyCubeGrid)
             {
                 IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3I? hitPos = grid.RayCastBlocks(bullet.PositionMatrix.Translation, bullet.VelocityPerTick);
+                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, bullet.PositionMatrix.Forward*0.5);
                 if (hitPos.HasValue)
                 {
                     obj = grid.GetCubeBlock(hitPos.Value);
-                    hitEntityHealth = obj.Integrity;
                 }
             }
 
@@ -34,41 +39,43 @@ namespace ProjectilesImproved.Effects
             {
                 hitObjectVelocity = hit.HitEntity.Physics.LinearVelocity;
             }
-
             Vector3 relativeV = bullet.Velocity - hitObjectVelocity;
 
-            float deflectionFactor = bullet.ProjectileMassDamage / (hitEntityHealth + bullet.ProjectileMassDamage) + 0.15f;
-            float deflectionAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal) / 1.5f;
+            float HitAngle0to90 = Vector3.Distance(-Vector3.Normalize(relativeV), hit.Normal);
 
-            if (deflectionAngle0to90 > deflectionFactor)
+            if ((HitAngle0to90*90) < DeflectionAngle)
             {
+                float NotHitAngle = (1 - HitAngle0to90);
+
+                // Apply impulse
+                float impulse = bullet.ProjectileHitImpulse * NotHitAngle * MaxVelocityTransfer;
                 if (hit.HitEntity.Physics != null)
                 {
-                    float impulse = hitObjectVelocity.Length() * bullet.ProjectileHitImpulse * (1 - deflectionAngle0to90);
                     hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Velocity * impulse * -hit.Normal, hit.Position, null);
-                    bullet.ProjectileHitImpulse = bullet.ProjectileHitImpulse * (1 - deflectionAngle0to90);
                 }
+                bullet.ProjectileHitImpulse -= impulse;
 
+                // apply partial damage
+                float damage = bullet.ProjectileMassDamage * NotHitAngle * MaxDamageTransfer;
                 if (obj != null)
                 {
-                    obj.DoDamage(bullet.ProjectileMassDamage * (1 - deflectionAngle0to90), bullet.AmmoId.SubtypeId, true);
+                    obj.DoDamage(damage, bullet.AmmoId.SubtypeId, false);
                 }
+                bullet.ProjectileMassDamage -= damage;
 
-                bullet.Velocity = (deflectionAngle0to90 * Vector3.Reflect(relativeV, hit.Normal)) + hitObjectVelocity;
-                bullet.ProjectileMassDamage = bullet.ProjectileMassDamage * deflectionAngle0to90;
+                // reduce velocity
+                bullet.Velocity -= bullet.Velocity * NotHitAngle * MaxVelocityTransfer;
+
+                // calculate new direction
                 bullet.ResetCollisionCheck();
-
                 bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity);
                 bullet.PositionMatrix.Translation = hit.Position;
 
-
-                bullet.Start = bullet.PositionMatrix.Translation + (bullet.PositionMatrix.Forward*0.5f); // ensure it does not hit itself
+                bullet.Start = bullet.PositionMatrix.Translation + (bullet.PositionMatrix.Forward * 0.5f); // ensure it does not hit itself
                 bullet.End = bullet.PositionMatrix.Translation + bullet.VelocityPerTick;
-
 
                 bullet.CollisionDetection();
                 bullet.Draw();
-
             }
             else
             {
@@ -79,8 +86,6 @@ namespace ProjectilesImproved.Effects
 
                 bullet.HasExpired = true;
             }
-
-            MyLog.Default.Info($"Entity Health {hitEntityHealth}, Bullet Damage {bullet.ProjectileMassDamage}, Angle: {deflectionAngle0to90}, Degree: {deflectionAngle0to90*90}");
         }
     }
 }

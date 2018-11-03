@@ -50,7 +50,7 @@ namespace ProjectilesImproved.Effects
                 else if (hit.HitEntity is IMyCubeGrid)
                 {
                     IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, bullet.End);
+                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, bullet.PositionMatrix.Forward * 0.5);
                     if (hitPos.HasValue)
                     {
                         IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
