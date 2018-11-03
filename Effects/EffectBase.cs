@@ -3,6 +3,8 @@ using ProtoBuf;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
+using VRage.Utils;
+using VRageMath;
 
 namespace ProjectilesImproved.Effects
 {
@@ -41,15 +43,10 @@ namespace ProjectilesImproved.Effects
                 else if (hit.HitEntity is IMyCubeGrid)
                 {
                     IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                    IMySlimBlock block = grid.GetCubeBlock(grid.WorldToGridInteger(hit.Position));
-
-                    if (block == null) // cover all the bases
+                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, bullet.End);
+                    if (hitPos.HasValue)
                     {
-                        block = grid.GetCubeBlock(grid.WorldToGridInteger(hit.Position + (bullet.PositionMatrix.Forward * 0.03f)));
-                    }
-
-                    if (block != null)
-                    {
+                        IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
                         block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
 
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
