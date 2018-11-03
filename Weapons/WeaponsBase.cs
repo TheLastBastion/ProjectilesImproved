@@ -1,4 +1,5 @@
 ﻿using ProjectilesImproved.Bullets;
+using ProjectilesImproved.Effects;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Definitions;
 using Sandbox.Game.Entities;
@@ -119,7 +120,7 @@ namespace ProjectilesImproved.Weapons
                     a.Action = (block) =>
                     {
                         WeaponsBase weps = block.GameLogic as WeaponsBase;
-                        MyAPIGateway.Utilities.ShowNotification($"shoot", 500);
+                        MyAPIGateway.Utilities.ShowNotification($"shoot action", 500);
                         weps.terminalShooting = !weps.terminalShooting;
                     };
 
@@ -201,7 +202,7 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
-            MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
+            //MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
             if (timeTillNextShot < 1)
             {
                 timeTillNextShot += weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire * FireRateMultiplayer;
@@ -209,7 +210,7 @@ namespace ProjectilesImproved.Weapons
 
             if (cooldownTime > 0)
             {
-                MyAPIGateway.Utilities.ShowNotification($"Reload: {cooldownTime.ToString("n0")}", 1);
+                //MyAPIGateway.Utilities.ShowNotification($"Reload: {cooldownTime.ToString("n0")}", 1);
                 cooldownTime -= MillisecondPerFrame;
                 return;
             }
@@ -241,17 +242,44 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
-                BulletDrop fireData = new BulletDrop()
+                EffectBase effects = new EffectBase();
+
+                if (Settings.AmmoEffectLookup.ContainsKey(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId))
                 {
-                    GridId = cube.CubeGrid.EntityId,
-                    BlockId = Entity.EntityId,
-                    WeaponId = weapon.Id,
-                    MagazineId = gun.GunBase.CurrentAmmoMagazineId,
-                    AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
-                    InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
-                    Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
-                    PositionMatrix = positionMatrix
-                };
+                    effects = Settings.AmmoEffectLookup[gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId];
+                }
+
+                BulletBase fireData;
+                if (effects.HasBulletDrop)
+                {
+                    fireData = new BulletDrop
+                    {
+                        GridId = cube.CubeGrid.EntityId,
+                        BlockId = Entity.EntityId,
+                        WeaponId = weapon.Id,
+                        MagazineId = gun.GunBase.CurrentAmmoMagazineId,
+                        AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
+                        InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
+                        Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
+                        PositionMatrix = positionMatrix,
+                        Effects = effects,
+                    };
+                }
+                else
+                {
+                    fireData = new BulletBase
+                    {
+                        GridId = cube.CubeGrid.EntityId,
+                        BlockId = Entity.EntityId,
+                        WeaponId = weapon.Id,
+                        MagazineId = gun.GunBase.CurrentAmmoMagazineId,
+                        AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
+                        InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
+                        Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
+                        PositionMatrix = positionMatrix,
+                        Effects = effects,
+                    };
+                }
 
                 while (timeTillNextShot >= 1)
                 {

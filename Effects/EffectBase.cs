@@ -4,7 +4,6 @@ using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
-using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects
@@ -17,6 +16,12 @@ namespace ProjectilesImproved.Effects
 
         [ProtoMember(2)]
         public Explosive Explosive { get; set; }
+
+        [ProtoMember(3)]
+        public bool HasBulletDrop { get; set; }
+
+        [ProtoMember(4)]
+        public float BulletDropMultiplyer { get; set; }
 
         public void Execute(IHitInfo hit, BulletBase bullet)
         {

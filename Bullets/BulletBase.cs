@@ -98,7 +98,7 @@ namespace ProjectilesImproved.Bullets
         public int CollisionCheckFrames { get; private set; } = -1;
         private int CollisionCheckCounter = 0;
         private bool DoShortRaycast = false;
-        private float VelocityPerTickLength = 0;
+        //private float VelocityPerTickLength = 0;
 
         /// <summary>
         /// Initializes all empty variables
@@ -132,33 +132,33 @@ namespace ProjectilesImproved.Bullets
                 ProjectileTrailColor = Ammo.ProjectileTrailColor;
 
 
-            if (Effects == null)
-            {
-                Effects = new EffectBase();
-                if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
-                {
-                    EffectBase b = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
+            //if (Effects == null)
+            //{
+            //    Effects = new EffectBase();
+            //    if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
+            //    {
+            //        EffectBase b = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
 
-                    if (b.Explosive != null)
-                    {
-                        Effects.Explosive = new Explosive()
-                        {
-                            Radius = b.Explosive.Radius,
-                            Angle = b.Explosive.Angle,
-                            Resolution = b.Explosive.Resolution,
-                            Offset = b.Explosive.Offset,
-                            AffectVoxels = b.Explosive.AffectVoxels
-                        };
-                    }
+            //        if (b.Explosive != null)
+            //        {
+            //            Effects.Explosive = new Explosive()
+            //            {
+            //                Radius = b.Explosive.Radius,
+            //                Angle = b.Explosive.Angle,
+            //                Resolution = b.Explosive.Resolution,
+            //                Offset = b.Explosive.Offset,
+            //                AffectVoxels = b.Explosive.AffectVoxels
+            //            };
+            //        }
 
-                    if (b.Ricochet != null)
-                    {
-                        Effects.Ricochet = new Ricochet();
-                    }
-                }
-            }
+            //        if (b.Ricochet != null)
+            //        {
+            //            Effects.Ricochet = new Ricochet();
+            //        }
+            //    }
+            //}
 
-            VelocityPerTickLength = (float)VelocityPerTick.Length();
+            //VelocityPerTickLength = (float)VelocityPerTick.Length();
 
             IsInitialized = true;
         }

@@ -19,11 +19,15 @@ namespace ProjectilesImproved
         {
             { MyStringHash.GetOrCompute("OKI230mmAmmoPars"), new EffectBase()
                 {
+                    HasBulletDrop = true,
+                    BulletDropMultiplyer = 0.3f,
                     Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
             },
             { MyStringHash.GetOrCompute("OKI23mmAmmoPars"), new EffectBase()
                 {
+                    HasBulletDrop = true,
+                    BulletDropMultiplyer = 2f,
                     //Ricochet = new Ricochet(),
                     //Explosive = new Explosive() { Radius = 1, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
@@ -33,6 +37,12 @@ namespace ProjectilesImproved
                     //Explosive = new Explosive() { Radius = 2, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
             },
+            {
+                MyStringHash.GetOrCompute("LargeCaliber"), new EffectBase()
+                {
+
+                } 
+            }
         };
 
         public const float GravityMultiplyer = 0.4f;

@@ -1,5 +1,4 @@
 ﻿using ProtoBuf;
-using Sandbox.Game;
 using VRageMath;
 
 namespace ProjectilesImproved.Bullets
