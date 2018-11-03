@@ -49,6 +49,8 @@ namespace ProjectilesImproved.Effects
 
             if (HitAngle < DeflectionAngle)
             {
+                MyLog.Default.Info($"{HitAngle} < {DeflectionAngle}");
+
                 // Apply impulse
                 float impulse = bullet.ProjectileHitImpulse * NotHitFraction * MaxVelocityTransfer;
                 if (hit.HitEntity.Physics != null)
@@ -67,6 +69,9 @@ namespace ProjectilesImproved.Effects
 
                 // reduce velocity
                 bullet.Velocity -= bullet.Velocity * NotHitFraction * MaxVelocityTransfer;
+
+                // reflect
+                bullet.Velocity = Vector3.Reflect(bullet.Velocity, hit.Normal);
 
                 // calculate new direction
                 bullet.ResetCollisionCheck();
