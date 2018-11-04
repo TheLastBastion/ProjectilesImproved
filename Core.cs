@@ -28,7 +28,7 @@ namespace ProjectilesImproved
         {
             if (!NetworkAPI.IsInitialized)
             {
-                NetworkAPI.Init(ModID, ModName);
+                NetworkAPI.Init(ModID, ModName, "weapons");
 
                 if (Network.NetworkType == NetworkTypes.Client)
                 {
