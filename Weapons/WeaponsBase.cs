@@ -13,6 +13,7 @@ using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRage.ObjectBuilders;
+using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Weapons
@@ -242,6 +243,7 @@ namespace ProjectilesImproved.Weapons
 
                 AmmoEffects effects = new AmmoEffects();
 
+                MyLog.Default.Info(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
                 if (Settings.AmmoEffectLookup.ContainsKey(gun.GunBase.CurrentAmmoDefinition.Id.ToString()))
                 {
                     effects = Settings.AmmoEffectLookup[gun.GunBase.CurrentAmmoDefinition.Id.ToString()];

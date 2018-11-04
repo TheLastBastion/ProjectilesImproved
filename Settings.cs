@@ -30,31 +30,31 @@ namespace ProjectilesImproved
 
         public static Dictionary<string, AmmoEffects> AmmoEffectLookup { get; private set; } = new Dictionary<string, AmmoEffects>
         {
-            { "AmmoDefinition/OKI230mmAmmoPars", new AmmoEffects()
+            { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new AmmoEffects()
                 {
-                    AmmoId = "AmmoDefinition/OKI230mmAmmoPars",
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropMultiplyer = 0.3f,
                     Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
             },
-            { "AmmoDefinition/OKI23mmAmmoPars", new AmmoEffects()
+            { "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars", new AmmoEffects()
                 {
-                    AmmoId = "AmmoDefinition/OKI23mmAmmoPars",
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropMultiplyer = 2f,
                     Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 1f },
                 }
             },
-            { "AmmoDefinition/OKI50mmAmmoPars", new AmmoEffects()
+            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new AmmoEffects()
                 {
-                    AmmoId = "AmmoDefinition/OKI50mmAmmoPars",
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars",
                 }
             },
             {
-               "AmmoDefinition/LargeCaliber", new AmmoEffects()
+               "MyObjectBuilder_AmmoDefinition/LargeCaliber", new AmmoEffects()
                 {
-                    AmmoId = "AmmoDefinition/LargeCaliber",
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/LargeCaliber",
                     Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 }
             }
