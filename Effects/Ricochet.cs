@@ -105,6 +105,8 @@ namespace ProjectilesImproved.Effects
                     effect.UserBirthMultiplier = 5f;
                     effect.DurationMin = 1;
                     effect.DurationMax = 20;
+                    effect.SetRandomDuration();
+                    effect.DistanceMax = 500;
 
                 }
             }
