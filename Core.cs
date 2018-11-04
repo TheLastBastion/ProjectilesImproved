@@ -19,7 +19,7 @@ namespace ProjectilesImproved
         public static event Action OnLoadComplete;
         public static List<BulletBase> ActiveProjectiles = new List<BulletBase>();
 
-        public const string ModName = "Projectiles Improved";
+        public const string ModName = "Weapons Overhaul";
         public const ushort ModID = 4112;
 
         private NetworkAPI Network => NetworkAPI.Instance;
@@ -28,7 +28,7 @@ namespace ProjectilesImproved
         {
             if (!NetworkAPI.IsInitialized)
             {
-                NetworkAPI.Init(ModID, ModName, "weapons");
+                NetworkAPI.Init(ModID, ModName, "/weapons");
 
                 if (Network.NetworkType == NetworkTypes.Client)
                 {
@@ -43,7 +43,11 @@ namespace ProjectilesImproved
 
                     if (Network.NetworkType != NetworkTypes.Dedicated)
                     {
-                        Network.RegisterChatCommand("load", (args) => { Settings.Load(); });
+                        Network.RegisterChatCommand("load", (args) => 
+                        {
+                            Settings.Load();
+                            MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
+                        });
                     }
                 }
             }

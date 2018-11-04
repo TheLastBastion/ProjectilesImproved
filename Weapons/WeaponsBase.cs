@@ -208,6 +208,12 @@ namespace ProjectilesImproved.Weapons
                 timeTillNextShot += weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire * FireRateMultiplayer;
             }
 
+            if (!cube.IsFunctional)
+            {
+                terminalShooting = false;
+                return;
+            }
+
             if (cooldownTime > 0)
             {
                 cooldownTime -= MillisecondPerFrame;
@@ -243,7 +249,6 @@ namespace ProjectilesImproved.Weapons
 
                 AmmoEffects effects = new AmmoEffects();
 
-                //MyLog.Default.Info(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
                 if (Settings.AmmoEffectLookup.ContainsKey(gun.GunBase.CurrentAmmoDefinition.Id.ToString()))
                 {
                     effects = Settings.AmmoEffectLookup[gun.GunBase.CurrentAmmoDefinition.Id.ToString()];
