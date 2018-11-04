@@ -90,23 +90,15 @@ namespace ProjectilesImproved.Effects
 
                 if (!MyAPIGateway.Session.IsServer)
                 {
-                    MatrixD world = MatrixD.CreateWorld(hit.Position, hit.Normal, Vector3.Cross(hit.Position, hit.Normal));
+
+
+                    MatrixD world = MatrixD.CreateFromDir(hit.Normal);
+                    world.Translation = hit.Position;
+
                     MyParticleEffect effect;
                     MyParticlesManager.TryCreateParticleEffect("Collision_Sparks_Directional", world, out effect);
 
-                    //effect.Play();
-
-                    //MyParticleEffect effect = new MyParticleEffect
-                    //{
-                         
-                    //    UserScale = 0.5f,
-                    //    UserEmitterScale = 6.0f,
-                    //    UserRadiusMultiplier = 0.2f,
-                    //    UserBirthMultiplier = 2f,
-                    //    Length = 0.5f,
-                    //    Loop = false,
-                         
-                    //};
+                    effect.Play();
                 }
             }
             else
