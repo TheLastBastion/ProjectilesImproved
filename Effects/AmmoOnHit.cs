@@ -62,12 +62,7 @@ namespace ProjectilesImproved.Effects
                     //Vector3I hitPos = grid.WorldToGridInteger(hit.Position + (bullet.PositionMatrix.Forward * 0.0001));
                     //IMySlimBlock block = grid.GetCubeBlock(hitPos);
                     Vector3D direction = bullet.PositionMatrix.Forward;
-                    if (!Vector3D.IsUnit(ref direction))
-                    {
-                        direction.Normalize();
-                    }
-
-                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
+                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position - direction, hit.Position + direction);
                     if (hitPos.HasValue)
                     {
                         IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);

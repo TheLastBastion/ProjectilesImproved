@@ -33,7 +33,8 @@ namespace ProjectilesImproved.Effects
             if (hit.HitEntity is IMyCubeGrid)
             {
                 IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position+(bullet.PositionMatrix.Forward * 0.5));
+                Vector3D direction = bullet.PositionMatrix.Forward;
+                Vector3I? hitPos = grid.RayCastBlocks(hit.Position - direction, hit.Position + direction);
                 if (hitPos.HasValue)
                 {
                     obj = grid.GetCubeBlock(hitPos.Value);
@@ -106,8 +107,6 @@ namespace ProjectilesImproved.Effects
                     effect.DurationMin = 0.015f;
                     effect.DurationMax = 0.025f;
                     effect.SetRandomDuration();
-                    //effect.DistanceMax = 50000;
-
                 }
             }
             else
