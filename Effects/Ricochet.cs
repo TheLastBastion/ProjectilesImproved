@@ -100,13 +100,13 @@ namespace ProjectilesImproved.Effects
 
                     effect.Loop = false;
                     effect.UserScale = 0.5f;
-                    effect.UserEmitterScale = 10f;
-                    effect.UserRadiusMultiplier = 0.2f;
+                    effect.UserEmitterScale = 16f;
+                    effect.UserRadiusMultiplier = 0.1f;
                     effect.UserBirthMultiplier = 20f;
-                    effect.DurationMin = 0.01f;
-                    effect.DurationMax = 0.02f;
+                    effect.DurationMin = 0.015f;
+                    effect.DurationMax = 0.025f;
                     effect.SetRandomDuration();
-                    effect.DistanceMax = 50000;
+                    //effect.DistanceMax = 50000;
 
                 }
             }
