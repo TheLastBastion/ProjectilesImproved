@@ -100,7 +100,7 @@ namespace ProjectilesImproved.Effects
 
                     effect.Loop = false;
                     effect.UserScale = 0.5f;
-                    effect.UserEmitterScale = 6f;
+                    effect.UserEmitterScale = 8f;
                     effect.UserRadiusMultiplier = 0.2f;
                     effect.UserBirthMultiplier = 20f;
                     effect.DurationMin = 0.05f;
