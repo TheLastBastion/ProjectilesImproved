@@ -67,7 +67,7 @@ namespace ProjectilesImproved.Effects
                         direction.Normalize();
                     }
 
-                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + (direction * 0.2));
+                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
                     if (hitPos.HasValue)
                     {
                         IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
