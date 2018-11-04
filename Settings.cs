@@ -28,9 +28,6 @@ namespace ProjectilesImproved
         [ProtoMember]
         public List<AmmoEffects> AmmoEffects { get; set; } = new List<AmmoEffects>();
 
-
-        public static Settings Defaults { get; } = GetCurrentSettings();
-
         public static Dictionary<string, AmmoEffects> AmmoEffectLookup { get; private set; } = new Dictionary<string, AmmoEffects>
         {
             { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new AmmoEffects()
