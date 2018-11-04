@@ -59,7 +59,7 @@ namespace ProjectilesImproved.Effects
                 {
                     IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
 
-                    Vector3I hitPos = grid.WorldToGridInteger(hit.Position);
+                    Vector3I hitPos = grid.WorldToGridInteger(hit.Position + (bullet.PositionMatrix.Forward * 0.0001));
                     IMySlimBlock block = grid.GetCubeBlock(hitPos);
                     //Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + (bullet.PositionMatrix.Forward * 0.5));
                     if (block != null)
