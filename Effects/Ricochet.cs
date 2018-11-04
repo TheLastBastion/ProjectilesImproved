@@ -88,7 +88,7 @@ namespace ProjectilesImproved.Effects
                 bullet.CollisionDetection();
                 bullet.Draw();
 
-                if (!MyAPIGateway.Session.IsServer)
+                if (!MyAPIGateway.Utilities.IsDedicated)
                 {
 
 
@@ -98,7 +98,7 @@ namespace ProjectilesImproved.Effects
                     MyParticleEffect effect;
                     MyParticlesManager.TryCreateParticleEffect("Collision_Sparks_Directional", world, out effect);
 
-                    effect.Play();
+                    //effect.Play();
                 }
             }
             else
