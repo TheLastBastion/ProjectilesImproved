@@ -26,11 +26,11 @@ namespace ProjectilesImproved
         public List<WeaponEffects> WeaponEffects { get; set; } = new List<WeaponEffects>();
 
         [ProtoMember]
-        public List<AmmoEffects> AmmoEffects { get; set; } = new List<AmmoEffects>();
+        public List<AmmoOnHit> AmmoEffects { get; set; } = new List<AmmoOnHit>();
 
-        public static Dictionary<string, AmmoEffects> AmmoEffectLookup { get; private set; } = new Dictionary<string, AmmoEffects>
+        public static Dictionary<string, AmmoOnHit> AmmoEffectLookup { get; private set; } = new Dictionary<string, AmmoOnHit>
         {
-            { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new AmmoEffects()
+            { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new AmmoOnHit()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars",
                     HasBulletDrop = true,
@@ -38,7 +38,7 @@ namespace ProjectilesImproved
                     Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
             },
-            { "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars", new AmmoEffects()
+            { "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars", new AmmoOnHit()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars",
                     HasBulletDrop = true,
@@ -46,13 +46,13 @@ namespace ProjectilesImproved
                     Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 1f },
                 }
             },
-            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new AmmoEffects()
+            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new AmmoOnHit()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars",
                 }
             },
             {
-               "MyObjectBuilder_AmmoDefinition/LargeCaliber", new AmmoEffects()
+               "MyObjectBuilder_AmmoDefinition/LargeCaliber", new AmmoOnHit()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/LargeCaliber",
                     Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
@@ -121,7 +121,7 @@ namespace ProjectilesImproved
                 s.WeaponEffects.Add(w);
             }
 
-            foreach (AmmoEffects a in AmmoEffectLookup.Values)
+            foreach (AmmoOnHit a in AmmoEffectLookup.Values)
             {
                 s.AmmoEffects.Add(a);
             }
@@ -143,7 +143,7 @@ namespace ProjectilesImproved
             }
 
             AmmoEffectLookup.Clear();
-            foreach (AmmoEffects a in s.AmmoEffects)
+            foreach (AmmoOnHit a in s.AmmoEffects)
             {
                 if (AmmoEffectLookup.ContainsKey(a.AmmoId.ToString()))
                 {

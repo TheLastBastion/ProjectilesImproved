@@ -247,7 +247,7 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
-                AmmoEffects effects = new AmmoEffects();
+                AmmoOnHit effects = new AmmoOnHit();
 
                 if (Settings.AmmoEffectLookup.ContainsKey(gun.GunBase.CurrentAmmoDefinition.Id.ToString()))
                 {

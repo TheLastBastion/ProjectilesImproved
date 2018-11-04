@@ -4,13 +4,17 @@ using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
+using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects
 {
     [ProtoContract]
-    public class AmmoEffects : IEffect
+    public class AmmoOnHit : IEffect
     {
+        public static long hits = 0;
+        public static long misses = 0;
+
         [ProtoMember(1)]
         public string AmmoId { get; set; }
 
@@ -54,7 +58,10 @@ namespace ProjectilesImproved.Effects
                 else if (hit.HitEntity is IMyCubeGrid)
                 {
                     IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + (bullet.PositionMatrix.Forward * 0.5));
+
+                    Vector3I? hitPos = grid.WorldToGridInteger(hit.Position);
+
+                    //Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + (bullet.PositionMatrix.Forward * 0.5));
                     if (hitPos.HasValue)
                     {
                         IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
@@ -63,6 +70,11 @@ namespace ProjectilesImproved.Effects
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
                         bullet.LastPositionFraction = hit.Fraction;
+                        hits++;
+                    }
+                    else
+                    {
+                        misses++;
                     }
                 }
 

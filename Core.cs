@@ -92,6 +92,7 @@ namespace ProjectilesImproved
         public override void UpdateAfterSimulation()
         {
             MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
+            MyAPIGateway.Utilities.ShowNotification($"Default Ammo Hit Success: {(AmmoOnHit.hits/(AmmoOnHit.hits+AmmoOnHit.misses))*100}% Hit: {AmmoOnHit.hits}, Missed: {AmmoOnHit.misses}", 1);
 
             for (int i = 0; i < ActiveProjectiles.Count; i++)
             {
