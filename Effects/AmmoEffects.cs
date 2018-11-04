@@ -15,16 +15,17 @@ namespace ProjectilesImproved.Effects
         public string AmmoId { get; set; }
 
         [ProtoMember(2)]
-        public Ricochet Ricochet { get; set; }
-
-        [ProtoMember(3)]
-        public Explosive Explosive { get; set; }
-
-        [ProtoMember(4)]
         public bool HasBulletDrop { get; set; }
 
-        [ProtoMember(5)]
+        [ProtoMember(3)]
         public float BulletDropMultiplyer { get; set; }
+
+        [ProtoMember(4)]
+        public Ricochet Ricochet { get; set; }
+
+        [ProtoMember(5)]
+        public Explosive Explosive { get; set; }
+
 
         public void Execute(IHitInfo hit, BulletBase bullet)
         {
