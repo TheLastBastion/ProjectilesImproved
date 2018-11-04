@@ -243,7 +243,7 @@ namespace ProjectilesImproved.Weapons
 
                 AmmoEffects effects = new AmmoEffects();
 
-                MyLog.Default.Info(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
+                //MyLog.Default.Info(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
                 if (Settings.AmmoEffectLookup.ContainsKey(gun.GunBase.CurrentAmmoDefinition.Id.ToString()))
                 {
                     effects = Settings.AmmoEffectLookup[gun.GunBase.CurrentAmmoDefinition.Id.ToString()];
