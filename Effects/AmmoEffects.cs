@@ -13,7 +13,7 @@ namespace ProjectilesImproved.Effects
     public class AmmoEffects : IEffect
     {
         [ProtoMember(1)]
-        public MyDefinitionId AmmoId { get; set; }
+        public string AmmoId { get; set; }
 
         [ProtoMember(2)]
         public Ricochet Ricochet { get; set; }

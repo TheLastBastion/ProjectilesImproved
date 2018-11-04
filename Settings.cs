@@ -5,7 +5,6 @@ using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using VRage.Game;
 using VRage.Utils;
 using VRageMath;
 
@@ -33,7 +32,7 @@ namespace ProjectilesImproved
         {
             { "AmmoDefinition/OKI230mmAmmoPars", new AmmoEffects()
                 {
-                    AmmoId = MyDefinitionId.Parse("AmmoDefinition/OKI230mmAmmoPars"),
+                    AmmoId = "AmmoDefinition/OKI230mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropMultiplyer = 0.3f,
                     Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
@@ -41,7 +40,7 @@ namespace ProjectilesImproved
             },
             { "AmmoDefinition/OKI23mmAmmoPars", new AmmoEffects()
                 {
-                    AmmoId = MyDefinitionId.Parse("AmmoDefinition/OKI23mmAmmoPars"),
+                    AmmoId = "AmmoDefinition/OKI23mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropMultiplyer = 2f,
                     Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 1f },
@@ -49,13 +48,13 @@ namespace ProjectilesImproved
             },
             { "AmmoDefinition/OKI50mmAmmoPars", new AmmoEffects()
                 {
-                    AmmoId = MyDefinitionId.Parse("AmmoDefinition/OKI50mmAmmoPars"),
+                    AmmoId = "AmmoDefinition/OKI50mmAmmoPars",
                 }
             },
             {
                "AmmoDefinition/LargeCaliber", new AmmoEffects()
                 {
-                    AmmoId = MyDefinitionId.Parse("AmmoDefinition/LargeCaliber"),
+                    AmmoId = "AmmoDefinition/LargeCaliber",
                     Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 }
             }
@@ -136,7 +135,7 @@ namespace ProjectilesImproved
             {
                 if (WeaponEffectLookup.ContainsKey(w.WeaponId.ToString()))
                 {
-                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{w.WeaponId.ToString()}'. Already in dictionary");
+                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{w.WeaponId}'. Already in dictionary");
                     continue;
                 }
 
@@ -148,7 +147,7 @@ namespace ProjectilesImproved
             {
                 if (AmmoEffectLookup.ContainsKey(a.AmmoId.ToString()))
                 {
-                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{a.AmmoId.SubtypeId}'. Already in dictionary");
+                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{a.AmmoId}'. Already in dictionary");
                     continue;
                 }
 

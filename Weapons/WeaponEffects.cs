@@ -7,6 +7,6 @@ namespace ProjectilesImproved.Weapons
     public class WeaponEffects
     {
         [ProtoMember(1)]
-        public MyDefinitionId WeaponId { get; set; }
+        public string WeaponId { get; set; }
     }
 }
