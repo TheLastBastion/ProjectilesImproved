@@ -2,6 +2,7 @@
 using ProtoBuf;
 using Sandbox.ModAPI;
 using System;
+using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -86,6 +87,27 @@ namespace ProjectilesImproved.Effects
 
                 bullet.CollisionDetection();
                 bullet.Draw();
+
+                if (!MyAPIGateway.Session.IsServer)
+                {
+                    MatrixD world = MatrixD.CreateWorld(hit.Position, hit.Normal, Vector3.Cross(hit.Position, hit.Normal));
+                    MyParticleEffect effect;
+                    MyParticlesManager.TryCreateParticleEffect("Collision_Sparks_Directional", world, out effect);
+
+                    //effect.Play();
+
+                    //MyParticleEffect effect = new MyParticleEffect
+                    //{
+                         
+                    //    UserScale = 0.5f,
+                    //    UserEmitterScale = 6.0f,
+                    //    UserRadiusMultiplier = 0.2f,
+                    //    UserBirthMultiplier = 2f,
+                    //    Length = 0.5f,
+                    //    Loop = false,
+                         
+                    //};
+                }
             }
             else
             {
