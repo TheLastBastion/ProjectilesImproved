@@ -102,11 +102,11 @@ namespace ProjectilesImproved.Effects
                     effect.UserScale = 0.5f;
                     effect.UserEmitterScale = 6f;
                     effect.UserRadiusMultiplier = 0.2f;
-                    effect.UserBirthMultiplier = 10f;
+                    effect.UserBirthMultiplier = 20f;
                     effect.DurationMin = 0.05f;
-                    effect.DurationMax = 0.2f;
+                    effect.DurationMax = 0.06f;
                     effect.SetRandomDuration();
-                    //effect.DistanceMax = 500;
+                    effect.DistanceMax = 500;
 
                 }
             }
