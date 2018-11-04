@@ -98,7 +98,12 @@ namespace ProjectilesImproved.Effects
                     MyParticleEffect effect;
                     MyParticlesManager.TryCreateParticleEffect("Collision_Sparks_Directional", world, out effect);
 
-                    //effect.Play();
+                    effect.Loop = false;
+                    effect.UserScale = 0.5f;
+                    effect.UserEmitterScale = 6f;
+                    effect.UserRadiusMultiplier = 0.2f;
+                    effect.UserBirthMultiplier = 2f;
+
                 }
             }
             else
