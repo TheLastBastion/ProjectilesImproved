@@ -59,12 +59,18 @@ namespace ProjectilesImproved.Effects
                 {
                     IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
 
-                    Vector3I hitPos = grid.WorldToGridInteger(hit.Position + (bullet.PositionMatrix.Forward * 0.0001));
-                    IMySlimBlock block = grid.GetCubeBlock(hitPos);
-                    //Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + (bullet.PositionMatrix.Forward * 0.5));
-                    if (block != null)
+                    //Vector3I hitPos = grid.WorldToGridInteger(hit.Position + (bullet.PositionMatrix.Forward * 0.0001));
+                    //IMySlimBlock block = grid.GetCubeBlock(hitPos);
+                    Vector3D direction = bullet.PositionMatrix.Forward;
+                    if (!Vector3D.IsUnit(ref direction))
                     {
-                        //IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
+                        direction.Normalize();
+                    }
+
+                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + (direction * 0.2));
+                    if (hitPos.HasValue)
+                    {
+                        IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
                         block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
 
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
