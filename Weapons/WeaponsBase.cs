@@ -202,7 +202,6 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
-            //MyAPIGateway.Utilities.ShowNotification($"{Entity.GetType().Name} {Entity.NeedsUpdate}", 1);
             if (timeTillNextShot < 1)
             {
                 timeTillNextShot += weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire * FireRateMultiplayer;
@@ -210,14 +209,13 @@ namespace ProjectilesImproved.Weapons
 
             if (cooldownTime > 0)
             {
-                //MyAPIGateway.Utilities.ShowNotification($"Reload: {cooldownTime.ToString("n0")}", 1);
                 cooldownTime -= MillisecondPerFrame;
                 return;
             }
 
             if (!IsShooting || cube?.CubeGrid?.Physics == null) return;
 
-            if (gun.IsShooting) terminalShooting = false; // turns off auto shoot if user begins to fire
+            if (gun.IsShooting) terminalShooting = false;
 
             if (!gun.GunBase.HasEnoughAmmunition())
             {
@@ -238,15 +236,15 @@ namespace ProjectilesImproved.Weapons
                 muzzleMatrix.Translation += bonus;
 
                 MatrixD positionMatrix = Matrix.CreateWorld(
-                    muzzleMatrix.Translation,// + (block.CubeGrid.Physics.LinearAcceleration * Tools.Tick),
+                    muzzleMatrix.Translation,
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
-                EffectBase effects = new EffectBase();
+                AmmoEffects effects = new AmmoEffects();
 
-                if (Settings.AmmoEffectLookup.ContainsKey(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId))
+                if (Settings.AmmoEffectLookup.ContainsKey(gun.GunBase.CurrentAmmoDefinition.Id.ToString()))
                 {
-                    effects = Settings.AmmoEffectLookup[gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId];
+                    effects = Settings.AmmoEffectLookup[gun.GunBase.CurrentAmmoDefinition.Id.ToString()];
                 }
 
                 BulletBase fireData;
@@ -298,7 +296,7 @@ namespace ProjectilesImproved.Weapons
                         break;
                     }
 
-                    positionMatrix.Translation += positionMatrix.Forward * (timeTillNextShot * 0.03); // using timeTillNextShot to offset bullets being fired in the same frame
+                    positionMatrix.Translation += positionMatrix.Forward * (timeTillNextShot * 0.03);
                 }
 
                 var forceVector = -positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.BackkickForce;

@@ -1,6 +1,7 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
 using Sandbox.ModAPI;
+using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -9,18 +10,21 @@ using VRageMath;
 namespace ProjectilesImproved.Effects
 {
     [ProtoContract]
-    public class EffectBase : IEffect
+    public class AmmoEffects : IEffect
     {
         [ProtoMember(1)]
-        public Ricochet Ricochet { get; set; }
+        public MyDefinitionId AmmoId { get; set; }
 
         [ProtoMember(2)]
-        public Explosive Explosive { get; set; }
+        public Ricochet Ricochet { get; set; }
 
         [ProtoMember(3)]
-        public bool HasBulletDrop { get; set; }
+        public Explosive Explosive { get; set; }
 
         [ProtoMember(4)]
+        public bool HasBulletDrop { get; set; }
+
+        [ProtoMember(5)]
         public float BulletDropMultiplyer { get; set; }
 
         public void Execute(IHitInfo hit, BulletBase bullet)

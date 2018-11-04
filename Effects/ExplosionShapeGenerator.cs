@@ -19,11 +19,11 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public Dictionary<MyStringHash, RayE[]> ShapeLookup = new Dictionary<MyStringHash, RayE[]>();
+        public Dictionary<string, RayE[]> ShapeLookup = new Dictionary<string, RayE[]>();
 
         public ExplosionShapeGenerator()
         {
-            foreach (KeyValuePair<MyStringHash, EffectBase> set in Settings.AmmoEffectLookup)
+            foreach (KeyValuePair<string, AmmoEffects> set in Settings.AmmoEffectLookup)
             {
                 if (set.Value.Explosive == null) continue;
                 Generate(set.Key, set.Value.Explosive.Radius, set.Value.Explosive.Resolution, set.Value.Explosive.Angle);
@@ -37,7 +37,7 @@ namespace ProjectilesImproved.Effects
         /// <param name="radius">Explosion Size</param>
         /// <param name="resolution">0.25 to less than 10</param>
         /// <param name="maxAngle">0 to 180</param>
-        private void Generate(MyStringHash id, float radius, float resolution, float maxAngle)
+        private void Generate(string id, float radius, float resolution, float maxAngle)
         {
             if (resolution < 0.25f)
             {
@@ -82,7 +82,7 @@ namespace ProjectilesImproved.Effects
             }
         }
 
-        public static RayE[][] GetExplosionRays(MyStringHash id, MatrixD transformMatrix, Vector3D epicenter, float Radius, float damagePool)
+        public static RayE[][] GetExplosionRays(string id, MatrixD transformMatrix, Vector3D epicenter, float Radius, float damagePool)
         {
             RayE[] baseRays = Instance.ShapeLookup[id];
             List<List<RayE>> rays = new List<List<RayE>>

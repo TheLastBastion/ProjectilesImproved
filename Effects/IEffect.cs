@@ -1,7 +1,4 @@
 ﻿using ProjectilesImproved.Bullets;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using VRage.Game.ModAPI;
 
 namespace ProjectilesImproved.Effects

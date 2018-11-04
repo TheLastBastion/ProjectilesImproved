@@ -6,6 +6,7 @@ using VRage.Game.Components;
 using ModNetworkAPI;
 using ProjectilesImproved.Bullets;
 using ProjectilesImproved.Effects;
+using VRage.Game.ModAPI;
 
 namespace ProjectilesImproved
 {
@@ -13,6 +14,8 @@ namespace ProjectilesImproved
     public class Core : MySessionComponentBase
     {
         public static bool IsInitialized = false;
+        public bool SentInitialRequest = false;
+        private int waitInterval = 0;
         public static event Action OnLoadComplete;
         public static List<BulletBase> ActiveProjectiles = new List<BulletBase>();
 
@@ -27,12 +30,25 @@ namespace ProjectilesImproved
             {
                 NetworkAPI.Init(ModID, ModName);
 
-                //if (Network.NetworkType == NetworkTypes.Client)
-                //{
-                //    Network.RegisterNetworkCommand("spawn", RecieveServerSpawn);
-                //}
+                if (Network.NetworkType == NetworkTypes.Client)
+                {
+                    Network.RegisterNetworkCommand(null, ClientCallback_Update);
+                    Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
+                    Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
+                }
+                else
+                {
+                    Network.RegisterNetworkCommand("update", ServerCallback_Update);
+                    Network.RegisterNetworkCommand("load", ServerCallback_Load);
+
+                    if (Network.NetworkType != NetworkTypes.Dedicated)
+                    {
+                        Network.RegisterChatCommand("load", (args) => { Settings.Load(); });
+                    }
+                }
             }
 
+            Settings.Load();
             MyAPIGateway.Session.OnSessionReady += OnStartInit;
         }
 
@@ -40,15 +56,33 @@ namespace ProjectilesImproved
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
 
-            IsInitialized = true;
             OnLoadComplete?.Invoke();
             ExplosionShapeGenerator.Initialize();
+            IsInitialized = true;
         }
 
         public static void SpawnProjectile(BulletBase data)
         {
             ActiveProjectiles.Add(data);
-            //((Server)NetworkAPI.Instance).SendCommand("spawn", data: MyAPIGateway.Utilities.SerializeToBinary(data), isReliable: true);
+        }
+
+        public override void UpdateBeforeSimulation()
+        {
+            /*
+            * this is a dumb hack to fix crashing when clients connect.
+            * the session ready event sometimes does not have everything loaded when i trigger the send command
+            */
+            if (IsInitialized && !SentInitialRequest && Network.NetworkType != NetworkTypes.Client)
+            {
+                if (waitInterval == 600) // 5 second timer before sending update request
+                {
+                    Network.SendCommand("update");
+                    SentInitialRequest = true;
+                    
+                }
+
+                waitInterval++;
+            }
         }
 
         public override void UpdateAfterSimulation()
@@ -84,9 +118,41 @@ namespace ProjectilesImproved
             }
         }
 
-        //private void RecieveServerSpawn(ulong steamId, string command, byte[] data)
-        //{
-        //    ActiveProjectiles.Add(MyAPIGateway.Utilities.SerializeFromBinary<BulletBase>(data));
-        //}
+        private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)
+        {
+            if (data != null)
+            {
+                Settings.SetNewSettings(MyAPIGateway.Utilities.SerializeFromBinary<Settings>(data));
+            }
+        }
+
+        private void ServerCallback_Update(ulong steamId, string commandString, byte[] data)
+        {
+            Network.SendCommand(null, data: MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()), steamId: steamId);
+        }
+
+        private void ServerCallback_Load(ulong steamId, string commandString, byte[] data)
+        {
+            if (IsAllowedSpecialOperations(steamId))
+            {
+                Settings.Load();
+                Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+            }
+            else
+            {
+                Network.SendCommand(null, "Load command requires Admin status.", steamId: steamId);
+            }
+        }
+
+        public static bool IsAllowedSpecialOperations(ulong steamId)
+        {
+            if (MyAPIGateway.Multiplayer.IsServer) return true;
+            return IsAllowedSpecialOperations(MyAPIGateway.Session.GetUserPromoteLevel(steamId));
+        }
+
+        public static bool IsAllowedSpecialOperations(MyPromoteLevel level)
+        {
+            return level == MyPromoteLevel.SpaceMaster || level == MyPromoteLevel.Admin || level == MyPromoteLevel.Owner;
+        }
     }
 }

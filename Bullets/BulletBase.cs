@@ -76,7 +76,7 @@ namespace ProjectilesImproved.Bullets
         public Vector3 ProjectileTrailColor = Vector3.Zero;
 
         [ProtoMember(18)]
-        public EffectBase Effects { get; set; }
+        public AmmoEffects Effects { get; set; }
 
         public bool IsInitialized = false;
 

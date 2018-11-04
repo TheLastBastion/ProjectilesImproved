@@ -68,7 +68,7 @@ namespace ProjectilesImproved.Effects
             transformationMatrix.Translation = epicenter;
 
             watch.Start("Pull Rays");
-            ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.SubtypeId, transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
+            ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.ToString(), transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
             watch.Stop("Pull Rays");
 
             watch.Start("Get World Entities");
