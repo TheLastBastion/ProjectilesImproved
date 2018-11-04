@@ -34,7 +34,7 @@ namespace ProjectilesImproved.Effects
             {
                 IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
                 Vector3D direction = bullet.PositionMatrix.Forward;
-                Vector3I? hitPos = grid.RayCastBlocks(hit.Position - direction, hit.Position + direction);
+                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
                 if (hitPos.HasValue)
                 {
                     obj = grid.GetCubeBlock(hitPos.Value);
