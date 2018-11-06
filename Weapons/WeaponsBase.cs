@@ -134,7 +134,7 @@ namespace ProjectilesImproved.Weapons
                         WeaponsBase weapon = (block.GameLogic as WeaponsBase);
                         if (weapon.cooldownTime == 0 && weapon.timeTillNextShot >= 1)
                         {
-                            FireWeapon();
+                            weapon.FireWeapon();
                         }
                     };
 
