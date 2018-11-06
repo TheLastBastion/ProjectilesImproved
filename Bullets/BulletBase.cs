@@ -197,13 +197,14 @@ namespace ProjectilesImproved.Bullets
         public virtual void CollisionDetection()
         {
             IHitInfo hit = null;
+            List<IHitInfo> hitlist = new List<IHitInfo>();
             if (UseLongRaycast)
             {
                 MyAPIGateway.Physics.CastLongRay(Start, End, out hit, true);
             }
             else
             {
-                List<IHitInfo> hitlist = new List<IHitInfo>();
+
                 MyAPIGateway.Physics.CastRay(Start, End, hitlist);
 
                 if (hitlist.Count > 0)
