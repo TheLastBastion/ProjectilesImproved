@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
+using Sandbox.Definitions;
 using System;
 using System.Collections.Generic;
 using VRage.Game.Components;
@@ -48,16 +49,35 @@ namespace ProjectilesImproved.Effects
                             {
                                 float damage;
 
-                                if (bullet.ProjectileMassDamage > block.Integrity)
+                                float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
+                                float trueIntegrity = block.Integrity * mult;
+                                if (bullet.Effects.IgnoreDamageReduction)
                                 {
-                                    damage = block.Integrity;
-                                    bullet.ProjectileMassDamage -= block.Integrity;
+                                    if (bullet.ProjectileMassDamage > block.Integrity)
+                                    {
+                                        damage = trueIntegrity;
+                                        bullet.ProjectileMassDamage -= block.Integrity;
+                                    }
+                                    else
+                                    {
+                                        damage = bullet.ProjectileMassDamage * mult;
+                                        bullet.ProjectileMassDamage = 0;
+                                        bullet.HasExpired = true;
+                                    }
                                 }
                                 else
                                 {
-                                    damage = bullet.ProjectileMassDamage;
-                                    bullet.ProjectileMassDamage = 0;
-                                    bullet.HasExpired = true;
+                                    if (bullet.ProjectileMassDamage > trueIntegrity)
+                                    {
+                                        damage = trueIntegrity;
+                                        bullet.ProjectileMassDamage -= trueIntegrity;
+                                    }
+                                    else
+                                    {
+                                        damage = bullet.ProjectileMassDamage;
+                                        bullet.ProjectileMassDamage = 0;
+                                        bullet.HasExpired = true;
+                                    }
                                 }
 
                                 block.DoDamage(damage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
