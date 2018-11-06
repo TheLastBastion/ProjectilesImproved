@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
-using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects
@@ -24,18 +23,24 @@ namespace ProjectilesImproved.Effects
         public bool HasBulletDrop { get; set; }
 
         [ProtoMember(3)]
-        public float BulletDropMultiplyer { get; set; }
+        public float BulletDropGravityScaler { get; set; }
 
         [ProtoMember(4)]
-        public bool IgnoreDamageReduction { get; set; }
-
-        [ProtoMember(4)]
-        public Penetration Penetration { get; set; }
+        public bool UseShrapnel { get; set; }
 
         [ProtoMember(5)]
-        public Ricochet Ricochet { get; set; }
+        public float ShrapnelDecayScaler { get; set; }
 
         [ProtoMember(6)]
+        public bool IgnoreDamageReduction { get; set; }
+
+        [ProtoMember(7)]
+        public Penetration Penetration { get; set; }
+
+        [ProtoMember(8)]
+        public Ricochet Ricochet { get; set; }
+
+        [ProtoMember(9)]
         public Explosive Explosive { get; set; }
 
 

@@ -34,7 +34,7 @@ namespace ProjectilesImproved
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars",
                     HasBulletDrop = true,
-                    BulletDropMultiplyer = 0.3f,
+                    BulletDropGravityScaler = 0.3f,
                     Penetration = new Penetration() { VelocityDecreasePerHp = 0 },
                     //Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
                 }
@@ -43,7 +43,7 @@ namespace ProjectilesImproved
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars",
                     HasBulletDrop = true,
-                    BulletDropMultiplyer = 2f,
+                    BulletDropGravityScaler = 2f,
                     Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 1f },
                 }
             },

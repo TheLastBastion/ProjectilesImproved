@@ -303,7 +303,7 @@ namespace ProjectilesImproved.Weapons
                         break;
                     }
 
-                    positionMatrix.Translation += positionMatrix.Forward * (timeTillNextShot * 0.03);
+                    //positionMatrix.Translation += positionMatrix.Forward * (timeTillNextShot * 0.03);
                 }
 
                 var forceVector = -positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.BackkickForce;

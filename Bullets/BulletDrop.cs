@@ -10,7 +10,7 @@ namespace ProjectilesImproved.Bullets
         {
             ExternalForceData forceData = WorldPlanets.GetExternalForces(PositionMatrix.Translation);
 
-            Velocity = Velocity + (forceData.Gravity * Effects.BulletDropMultiplyer);
+            Velocity = Velocity + (forceData.Gravity * Effects.BulletDropGravityScaler);
             PositionMatrix.Forward = Vector3D.Normalize(Velocity - InitialGridVelocity);
 
             PositionMatrix.Translation += VelocityPerTick;
