@@ -1,4 +1,5 @@
 ﻿using ProjectilesImproved.Bullets;
+using System.Collections.Generic;
 using VRage.Game.ModAPI;
 
 namespace ProjectilesImproved.Effects
@@ -10,6 +11,6 @@ namespace ProjectilesImproved.Effects
         /// </summary>
         /// <param name="hit">The raycast information</param>
         /// <param name="bullet">The bullet that did the hitting</param>
-        void Execute(IHitInfo hit, BulletBase bullet);
+        void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet);
     }
 }

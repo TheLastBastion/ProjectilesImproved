@@ -195,6 +195,19 @@ namespace ProjectilesImproved
             return theta * 180 / Math.PI;
         }
 
+        public static float GetScalerInverse(float mult)
+        {
+            if (mult > 1)
+            {
+                mult = 1 / mult;
+            }
+            else
+            {
+                mult = 1 + (1 - mult);
+            }
+            return mult;
+        }
+
         public static Random Random = new Random();
     }
 }

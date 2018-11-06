@@ -1,6 +1,8 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
+using Sandbox.Definitions;
 using Sandbox.ModAPI;
+using System.Collections.Generic;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -10,7 +12,7 @@ using VRageMath;
 namespace ProjectilesImproved.Effects
 {
     [ProtoContract]
-    public class AmmoOnHit : IEffect
+    public class AmmoEffect
     {
         public static long hits = 0;
         public static long misses = 0;
@@ -25,22 +27,31 @@ namespace ProjectilesImproved.Effects
         public float BulletDropMultiplyer { get; set; }
 
         [ProtoMember(4)]
-        public Ricochet Ricochet { get; set; }
+        public bool IgnoreDamageReduction { get; set; }
+
+        [ProtoMember(4)]
+        public Penetration Penetration { get; set; }
 
         [ProtoMember(5)]
+        public Ricochet Ricochet { get; set; }
+
+        [ProtoMember(6)]
         public Explosive Explosive { get; set; }
 
 
-        public void Execute(IHitInfo hit, BulletBase bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
         {
-
-            if (Ricochet != null)
+            if (Penetration != null)
             {
-                Ricochet.Execute(hit, bullet);
+                Penetration.Execute(hit, hitlist, bullet);
+            }
+            else if (Ricochet != null)
+            {
+                Ricochet.Execute(hit, null, bullet);
             }
             else if (Explosive != null)
             {
-                Explosive.Execute(hit, bullet);
+                Explosive.Execute(hit, null, bullet);
             }
             else
             {
@@ -64,7 +75,16 @@ namespace ProjectilesImproved.Effects
                     if (hitPos.HasValue)
                     {
                         IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
-                        block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                        if (IgnoreDamageReduction)
+                        {
+                            float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
+
+                            block.DoDamage(bullet.ProjectileMassDamage*mult, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                        }
+                        else
+                        {
+                            block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                        }
 
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 

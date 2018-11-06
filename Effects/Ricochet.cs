@@ -2,6 +2,7 @@
 using ProtoBuf;
 using Sandbox.ModAPI;
 using System;
+using System.Collections.Generic;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -27,7 +28,7 @@ namespace ProjectilesImproved.Effects
         [ProtoMember(4)]
         public float RicochetChance { get; set; }
 
-        public void Execute(IHitInfo hit, BulletBase bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
         {
             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
             if (hit.HitEntity is IMyCubeGrid)

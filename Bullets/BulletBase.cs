@@ -76,7 +76,7 @@ namespace ProjectilesImproved.Bullets
         public Vector3 ProjectileTrailColor = Vector3.Zero;
 
         [ProtoMember(18)]
-        public AmmoOnHit Effects { get; set; }
+        public AmmoEffect Effects { get; set; }
 
         public bool IsInitialized = false;
 
@@ -130,35 +130,6 @@ namespace ProjectilesImproved.Bullets
 
             if (ProjectileTrailColor == Vector3.Zero)
                 ProjectileTrailColor = Ammo.ProjectileTrailColor;
-
-
-            //if (Effects == null)
-            //{
-            //    Effects = new EffectBase();
-            //    if (Settings.AmmoEffectLookup.ContainsKey(Ammo.Id.SubtypeId))
-            //    {
-            //        EffectBase b = Settings.AmmoEffectLookup[Ammo.Id.SubtypeId];
-
-            //        if (b.Explosive != null)
-            //        {
-            //            Effects.Explosive = new Explosive()
-            //            {
-            //                Radius = b.Explosive.Radius,
-            //                Angle = b.Explosive.Angle,
-            //                Resolution = b.Explosive.Resolution,
-            //                Offset = b.Explosive.Offset,
-            //                AffectVoxels = b.Explosive.AffectVoxels
-            //            };
-            //        }
-
-            //        if (b.Ricochet != null)
-            //        {
-            //            Effects.Ricochet = new Ricochet();
-            //        }
-            //    }
-            //}
-
-            //VelocityPerTickLength = (float)VelocityPerTick.Length();
 
             IsInitialized = true;
         }
@@ -246,7 +217,7 @@ namespace ProjectilesImproved.Bullets
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
                 if (framesToWait < 1)
                 {
-                    Effects.Execute(hit, this);
+                    Effects.Execute(hit, hitlist, this);
                 }
                 else
                 {
