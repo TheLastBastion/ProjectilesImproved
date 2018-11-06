@@ -23,9 +23,13 @@ namespace ProjectilesImproved.Effects
                 hit = hitlist[i];
 
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)bullet.CollisionCheckFrames);
-                if (framesToWait < 1)
+                if (framesToWait > 1)                
                 {
-
+                    bullet.CollisionCheckCounter = bullet.CollisionCheckWaitFrames() - framesToWait;
+                    bullet.DoShortRaycast = true;
+                }
+                else
+                {
                     if (hit.HitEntity is IMyDestroyableObject)
                     {
                         IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;

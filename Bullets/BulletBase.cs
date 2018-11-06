@@ -96,8 +96,8 @@ namespace ProjectilesImproved.Bullets
         public float LastPositionFraction = 0;
 
         public int CollisionCheckFrames { get; private set; } = -1;
-        private int CollisionCheckCounter = 0;
-        private bool DoShortRaycast = false;
+        public int CollisionCheckCounter = 0;
+        public bool DoShortRaycast = false;
         //private float VelocityPerTickLength = 0;
 
         /// <summary>
