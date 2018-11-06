@@ -35,28 +35,57 @@ namespace ProjectilesImproved
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
+                    UseOverKillSpread = false,
+                    IgnoreDamageReduction = true,
                     Penetration = new Penetration() { VelocityDecreasePerHp = 0 },
-                    //Explosive = new Explosive() { Radius = 5, Resolution = 0.5f, Angle = 180, Offset = 0, AffectVoxels = true },
+                }
+            },
+            {
+                "MyObjectBuilder_AmmoDefinition/OKI122mmAmmoPars", new AmmoEffect()
+                {
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI122mmAmmoPars",
+                    HasBulletDrop = true,
+                    BulletDropGravityScaler = 0.3f,
+                    UseOverKillSpread = false,
+                    Explosive = new Explosive() { Offset = 1f, Angle = 20,  Radius = 7f, Resolution = 1.2f }
+                }
+            },
+            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new AmmoEffect()
+                {
+                    HasBulletDrop = true,
+                    BulletDropGravityScaler = 0.3f,
+                    UseOverKillSpread = true,
+                    OverKillSpreadScaler = 1,
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars",
                 }
             },
             { "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars", new AmmoEffect()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars",
                     HasBulletDrop = true,
-                    BulletDropGravityScaler = 2f,
-                    Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 1f },
-                }
-            },
-            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new AmmoEffect()
-                {
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars",
+                    BulletDropGravityScaler = 0.3f,
+                    Ricochet = new Ricochet { DeflectionAngle = 20, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 }
             },
             {
                "MyObjectBuilder_AmmoDefinition/LargeCaliber", new AmmoEffect()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/LargeCaliber",
-                    Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
+                    HasBulletDrop = true,
+                    BulletDropGravityScaler = 0.3f,
+                    UseOverKillSpread = true,
+                    OverKillSpreadScaler = 1,
+                    Ricochet = new Ricochet { DeflectionAngle = 45, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.35f },
+                }
+            },
+            {
+               "MyObjectBuilder_AmmoDefinition/SmallCaliber", new AmmoEffect()
+                {
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/SmallCaliber",
+                    HasBulletDrop = true,
+                    BulletDropGravityScaler = 0.3f,
+                    UseOverKillSpread = false,
+                    Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.25f },
                 }
             }
         };

@@ -26,7 +26,7 @@ namespace ProjectilesImproved.Effects
             if (info.Type == MyDamageType.Bullet || Settings.AmmoEffectLookup.ContainsKey(id))
             {
                 AmmoEffect ammo = Settings.AmmoEffectLookup[id];
-                if (ammo.UseShrapnel)
+                if (ammo.UseOverKillSpread)
                 {
                     IMySlimBlock slim = target as IMySlimBlock;
                     if (slim.Integrity >= info.Amount) return;
@@ -52,7 +52,7 @@ namespace ProjectilesImproved.Effects
                 int count = data.Neighbours.Count;
                 foreach (IMySlimBlock neighbour in data.Neighbours)
                 {
-                    float damage = ((data.OverKill / (float)count) * data.Ammo.ShrapnelDecayScaler);
+                    float damage = ((data.OverKill / (float)count) * data.Ammo.OverKillSpreadScaler);
                     neighbour.DoDamage(damage, MyDamageType.Bullet, true);
                 }
             }

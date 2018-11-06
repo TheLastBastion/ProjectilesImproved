@@ -26,10 +26,10 @@ namespace ProjectilesImproved.Effects
         public float BulletDropGravityScaler { get; set; }
 
         [ProtoMember(4)]
-        public bool UseShrapnel { get; set; }
+        public bool UseOverKillSpread { get; set; }
 
         [ProtoMember(5)]
-        public float ShrapnelDecayScaler { get; set; }
+        public float OverKillSpreadScaler { get; set; }
 
         [ProtoMember(6)]
         public bool IgnoreDamageReduction { get; set; }
