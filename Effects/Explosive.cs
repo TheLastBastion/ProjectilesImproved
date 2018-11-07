@@ -234,12 +234,12 @@ namespace ProjectilesImproved.Effects
         {
             foreach (EntityDesc entity in orderedEntities)
             {
-
                 if (entity.Object.Integrity < 0)
                 {
                     continue;
                 }
 
+                entity.AccumulatedDamage = 0;
                 foreach (RayE ray in entity.Rays)
                 {
                     entity.AccumulatedDamage += ray.Damage;
