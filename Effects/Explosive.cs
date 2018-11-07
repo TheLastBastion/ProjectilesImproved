@@ -4,7 +4,6 @@ using Sandbox.Game;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
@@ -59,74 +58,82 @@ namespace ProjectilesImproved.Effects
 
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
         {
-            //watch.Start("Explode");
-            bullet.HasExpired = true;
-
-            radiusSquared = Radius * Radius;
-            epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
-            transformationMatrix = new MatrixD(bullet.PositionMatrix);
-            transformationMatrix.Translation = epicenter;
-
-            //watch.Start("Pull Rays");
-            ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.ToString(), transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
-            //watch.Stop("Pull Rays");
-
-            //watch.Start("Get World Entities");
-            List<IMyEntity> effectedEntities;
-            BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
-            effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-            //watch.Stop("Get World Entities");
-
-            //watch.Start("Ray Tracing");
-            foreach (IMyEntity ent in effectedEntities)
+            if (!MyAPIGateway.Utilities.IsDedicated)
             {
-                if (ent is IMyCubeGrid)
+                // add explosion here
+            }
+
+            if (MyAPIGateway.Session.IsServer)
+            {
+                //watch.Start("Explode");
+                bullet.HasExpired = true;
+
+                radiusSquared = Radius * Radius;
+                epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
+                transformationMatrix = new MatrixD(bullet.PositionMatrix);
+                transformationMatrix.Translation = epicenter;
+
+                //watch.Start("Pull Rays");
+                ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.ToString(), transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
+                //watch.Stop("Pull Rays");
+
+                //watch.Start("Get World Entities");
+                List<IMyEntity> effectedEntities;
+                BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
+                effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+                //watch.Stop("Get World Entities");
+
+                //watch.Start("Ray Tracing");
+                foreach (IMyEntity ent in effectedEntities)
                 {
-                    //watch.Start("Get Blocks");
-                    List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
-                    //watch.Stop("Get Blocks");
-
-                    foreach (IMySlimBlock slim in slims)
+                    if (ent is IMyCubeGrid)
                     {
-                        if (slim != null)
-                        {
-                            //watch.Start("Get Block Bounds");
-                            BoundingBoxD bounds;
-                            slim.GetWorldBoundingBox(out bounds);
-                            //watch.Stop("Get Block Bounds");
+                        //watch.Start("Get Blocks");
+                        List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
+                        //watch.Stop("Get Blocks");
 
-                            //watch.Start("Block Eat");
-                            BlockEater(slim, bounds);
-                            //watch.Stop("Block Eat");
+                        foreach (IMySlimBlock slim in slims)
+                        {
+                            if (slim != null)
+                            {
+                                //watch.Start("Get Block Bounds");
+                                BoundingBoxD bounds;
+                                slim.GetWorldBoundingBox(out bounds);
+                                //watch.Stop("Get Block Bounds");
+
+                                //watch.Start("Block Eat");
+                                BlockEater(slim, bounds);
+                                //watch.Stop("Block Eat");
+                            }
                         }
                     }
+                    else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
+                    {
+                        BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
+                    }
                 }
-                else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
-                {
-                    BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
-                }
+                //watch.Stop("Ray Tracing");
+
+                //watch.Start("Sort Hit Objects");
+                orderedEntities = entities.OrderBy(e => e.DistanceSquared);
+                //watch.Stop("Sort Hit Objects");
+
+                //watch.Start("Damage Time");
+                DamageBlocks(bullet.AmmoId.SubtypeId, bullet.BlockId);
+                //watch.Stop("Damage Time");
+                //watch.Stop("Explode");
+
+                //watch.Write("Explode");
+                //watch.Write("Pull Rays");
+                //watch.Write("Get World Entities");
+                //watch.Write("Ray Tracing");
+                //watch.Write("Get Blocks");
+                //watch.Write("Get Block Bounds");
+                //watch.Write("Block Eat");
+                //watch.Write("Sort Hit Objects");
+                //watch.Write("Damage Time");
+                //watch.ResetAll();
             }
-            //watch.Stop("Ray Tracing");
-
-            //watch.Start("Sort Hit Objects");
-            orderedEntities = entities.OrderBy(e => e.DistanceSquared);
-            //watch.Stop("Sort Hit Objects");
-
-            //watch.Start("Damage Time");
-            DamageBlocks(bullet.AmmoId.SubtypeId, bullet.BlockId);
-            //watch.Stop("Damage Time");
-            //watch.Stop("Explode");
-
-            //watch.Write("Explode");
-            //watch.Write("Pull Rays");
-            //watch.Write("Get World Entities");
-            //watch.Write("Ray Tracing");
-            //watch.Write("Get Blocks");
-            //watch.Write("Get Block Bounds");
-            //watch.Write("Block Eat");
-            //watch.Write("Sort Hit Objects");
-            //watch.Write("Damage Time");
-            //watch.ResetAll();
         }
 
         private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
@@ -262,7 +269,14 @@ namespace ProjectilesImproved.Effects
                 //    MyLog.Default.Flush();
                 //}
 
-                entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
+                try
+                {
+                    entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
+                }
+                catch (Exception e)
+                {
+                    MyLog.Default.Info(e.ToString());
+                }
             }
         }
     }
