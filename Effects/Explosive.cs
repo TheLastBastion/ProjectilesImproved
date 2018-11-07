@@ -243,7 +243,6 @@ namespace ProjectilesImproved.Effects
                 foreach (RayE ray in entity.Rays)
                 {
                     entity.AccumulatedDamage += ray.Damage;
-                    MyLog.Default.Info($"{ray.Damage}");
                 }
 
                 float damageToBeDone;
@@ -261,18 +260,20 @@ namespace ProjectilesImproved.Effects
                 {
                     damageToBeDone = entity.Object.Integrity;
 
-                    float todoDamage = entity.AccumulatedDamage / entity.Rays.Count;
+                    float average = entity.AccumulatedDamage / entity.Rays.Count;
                     for (int i = 0; i < entity.Rays.Count; i++)
                     {
                         RayE ray = entity.Rays[i];
 
-                        if (ray.Damage > todoDamage)
+                        if (ray.Damage > average)
                         {
-                            ray.Damage -= todoDamage;
+                            ray.Damage -= average;
                         }
                         else
                         {
-                            todoDamage += (todoDamage - ray.Damage) / (entity.Rays.Count - (i + 1));
+
+                            average = average + ((average - ray.Damage) / (entity.Rays.Count - (i + 1)));
+                            ray.Damage = 0;
                         }
                     }
                 }
