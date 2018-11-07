@@ -1,10 +1,13 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
 using Sandbox.Game;
+using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using VRage.Game;
+using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.ModAPI;
@@ -54,13 +57,37 @@ namespace ProjectilesImproved.Effects
 
         private float radiusSquared;
 
+        MySoundPair sound = new MySoundPair("WepSmallMissileExpl", false);
+        MyEntity3DSoundEmitter myEntity3DSoundEmitter;
+
         //private Stopwatch watch = new Stopwatch();
 
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
         {
+            epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
+            bullet.HasExpired = true;
+
             if (!MyAPIGateway.Utilities.IsDedicated)
             {
+                myEntity3DSoundEmitter = new MyEntity3DSoundEmitter((MyEntity)hit.HitEntity, true, 1f);
+                myEntity3DSoundEmitter.SetPosition(epicenter);
+                myEntity3DSoundEmitter.PlaySound(sound, false, false, false, false, false, null);
+
                 // add explosion here
+                MatrixD world = MatrixD.CreateFromDir(bullet.PositionMatrix.Forward);
+                world.Translation = epicenter;
+
+                MyParticleEffect effect;
+                MyParticlesManager.TryCreateParticleEffect("Explosion_Missile", world, out effect);
+
+                //effect.Loop = false;
+                //effect.UserScale = 0.5f;
+                //effect.UserEmitterScale = 16f;
+                //effect.UserRadiusMultiplier = 0.1f;
+                //effect.UserBirthMultiplier = 20f;
+                //effect.DurationMin = 0.015f;
+                //effect.DurationMax = 0.025f;
+                //effect.SetRandomDuration();
             }
 
             if (MyAPIGateway.Session.IsServer)
@@ -69,10 +96,7 @@ namespace ProjectilesImproved.Effects
                 entities = new List<EntityDesc>();
 
                 //watch.Start("Explode");
-                bullet.HasExpired = true;
-
                 radiusSquared = Radius * Radius;
-                epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
 
                 if (Settings.DebugMode_ShowSphereOctants)
                 {
