@@ -15,7 +15,7 @@ namespace ProjectilesImproved
     {
         public const bool DebugMode = true;
         public const bool DebugMode_ShowBlockOctants = false;
-        public const bool DebugMode_ShowSphereOctants = true;
+        public const bool DebugMode_ShowSphereOctants = false;
         public const bool DebugMode_ShowBlockRayIntersects = false;
 
         public static readonly Color[] DebugOctantColors = new Color[] { Color.Green, Color.Blue, Color.Orange, Color.Black, Color.HotPink, Color.Red, Color.LightGreen, Color.White };
