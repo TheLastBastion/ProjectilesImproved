@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Bullets;
 using ProtoBuf;
+using Sandbox.Definitions;
 using Sandbox.Game;
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
@@ -81,7 +82,7 @@ namespace ProjectilesImproved.Effects
                 MyParticlesManager.TryCreateParticleEffect("Explosion_Missile", world, out effect);
 
                 //effect.Loop = false;
-                //effect.UserScale = 0.5f;
+                effect.UserScale = 0.5f;
                 //effect.UserEmitterScale = 16f;
                 //effect.UserRadiusMultiplier = 0.1f;
                 //effect.UserBirthMultiplier = 20f;
@@ -180,9 +181,9 @@ namespace ProjectilesImproved.Effects
             if (Min.X < grid.Min.X) Min.X = grid.Min.X;
             if (Min.Y < grid.Min.Y) Min.Y = grid.Min.Y;
             if (Min.Z < grid.Min.Z) Min.Z = grid.Min.Z;
-            if (Max.X > grid.Max.X) Max.X = grid.Max.X+1;
-            if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y+1;
-            if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z+1;
+            if (Max.X > grid.Max.X) Max.X = grid.Max.X + 1;
+            if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y + 1;
+            if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z + 1;
 
             List<IMySlimBlock> slims = new List<IMySlimBlock>();
 
@@ -265,14 +266,22 @@ namespace ProjectilesImproved.Effects
                     continue;
                 }
 
-                entity.AccumulatedDamage = 0;
+                float mult = 1;
+                float trueIntegrity;
+                if (entity.Object is IMySlimBlock)
+                {
+                    mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)((IMySlimBlock)entity.Object).BlockDefinition).GeneralDamageMultiplier);
+                }
+
+                trueIntegrity = entity.Object.Integrity * mult;
+
                 foreach (RayLookup ray in entity.Rays)
                 {
                     entity.AccumulatedDamage += ExplosionRays[ray.Octant][ray.Index].Damage;
                 }
 
                 float damageToBeDone;
-                if (entity.AccumulatedDamage < entity.Object.Integrity)
+                if (entity.AccumulatedDamage < trueIntegrity)
                 {
                     damageToBeDone = entity.AccumulatedDamage;
                     for (int i = 0; i < entity.Rays.Count; i++)
@@ -283,7 +292,7 @@ namespace ProjectilesImproved.Effects
                 }
                 else
                 {
-                    damageToBeDone = entity.Object.Integrity;
+                    damageToBeDone = trueIntegrity;
 
                     float average = entity.AccumulatedDamage / entity.Rays.Count;
                     for (int i = 0; i < entity.Rays.Count; i++)

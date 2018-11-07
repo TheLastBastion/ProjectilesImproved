@@ -13,7 +13,7 @@ namespace ProjectilesImproved
     [ProtoContract]
     public class Settings
     {
-        public const bool DebugMode = true;
+        public const bool DebugMode = false;
         public const bool DebugMode_ShowBlockOctants = false;
         public const bool DebugMode_ShowSphereOctants = false;
         public const bool DebugMode_ShowBlockRayIntersects = false;
