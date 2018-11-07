@@ -46,7 +46,7 @@ namespace ProjectilesImproved.Effects
         public bool AffectVoxels { get; set; }
 
         private RayE[][] ExplosionRays;
-        private List<EntityDesc> entities = new List<EntityDesc>();
+        private List<EntityDesc> entities;
         private IOrderedEnumerable<EntityDesc> orderedEntities;
 
         private Vector3D epicenter;
@@ -65,6 +65,9 @@ namespace ProjectilesImproved.Effects
 
             if (MyAPIGateway.Session.IsServer)
             {
+                ExplosionRays = null;
+                entities = new List<EntityDesc>();
+
                 //watch.Start("Explode");
                 bullet.HasExpired = true;
 
@@ -125,7 +128,6 @@ namespace ProjectilesImproved.Effects
                 //watch.Stop("Sort Hit Objects");
 
                 //watch.Start("Damage Time");
-                MyLog.Default.Info($"Epected: {bullet.ProjectileMassDamage / ExplosionRays.Count()}");
                 DamageBlocks(bullet.AmmoId.SubtypeId, bullet.BlockId);
                 //watch.Stop("Damage Time");
                 //watch.Stop("Explode");
@@ -249,7 +251,6 @@ namespace ProjectilesImproved.Effects
                 if (entity.AccumulatedDamage < entity.Object.Integrity)
                 {
                     damageToBeDone = entity.AccumulatedDamage;
-
                     for (int i = 0; i < entity.Rays.Count; i++)
                     {
                         RayE ray = entity.Rays[i];

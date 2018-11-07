@@ -97,7 +97,7 @@ namespace ProjectilesImproved.Effects
                 new List<RayE>()
             };
 
-            float RayDamage = damagePool / baseRays.Length;
+            float RayDamage = damagePool / baseRays.Length + 1;
 
             foreach (RayE baseRay in baseRays)
             {
@@ -143,6 +143,7 @@ namespace ProjectilesImproved.Effects
 
         public EntityDesc(IMyDestroyableObject obj, double dist)
         {
+            AccumulatedDamage = 0;
             DistanceSquared = dist;
             Object = obj;
         }
