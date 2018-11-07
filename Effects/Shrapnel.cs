@@ -23,7 +23,7 @@ namespace ProjectilesImproved.Effects
             if (!(target is IMySlimBlock)) return;
 
             string id = $"MyObjectBuilder_AmmoDefinition/{info.Type.String}";
-            if (info.Type == MyDamageType.Bullet || Settings.AmmoEffectLookup.ContainsKey(id))
+            if (info.Type == MyDamageType.Bullet && Settings.AmmoEffectLookup.ContainsKey(id))
             {
                 AmmoEffect ammo = Settings.AmmoEffectLookup[id];
                 if (ammo.UseOverKillSpread)
