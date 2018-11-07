@@ -203,7 +203,7 @@ namespace ProjectilesImproved.Effects
 
                     if (bounds.GaugeIntersects(ray))
                     {
-                        entity.Rays.Add(ExplosionRays[i][j]);
+                        entity.Rays.Add(new RayLookup(i, j));
                     }
                 }
             }
@@ -242,9 +242,9 @@ namespace ProjectilesImproved.Effects
                 }
 
                 entity.AccumulatedDamage = 0;
-                foreach (RayE ray in entity.Rays)
+                foreach (RayLookup ray in entity.Rays)
                 {
-                    entity.AccumulatedDamage += ray.Damage;
+                    entity.AccumulatedDamage += ExplosionRays[ray.Octant][ray.Index].Damage;
                 }
 
                 float damageToBeDone;
@@ -253,8 +253,8 @@ namespace ProjectilesImproved.Effects
                     damageToBeDone = entity.AccumulatedDamage;
                     for (int i = 0; i < entity.Rays.Count; i++)
                     {
-                        RayE ray = entity.Rays[i];
-                        ray.Damage = 0;
+                        RayLookup ray = entity.Rays[i];
+                        ExplosionRays[ray.Octant][ray.Index].Damage = 0;
                     }
                 }
                 else
@@ -264,7 +264,8 @@ namespace ProjectilesImproved.Effects
                     float average = entity.AccumulatedDamage / entity.Rays.Count;
                     for (int i = 0; i < entity.Rays.Count; i++)
                     {
-                        RayE ray = entity.Rays[i];
+                        RayLookup loc = entity.Rays[i];
+                        RayE ray = ExplosionRays[loc.Octant][loc.Index];
 
                         if (ray.Damage > average)
                         {

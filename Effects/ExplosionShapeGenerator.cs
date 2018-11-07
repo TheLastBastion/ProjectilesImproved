@@ -139,13 +139,25 @@ namespace ProjectilesImproved.Effects
         public float AccumulatedDamage;
         public double DistanceSquared;
         public IMyDestroyableObject Object;
-        public List<RayE> Rays = new List<RayE>();
+        public List<RayLookup> Rays = new List<RayLookup>();
 
         public EntityDesc(IMyDestroyableObject obj, double dist)
         {
             AccumulatedDamage = 0;
             DistanceSquared = dist;
             Object = obj;
+        }
+    }
+
+    public struct RayLookup
+    {
+        public int Octant;
+        public int Index;
+
+        public RayLookup(int o, int i)
+        {
+            Octant = o;
+            Index = i;
         }
     }
 
