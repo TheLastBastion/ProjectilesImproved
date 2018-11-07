@@ -125,6 +125,7 @@ namespace ProjectilesImproved.Effects
                 //watch.Stop("Sort Hit Objects");
 
                 //watch.Start("Damage Time");
+                MyLog.Default.Info($"Epected: {bullet.ProjectileMassDamage / ExplosionRays.Count()}");
                 DamageBlocks(bullet.AmmoId.SubtypeId, bullet.BlockId);
                 //watch.Stop("Damage Time");
                 //watch.Stop("Explode");
@@ -269,11 +270,11 @@ namespace ProjectilesImproved.Effects
                     }
                 }
 
-                //if (Settings.DebugMode)
-                //{
-                //    MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
-                //    MyLog.Default.Flush();
-                //}
+                if (Settings.DebugMode)
+                {
+                    MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
+                    MyLog.Default.Flush();
+                }
 
                 try
                 {
