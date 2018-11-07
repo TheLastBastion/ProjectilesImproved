@@ -41,9 +41,9 @@ namespace ProjectilesImproved
                 }
             },
             {
-                "MyObjectBuilder_AmmoDefinition/OKI122mmAmmoPars", new AmmoEffect()
+                "MyObjectBuilder_AmmoDefinition/OKI76mmAmmoPars", new AmmoEffect()
                 {
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI122mmAmmoPars",
+                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI76mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
                     UseOverKillSpread = false,

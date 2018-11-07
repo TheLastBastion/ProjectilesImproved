@@ -56,6 +56,11 @@ namespace ProjectilesImproved
             MyAPIGateway.Session.OnSessionReady += OnStartInit;
         }
 
+        protected override void UnloadData()
+        {
+            Network.Close();
+        }
+
         private void OnStartInit()
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
