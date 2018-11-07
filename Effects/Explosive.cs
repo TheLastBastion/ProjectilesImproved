@@ -70,6 +70,12 @@ namespace ProjectilesImproved.Effects
 
                 radiusSquared = Radius * Radius;
                 epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
+
+                if (Settings.DebugMode_ShowSphereOctants)
+                {
+                    MyVisualScriptLogicProvider.AddGPS("", "", epicenter, Color.Black);
+                }
+
                 transformationMatrix = new MatrixD(bullet.PositionMatrix);
                 transformationMatrix.Translation = epicenter;
 
