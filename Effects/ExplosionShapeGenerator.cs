@@ -103,7 +103,7 @@ namespace ProjectilesImproved.Effects
             {
                 RayE ray = new RayE
                 {
-                    Position =  Vector3D.Transform(baseRay.Position, transformMatrix),
+                    Position = Vector3D.Transform(baseRay.Position, transformMatrix),
                     Damage = RayDamage
                 };
                 ray.Direction = (ray.Position - transformMatrix.Translation) / Radius;

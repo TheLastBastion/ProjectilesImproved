@@ -243,6 +243,7 @@ namespace ProjectilesImproved.Effects
                 foreach (RayE ray in entity.Rays)
                 {
                     entity.AccumulatedDamage += ray.Damage;
+                    MyLog.Default.Info($"{ray.Damage}");
                 }
 
                 float damageToBeDone;
@@ -281,7 +282,6 @@ namespace ProjectilesImproved.Effects
                 if (Settings.DebugMode)
                 {
                     MyLog.Default.Info($"Block HP: {entity.Object.Integrity} Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
-                    MyLog.Default.Flush();
                 }
 
                 try
