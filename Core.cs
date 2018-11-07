@@ -24,6 +24,8 @@ namespace ProjectilesImproved
 
         private NetworkAPI Network => NetworkAPI.Instance;
 
+        private Settings DefaultSettings = null;
+
         public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
         {
             if (!NetworkAPI.IsInitialized)
@@ -35,11 +37,15 @@ namespace ProjectilesImproved
                     Network.RegisterNetworkCommand(null, ClientCallback_Update);
                     Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
                     Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
+                    Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
+                    Network.RegisterChatCommand("reset_default",  (args) => { Network.SendCommand("reset_default"); });
                 }
                 else
                 {
                     Network.RegisterNetworkCommand("update", ServerCallback_Update);
                     Network.RegisterNetworkCommand("load", ServerCallback_Load);
+                    Network.RegisterNetworkCommand("save", ServerCallback_Save);
+                    Network.RegisterNetworkCommand("reset_default", ServerCallback_Default);
 
                     if (Network.NetworkType != NetworkTypes.Dedicated)
                     {
@@ -48,10 +54,23 @@ namespace ProjectilesImproved
                             Settings.Load();
                             MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
                         });
+
+                        Network.RegisterChatCommand("reset_default", (args) =>
+                        {
+                            Settings.SetNewSettings(DefaultSettings);
+                            MyAPIGateway.Utilities.ShowMessage(ModName, "Reset default settings. This has not been saved yet.");
+                        });
+
+                        Network.RegisterChatCommand("save", (args) =>
+                        {
+                            Settings.Save();
+                            MyAPIGateway.Utilities.ShowMessage(ModName, "Settings saved");
+                        });
                     }
                 }
             }
 
+            DefaultSettings = Settings.GetCurrentSettings();
             Settings.Load();
             MyAPIGateway.Session.OnSessionReady += OnStartInit;
         }
@@ -147,6 +166,32 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 Settings.Load();
+                Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+            }
+            else
+            {
+                Network.SendCommand(null, "Load command requires Admin status.", steamId: steamId);
+            }
+        }
+
+        private void ServerCallback_Save(ulong steamId, string commandString, byte[] data)
+        {
+            if (IsAllowedSpecialOperations(steamId))
+            {
+                Settings.Save();
+                Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+            }
+            else
+            {
+                Network.SendCommand(null, "Load command requires Admin status.", steamId: steamId);
+            }
+        }
+
+        private void ServerCallback_Default(ulong steamId, string commandString, byte[] data)
+        {
+            if (IsAllowedSpecialOperations(steamId))
+            {
+                Settings.SetNewSettings(DefaultSettings);
                 Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
             }
             else
