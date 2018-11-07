@@ -270,9 +270,11 @@ namespace ProjectilesImproved.Effects
                     }
                 }
 
+                if (damageToBeDone == 0) continue;
+
                 if (Settings.DebugMode)
                 {
-                    MyLog.Default.Info($"Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
+                    MyLog.Default.Info($"Block HP: {entity.Object.Integrity} Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
                     MyLog.Default.Flush();
                 }
 
