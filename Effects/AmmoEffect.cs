@@ -119,7 +119,7 @@ namespace ProjectilesImproved.Effects
 
                 Ricochet = Ricochet.Clone(),
                 Penetration = Penetration.Clone(),
-                Explosive = Penetration.Clone()
+                Explosive = Explosive.Clone()
             };
         }
 

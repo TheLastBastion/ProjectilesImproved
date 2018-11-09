@@ -143,7 +143,7 @@ namespace ProjectilesImproved
                 bullet.PreUpdate();
 
                 if (bullet.DoCollisionCheck())
-                {
+                { 
                     bullet.PreCollitionDetection();
                     bullet.CollisionDetection();
                 }
