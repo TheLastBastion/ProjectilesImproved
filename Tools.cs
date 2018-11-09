@@ -168,13 +168,15 @@ namespace ProjectilesImproved
             return Analitics[name][Runs];
         }
 
-        public static void Write(this Stopwatch watch, string name)
+        public static string Write(this Stopwatch watch, string name)
         {
-            if (!Settings.DebugMode) return;
-            if (!Analitics.ContainsKey(name)) return;
+            //if (!Settings.DebugMode) return;
+            if (!Analitics.ContainsKey(name)) return "";
 
             long[] list = Analitics[name];
-            MyLog.Default.Info($"[{name}] Avg: {((((double)list[Time] / (double)list[Runs])/Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Total: {(((double)list[Time] / Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Runs: {list[Runs]}");
+            string value = $"[{name}] Avg: {((((double)list[Time] / (double)list[Runs]) / Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Total: {(((double)list[Time] / Stopwatch.Frequency) * 1000d).ToString("n4")}ms, Runs: {list[Runs]}";
+            MyLog.Default.Info(value);
+            return value;
         }
 
         public static double AngleBetween(Vector3D norm1, Vector3D norm2)

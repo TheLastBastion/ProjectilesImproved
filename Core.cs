@@ -7,6 +7,7 @@ using ModNetworkAPI;
 using ProjectilesImproved.Bullets;
 using ProjectilesImproved.Effects;
 using VRage.Game.ModAPI;
+using System.Diagnostics;
 
 namespace ProjectilesImproved
 {
@@ -25,6 +26,8 @@ namespace ProjectilesImproved
         private NetworkAPI Network => NetworkAPI.Instance;
 
         private Settings DefaultSettings = null;
+
+        Stopwatch timer = new Stopwatch();
 
         public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
         {
@@ -119,6 +122,8 @@ namespace ProjectilesImproved
             //long total = AmmoEffect.hits + AmmoEffect.misses;
             //MyAPIGateway.Utilities.ShowNotification($"Default Ammo Hit Success: {(((float)AmmoEffect.hits/(float)((total == 0) ? 1 : total))*100f).ToString("n0")}% Hit: {AmmoEffect.hits}, Missed: {AmmoEffect.misses}", 1);
 
+            timer.Start("GameLoop");
+
             for (int i = 0; i < ActiveProjectiles.Count; i++)
             {
                 BulletBase bullet = ActiveProjectiles[i];
@@ -146,6 +151,9 @@ namespace ProjectilesImproved
                 bullet.Draw();
                 bullet.Update();
             }
+
+            timer.Stop("GameLoop");
+            MyAPIGateway.Utilities.ShowNotification($"Loop Time: {timer.Write("GameLoop")}", 1);
         }
 
         private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)
