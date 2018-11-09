@@ -124,7 +124,8 @@ namespace ProjectilesImproved
 
             timer.Start("GameLoop");
 
-            MyAPIGateway.Parallel.For(0, ActiveProjectiles.Count, (i) =>
+
+            for (int i = 0; i < ActiveProjectiles.Count; i++)
             {
                 BulletBase bullet = ActiveProjectiles[i];
 
@@ -132,8 +133,20 @@ namespace ProjectilesImproved
                 {
                     ActiveProjectiles.RemoveAt(i);
                     i--;
-                    return;
+                    continue;
                 }
+            }
+
+            MyAPIGateway.Parallel.For(0, ActiveProjectiles.Count, (i) =>
+            {
+                BulletBase bullet = ActiveProjectiles[i];
+
+                //if (bullet.HasExpired)
+                //{
+                //    ActiveProjectiles.RemoveAt(i);
+                //    i--;
+                //    return;
+                //}
 
                 if (!bullet.IsInitialized)
                 {
