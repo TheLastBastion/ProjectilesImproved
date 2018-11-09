@@ -124,7 +124,7 @@ namespace ProjectilesImproved
 
         public static void Start(this Stopwatch watch, string name)
         {
-            if (!Settings.DebugMode) return;
+            //if (!Settings.DebugMode) return;
             if (!Analitics.ContainsKey(name))
             {
                 Analitics.Add(name, new long[3]);
@@ -139,7 +139,7 @@ namespace ProjectilesImproved
 
         public static void Stop(this Stopwatch watch, string name)
         {
-            if (!Settings.DebugMode) return;
+            //if (!Settings.DebugMode) return;
             if (!Analitics.ContainsKey(name)) return;
 
             long[] data = Analitics[name];
@@ -149,7 +149,7 @@ namespace ProjectilesImproved
 
         public static void ResetAll(this Stopwatch watch)
         {
-            if (!Settings.DebugMode) return;
+            //if (!Settings.DebugMode) return;
             watch.Reset();
             Analitics.Clear();
         }
