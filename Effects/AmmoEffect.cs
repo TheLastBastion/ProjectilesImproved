@@ -117,9 +117,9 @@ namespace ProjectilesImproved.Effects
                 UseOverKillSpread = UseOverKillSpread,
                 OverKillSpreadScaler = OverKillSpreadScaler,
 
-                Ricochet = Ricochet.Clone(),
-                Penetration = Penetration.Clone(),
-                Explosive = Explosive.Clone()
+                Ricochet = (Ricochet == null) ? null : Ricochet.Clone(),
+                Penetration = (Penetration == null) ? null : Penetration.Clone(),
+                Explosive = (Explosive == null) ? null : Explosive.Clone()
             };
         }
 
