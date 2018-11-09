@@ -118,13 +118,13 @@ namespace ProjectilesImproved
 
         public override void UpdateAfterSimulation()
         {
-            //MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
+            MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
             //long total = AmmoEffect.hits + AmmoEffect.misses;
             //MyAPIGateway.Utilities.ShowNotification($"Default Ammo Hit Success: {(((float)AmmoEffect.hits/(float)((total == 0) ? 1 : total))*100f).ToString("n0")}% Hit: {AmmoEffect.hits}, Missed: {AmmoEffect.misses}", 1);
 
             timer.Start("GameLoop");
 
-            for (int i = 0; i < ActiveProjectiles.Count; i++)
+            MyAPIGateway.Parallel.For(0, ActiveProjectiles.Count, (i) =>
             {
                 BulletBase bullet = ActiveProjectiles[i];
 
@@ -132,7 +132,7 @@ namespace ProjectilesImproved
                 {
                     ActiveProjectiles.RemoveAt(i);
                     i--;
-                    continue;
+                    return;
                 }
 
                 if (!bullet.IsInitialized)
@@ -143,14 +143,42 @@ namespace ProjectilesImproved
                 bullet.PreUpdate();
 
                 if (bullet.DoCollisionCheck())
-                { 
+                {
                     bullet.PreCollitionDetection();
                     bullet.CollisionDetection();
                 }
 
                 bullet.Draw();
                 bullet.Update();
-            }
+            }, 10);
+
+            //for (int i = 0; i < ActiveProjectiles.Count; i++)
+            //{
+            //    BulletBase bullet = ActiveProjectiles[i];
+
+            //    if (bullet.HasExpired)
+            //    {
+            //        ActiveProjectiles.RemoveAt(i);
+            //        i--;
+            //        continue;
+            //    }
+
+            //    if (!bullet.IsInitialized)
+            //    {
+            //        bullet.Init();
+            //    }
+
+            //    bullet.PreUpdate();
+
+            //    if (bullet.DoCollisionCheck())
+            //    { 
+            //        bullet.PreCollitionDetection();
+            //        bullet.CollisionDetection();
+            //    }
+
+            //    bullet.Draw();
+            //    bullet.Update();
+            //}
 
             timer.Stop("GameLoop");
             MyAPIGateway.Utilities.ShowNotification($"Loop Time: {timer.Write("GameLoop")}", 1);
