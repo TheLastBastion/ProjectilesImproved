@@ -15,7 +15,6 @@ namespace ProjectilesImproved.Effects
     [ProtoContract]
     public class Ricochet : IEffect
     {
-
         [ProtoMember(1)]
         public float DeflectionAngle { get; set; }
 
@@ -119,6 +118,17 @@ namespace ProjectilesImproved.Effects
 
                 bullet.HasExpired = true;
             }
+        }
+
+        public Ricochet Clone()
+        {
+            return new Ricochet
+            {
+                DeflectionAngle = DeflectionAngle,
+                MaxDamageTransfer = MaxDamageTransfer,
+                MaxVelocityTransfer = MaxVelocityTransfer,
+                RicochetChance = RicochetChance
+            };
         }
     }
 }

@@ -99,8 +99,11 @@ namespace ProjectilesImproved.Effects
 
             float RayDamage = damagePool / baseRays.Length + 1;
 
-            foreach (RayE baseRay in baseRays)
+            RayE baseRay;
+            for (int i = 0; i < baseRays.Length; i++)
             {
+                baseRay = baseRays[i];
+
                 RayE ray = new RayE
                 {
                     Position = Vector3D.Transform(baseRay.Position, transformMatrix),

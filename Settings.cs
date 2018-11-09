@@ -22,13 +22,23 @@ namespace ProjectilesImproved
 
         public const string Filename = "WeaponsOverhaul.cfg";
 
+        public static AmmoEffect GetAmmoEffect(string id)
+        {
+            if (AmmoEffectLookup.ContainsKey(id))
+            {
+                return AmmoEffectLookup[id].Clone();
+            }
+
+            return new AmmoEffect();
+        }
+
         [ProtoMember]
         public List<WeaponEffects> WeaponEffects { get; set; } = new List<WeaponEffects>();
 
         [ProtoMember]
         public List<AmmoEffect> AmmoEffects { get; set; } = new List<AmmoEffect>();
 
-        public static Dictionary<string, AmmoEffect> AmmoEffectLookup { get; private set; } = new Dictionary<string, AmmoEffect>
+        private static Dictionary<string, AmmoEffect> AmmoEffectLookup { get; set; } = new Dictionary<string, AmmoEffect>
         {
             { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new AmmoEffect()
                 {
@@ -90,7 +100,7 @@ namespace ProjectilesImproved
             }
         };
 
-        public static Dictionary<string, WeaponEffects> WeaponEffectLookup { get; private set; } = new Dictionary<string, WeaponEffects>
+        private static Dictionary<string, WeaponEffects> WeaponEffectLookup { get; set; } = new Dictionary<string, WeaponEffects>
         {
 
         };

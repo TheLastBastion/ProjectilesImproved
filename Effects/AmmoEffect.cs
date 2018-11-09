@@ -84,7 +84,7 @@ namespace ProjectilesImproved.Effects
                         {
                             float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                            block.DoDamage(bullet.ProjectileMassDamage*mult, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                            block.DoDamage(bullet.ProjectileMassDamage * mult, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
                         }
                         else
                         {
@@ -105,5 +105,23 @@ namespace ProjectilesImproved.Effects
                 bullet.HasExpired = true;
             }
         }
+
+        public AmmoEffect Clone()
+        {
+            return new AmmoEffect
+            {
+                AmmoId = AmmoId,
+                HasBulletDrop = HasBulletDrop,
+                BulletDropGravityScaler = BulletDropGravityScaler,
+                IgnoreDamageReduction = IgnoreDamageReduction,
+                UseOverKillSpread = UseOverKillSpread,
+                OverKillSpreadScaler = OverKillSpreadScaler,
+
+                Ricochet = Ricochet.Clone(),
+                Penetration = Penetration.Clone(),
+                Explosive = Penetration.Clone()
+            };
+        }
+
     }
 }

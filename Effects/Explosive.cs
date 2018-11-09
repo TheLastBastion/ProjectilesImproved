@@ -58,8 +58,8 @@ namespace ProjectilesImproved.Effects
 
         private float radiusSquared;
 
-        MySoundPair sound = new MySoundPair("WepSmallMissileExpl", false);
-        MyEntity3DSoundEmitter myEntity3DSoundEmitter;
+        private MySoundPair sound = new MySoundPair("WepSmallMissileExpl", false);
+        private MyEntity3DSoundEmitter myEntity3DSoundEmitter;
 
         //private Stopwatch watch = new Stopwatch();
 
@@ -329,6 +329,18 @@ namespace ProjectilesImproved.Effects
                     MyLog.Default.Info(e.ToString());
                 }
             }
+        }
+
+        public Explosive Clone()
+        {
+            return new Explosive
+            {
+                Angle = Angle,
+                AffectVoxels = AffectVoxels,
+                Offset = Offset,
+                Radius = Radius,
+                Resolution = Resolution
+            };
         }
     }
 }

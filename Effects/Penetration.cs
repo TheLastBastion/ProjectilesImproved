@@ -95,5 +95,13 @@ namespace ProjectilesImproved.Effects
                 }
             }
         }
+
+        public Penetration Clone()
+        {
+            return new Penetration
+            {
+                VelocityDecreasePerHp = VelocityDecreasePerHp
+            };
+        }
     }
 }
