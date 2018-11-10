@@ -37,48 +37,79 @@ namespace ProjectilesImproved.Effects
         /// <param name="radius">Explosion Size</param>
         /// <param name="resolution">0.25 to less than 10</param>
         /// <param name="maxAngle">0 to 180</param>
-        private void Generate(string id, float radius, float resolution, float maxAngle)
+        //private void Generate(string id, float radius, float resolution, float maxAngle)
+        //{
+        //    if (resolution < 0.25f)
+        //    {
+        //        resolution = 0.25f; // this will only need to change if a micro grid size is made
+        //    }
+
+        //    List<RayE> rays = new List<RayE>();
+        //    double x = 0;
+        //    double y = 0;
+        //    double z = 0;
+        //    double calcRange = 0;
+        //    float radiusSquared = radius * radius;
+
+        //    double step = resolution / radius;
+        //    int steps = (int)Math.Ceiling(maxAngle * 2 * Math.PI / 360 / step);
+
+        //    for (int h = 0; h < steps; h++)
+        //    {
+        //        z = (1 - Math.Cos(h * step)) * radius;
+        //        calcRange = Math.Sin(h * step) * radius;
+        //        float step2 = (float)(resolution / calcRange);
+        //        int steps2 = (int)Math.Ceiling(2 * Math.PI / step2);
+
+        //        for (int i = 0; i < steps2; i++)
+        //        {
+        //            x = Math.Sin(i * step2) * calcRange;
+        //            y = Math.Cos(i * step2) * calcRange;
+
+        //            Vector3D position = new Vector3D(x, y, z-radius);
+        //            Vector3D direction = Vector3D.Normalize(position);
+        //            rays.Add(new RayE(position, direction));
+        //        }
+        //    }
+
+        //    if (!ShapeLookup.ContainsKey(id))
+        //    {
+        //        ShapeLookup.Add(id, rays.ToArray());
+        //    }
+        //    else
+        //    {
+        //        ShapeLookup[id] = rays.ToArray();
+        //    }
+        //}
+
+        public void Generate(string id, float radius, float resolution, float maxAngle)
         {
-            if (resolution < 0.25f)
+            double x;
+            double y;
+            double z;
+            double sqrtFive = Math.Sqrt(5);
+            int raycount = (int)((4 * Math.PI * radius * radius) / (resolution * resolution));
+            RayE[] rays = new RayE[raycount];
+
+            for (int i = 0; i < raycount; i++)
             {
-                resolution = 0.25f; // this will only need to change if a micro grid size is made
-            }
+                double t = -1d + ((2d * i) / raycount);
 
-            List<RayE> rays = new List<RayE>();
-            double x = 0;
-            double y = 0;
-            double z = 0;
-            double calcRange = 0;
-            float radiusSquared = radius * radius;
+                x = Math.Cos(Math.Asin(t)) * Math.Cos(((sqrtFive + 1d) / 2d - 1d) * Math.PI * i);
+                y = Math.Cos(Math.Asin(t)) * Math.Sin(((sqrtFive + 1d) / 2d - 1d) * Math.PI * i);
+                z = t;
+                Vector3D vector = new Vector3D(x, y, z);
+                rays[i] = new RayE(vector*radius, vector);
 
-            double step = resolution / radius;
-            int steps = (int)Math.Ceiling(maxAngle * 2 * Math.PI / 360 / step);
-
-            for (int h = 0; h < steps; h++)
-            {
-                z = (1 - Math.Cos(h * step)) * radius;
-                calcRange = Math.Sin(h * step) * radius;
-                float step2 = (float)(resolution / calcRange);
-                int steps2 = (int)Math.Ceiling(2 * Math.PI / step2);
-
-                for (int i = 0; i < steps2; i++)
-                {
-                    x = Math.Sin(i * step2) * calcRange;
-                    y = Math.Cos(i * step2) * calcRange;
-
-                    Vector3D position = new Vector3D(x, y, z-radius);
-                    Vector3D direction = Vector3D.Normalize(position);
-                    rays.Add(new RayE(position, direction));
-                }
             }
 
             if (!ShapeLookup.ContainsKey(id))
             {
-                ShapeLookup.Add(id, rays.ToArray());
+                ShapeLookup.Add(id, rays);
             }
             else
             {
-                ShapeLookup[id] = rays.ToArray();
+                ShapeLookup[id] = rays;
             }
         }
 
@@ -117,11 +148,12 @@ namespace ProjectilesImproved.Effects
                 {
                     MyVisualScriptLogicProvider.AddGPS("", "", ray.Position, Settings.DebugOctantColors[octant]);
                     //MyVisualScriptLogicProvider.AddGPS("", "", ray.Position + (ray.Direction * 0.25f), Settings.DebugOctantColors[octant]);
-                } 
+                }
             }
 
             return new RayE[8][]
             {
+                //(rays[1].Count == 0) ? null :
                 rays[0].ToArray(),
                 rays[1].ToArray(),
                 rays[2].ToArray(),

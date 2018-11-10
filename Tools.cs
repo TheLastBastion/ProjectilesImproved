@@ -23,6 +23,16 @@ namespace ProjectilesImproved
             return ((dir.X > 0) ? 0 : 4) + ((dir.Y > 0) ? 0 : 2) + ((dir.Z > 0) ? 0 : 1);
         }
 
+        /// <summary>
+        /// Gets the octant this vector occupies 
+        /// </summary>
+        /// <param name="dir">localized vector</param>
+        /// <returns>a linear representation of its octant</returns>
+        public static int GetOctant(this Vector3I dir)
+        {
+            return ((dir.X > 0) ? 0 : 4) + ((dir.Y > 0) ? 0 : 2) + ((dir.Z > 0) ? 0 : 1);
+        }
+
         public static bool[] GetOctants(this BoundingBoxD box, Vector3D epicenter)
         {
             return GetOctants(box.Min - epicenter, box.Max - epicenter);
