@@ -13,9 +13,6 @@ namespace ProjectilesImproved.Effects
     [ProtoContract]
     public class AmmoEffect
     {
-        public static long hits = 0;
-        public static long misses = 0;
-
         [ProtoMember(1)]
         public string AmmoId { get; set; }
 
@@ -94,11 +91,6 @@ namespace ProjectilesImproved.Effects
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
                         bullet.LastPositionFraction = hit.Fraction;
-                        hits++;
-                    }
-                    else
-                    {
-                        misses++;
                     }
                 }
 
@@ -122,6 +114,5 @@ namespace ProjectilesImproved.Effects
                 Explosive = (Explosive == null) ? null : Explosive.Clone()
             };
         }
-
     }
 }

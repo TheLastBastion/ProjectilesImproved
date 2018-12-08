@@ -7,7 +7,6 @@ using ModNetworkAPI;
 using ProjectilesImproved.Bullets;
 using ProjectilesImproved.Effects;
 using VRage.Game.ModAPI;
-using System.Diagnostics;
 
 namespace ProjectilesImproved
 {
@@ -27,8 +26,6 @@ namespace ProjectilesImproved
 
         private Settings DefaultSettings = null;
 
-        //Stopwatch timer = new Stopwatch();
-
         public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
         {
             if (!NetworkAPI.IsInitialized)
@@ -41,7 +38,7 @@ namespace ProjectilesImproved
                     Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
                     Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
                     Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
-                    Network.RegisterChatCommand("reset_default",  (args) => { Network.SendCommand("reset_default"); });
+                    Network.RegisterChatCommand("reset_default", (args) => { Network.SendCommand("reset_default"); });
                 }
                 else
                 {
@@ -52,7 +49,7 @@ namespace ProjectilesImproved
 
                     if (Network.NetworkType != NetworkTypes.Dedicated)
                     {
-                        Network.RegisterChatCommand("load", (args) => 
+                        Network.RegisterChatCommand("load", (args) =>
                         {
                             Settings.Load();
                             MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
@@ -109,7 +106,7 @@ namespace ProjectilesImproved
                 {
                     Network.SendCommand("update");
                     SentInitialRequest = true;
-                    
+
                 }
 
                 waitInterval++;
@@ -118,42 +115,38 @@ namespace ProjectilesImproved
 
         public override void UpdateAfterSimulation()
         {
-            //MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
-            //long total = AmmoEffect.hits + AmmoEffect.misses;
-            //MyAPIGateway.Utilities.ShowNotification($"Default Ammo Hit Success: {(((float)AmmoEffect.hits/(float)((total == 0) ? 1 : total))*100f).ToString("n0")}% Hit: {AmmoEffect.hits}, Missed: {AmmoEffect.misses}", 1);
-
-            //timer.Start("GameLoop");
-
             for (int i = 0; i < ActiveProjectiles.Count; i++)
             {
-                BulletBase bullet = ActiveProjectiles[i];
-
-                if (bullet.HasExpired)
+                if (ActiveProjectiles[i].HasExpired)
                 {
                     ActiveProjectiles.RemoveAt(i);
                     i--;
                     continue;
                 }
-
-                if (!bullet.IsInitialized)
-                {
-                    bullet.Init();
-                }
-
-                bullet.PreUpdate();
-
-                if (bullet.DoCollisionCheck())
-                { 
-                    bullet.PreCollitionDetection();
-                    bullet.CollisionDetection();
-                }
-
-                bullet.Draw();
-                bullet.Update();
             }
 
-            //timer.Stop("GameLoop");
-            //MyAPIGateway.Utilities.ShowNotification($"Loop Time: {timer.Write("GameLoop")}", 1);
+            MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
+
+            MyAPIGateway.Parallel.For(0, ActiveProjectiles.Count, (i) =>
+            {
+                    BulletBase bullet = ActiveProjectiles[i];
+
+                    if (!bullet.IsInitialized)
+                    {
+                        bullet.Init();
+                    }
+
+                    bullet.PreUpdate();
+
+                    if (bullet.DoCollisionCheck())
+                    {
+                        bullet.PreCollitionDetection();
+                        bullet.CollisionDetection();
+                    }
+
+                    bullet.Draw();
+                    bullet.Update();
+            }, 50);
         }
 
         private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)

@@ -49,6 +49,7 @@ namespace ProjectilesImproved.Weapons
         private double timeTillNextShot = 1d;
         private int currentShotInBurst = 0;
         private float cooldownTime = 0;
+        private int FirstTimeCooldown = 0;
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
@@ -56,6 +57,7 @@ namespace ProjectilesImproved.Weapons
             cube = Entity as IMyCubeBlock;
             gun = Entity as IMyGunObject<MyGunBase>;
             IsFixedGun = Entity is IMySmallGatlingGun;
+            FirstTimeCooldown = 10;
 
             soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
 
@@ -203,28 +205,40 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
+            bool shouldReturn = false;
+
             if (timeTillNextShot < 1)
             {
                 timeTillNextShot += weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire * FireRateMultiplayer;
             }
 
-            if (!cube.IsFunctional)
+            if (FirstTimeCooldown > 0)
             {
-                terminalShooting = false;
-                return;
+                FirstTimeCooldown--;
+                shouldReturn = true;
             }
 
             if (cooldownTime > 0)
             {
                 cooldownTime -= MillisecondPerFrame;
-                return;
+                shouldReturn = true;
             }
 
-            if (!IsShooting || cube?.CubeGrid?.Physics == null) return;
+            if (!cube.IsFunctional)
+            {
+                terminalShooting = false;
+                shouldReturn = true;
+            }
 
-            if (gun.IsShooting) terminalShooting = false;
+            if (gun.IsShooting)
+            {
+                terminalShooting = false;
+            }
 
-            if (!gun.GunBase.HasEnoughAmmunition())
+            if (!IsShooting ||
+                cube?.CubeGrid?.Physics == null ||
+                !gun.GunBase.HasEnoughAmmunition() ||
+                shouldReturn)
             {
                 return;
             }
