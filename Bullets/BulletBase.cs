@@ -161,9 +161,12 @@ namespace ProjectilesImproved.Bullets
         {
             if (MyAPIGateway.Utilities.IsDedicated) return;
 
-            float scaleFactor = MyParticlesManager.Paused ? 1f : MyUtils.GetRandomFloat(1f, 2f);
-            float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (ProjectileTrailScale + 0.5f);
-            thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
+            float scaleFactor = ProjectileTrailScale;
+            float thickness = MyUtils.GetRandomFloat(0.2f, 0.3f) * ProjectileTrailScale;
+
+            //float scaleFactor = MyParticlesManager.Paused ? 1f : MyUtils.GetRandomFloat(1f, 2f);
+            //float thickness = (MyParticlesManager.Paused ? 0.2f : MyUtils.GetRandomFloat(0.2f, 0.3f)) * (ProjectileTrailScale + 0.5f);
+            //thickness *= MathHelper.Lerp(0.2f, 0.8f, 1f);
 
             MyTransparentGeometry.AddLineBillboard(
                 BulletMaterial,

@@ -115,6 +115,8 @@ namespace ProjectilesImproved
 
         public override void UpdateAfterSimulation()
         {
+            MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
+
             for (int i = 0; i < ActiveProjectiles.Count; i++)
             {
                 if (ActiveProjectiles[i].HasExpired)
@@ -123,30 +125,56 @@ namespace ProjectilesImproved
                     i--;
                     continue;
                 }
+
+                BulletBase bullet = ActiveProjectiles[i];
+
+                if (!bullet.IsInitialized)
+                {
+                    bullet.Init();
+                }
+
+                bullet.PreUpdate();
+
+                if (bullet.DoCollisionCheck())
+                {
+                    bullet.PreCollitionDetection();
+                    bullet.CollisionDetection();
+                }
+
+                bullet.Draw();
+                bullet.Update();
             }
 
-            MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
+            //for (int i = 0; i < ActiveProjectiles.Count; i++)
+            //{
+            //    if (ActiveProjectiles[i].HasExpired)
+            //    {
+            //        ActiveProjectiles.RemoveAt(i);
+            //        i--;
+            //        continue;
+            //    }
+            //}
 
-            MyAPIGateway.Parallel.For(0, ActiveProjectiles.Count, (i) =>
-            {
-                    BulletBase bullet = ActiveProjectiles[i];
+            //MyAPIGateway.Parallel.For(0, ActiveProjectiles.Count, (i) =>
+            //{
+            //        BulletBase bullet = ActiveProjectiles[i];
 
-                    if (!bullet.IsInitialized)
-                    {
-                        bullet.Init();
-                    }
+            //        if (!bullet.IsInitialized)
+            //        {
+            //            bullet.Init();
+            //        }
 
-                    bullet.PreUpdate();
+            //        bullet.PreUpdate();
 
-                    if (bullet.DoCollisionCheck())
-                    {
-                        bullet.PreCollitionDetection();
-                        bullet.CollisionDetection();
-                    }
+            //        if (bullet.DoCollisionCheck())
+            //        {
+            //            bullet.PreCollitionDetection();
+            //            bullet.CollisionDetection();
+            //        }
 
-                    bullet.Draw();
-                    bullet.Update();
-            }, 50);
+            //        bullet.Draw();
+            //        bullet.Update();
+            //}, 50);
         }
 
         private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)
