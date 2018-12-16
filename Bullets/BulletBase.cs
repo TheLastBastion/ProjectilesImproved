@@ -135,7 +135,14 @@ namespace ProjectilesImproved.Bullets
             }
 
             if (ProjectileTrailColor == Vector3.Zero)
+            {
                 ProjectileTrailColor = Ammo.ProjectileTrailColor;
+            }
+
+            if (ProjectileTrailScale == -1)
+            {
+                ProjectileTrailScale = Ammo.ProjectileTrailScale;
+            }
 
             IsInitialized = true;
         }
