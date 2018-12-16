@@ -175,10 +175,10 @@ namespace ProjectilesImproved.Bullets
             if (MyAPIGateway.Utilities.IsDedicated) return;
 
 
-            float scaleFactor = ProjectileTrailScale + 1;
-            scaleFactor =  scaleFactor * scaleFactor;
-            float thickness = scaleFactor * 0.03f;
-            float length = 10f * scaleFactor;
+            float scaleFactor = ProjectileTrailScale;
+            //scaleFactor =  scaleFactor * scaleFactor;
+            float thickness = scaleFactor * 0.2f;
+            float length = 20f * scaleFactor;
 
             MyAPIGateway.Utilities.ShowNotification($"Scale: {ProjectileTrailScale}   Length: {length}   Thickness: {thickness}", 1);
 
