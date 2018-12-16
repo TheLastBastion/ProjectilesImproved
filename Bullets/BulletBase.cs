@@ -169,7 +169,7 @@ namespace ProjectilesImproved.Bullets
 
             float scaleFactor = ProjectileTrailScale * ProjectileTrailScale;
             float thickness = ProjectileTrailScale * 0.2f;
-            float length = 10f * ProjectileTrailScale;
+            float length = 20f * ProjectileTrailScale;
 
             MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
