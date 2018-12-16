@@ -14,7 +14,6 @@ namespace ProjectilesImproved.Bullets
     [ProtoContract]
     public class BulletBase
     {
-        public static MyStringId BulletMaterial = MyStringId.GetOrCompute("ProjectileTrailLine");
         public static MyStringHash Bullet = MyStringHash.GetOrCompute("bullet");
         public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ?
             MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
@@ -76,6 +75,9 @@ namespace ProjectilesImproved.Bullets
         public Vector3 ProjectileTrailColor = Vector3.Zero;
 
         [ProtoMember(18)]
+        public MyStringId BulletMaterial = MyStringId.GetOrCompute("ProjectileTrailLine");
+
+        [ProtoMember(19)]
         public AmmoEffect Effects { get; set; }
 
         public bool IsInitialized = false;
@@ -127,6 +129,11 @@ namespace ProjectilesImproved.Bullets
             if (MaxTrajectory == -1)
                 MaxTrajectory = Ammo.MaxTrajectory;
 
+            if (Ammo.ProjectileTrailMaterial != null)
+            {
+                BulletMaterial = MyStringId.GetOrCompute(Ammo.ProjectileTrailMaterial);
+            }
+
             if (ProjectileTrailColor == Vector3.Zero)
                 ProjectileTrailColor = Ammo.ProjectileTrailColor;
 
@@ -166,7 +173,7 @@ namespace ProjectilesImproved.Bullets
 
             MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
-                    new Vector4(ProjectileTrailColor, 1f),
+                    new Vector4(ProjectileTrailColor * 10f, 1f),
                     PositionMatrix.Translation,
                     -PositionMatrix.Forward,
                     length,
