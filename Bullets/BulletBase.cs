@@ -174,13 +174,8 @@ namespace ProjectilesImproved.Bullets
         {
             if (MyAPIGateway.Utilities.IsDedicated) return;
 
-
-            float scaleFactor = ProjectileTrailScale;
-            //scaleFactor =  scaleFactor * scaleFactor;
-            float thickness = scaleFactor * 0.2f;
-            float length = 20f * scaleFactor;
-
-            MyAPIGateway.Utilities.ShowNotification($"Scale: {ProjectileTrailScale}   Length: {length}   Thickness: {thickness}", 1);
+            float thickness = ProjectileTrailScale * 0.2f;
+            float length = 20f * ProjectileTrailScale;
 
             MyTransparentGeometry.AddLineBillboard(
                     BulletMaterial,
