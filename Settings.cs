@@ -21,25 +21,25 @@ namespace ProjectilesImproved
 
         public const string Filename = "WeaponsOverhaul.cfg";
 
-        public static AmmoEffect GetAmmoEffect(string id)
+        public static CollisionEffect GetAmmoEffect(string id)
         {
             if (AmmoEffectLookup.ContainsKey(id))
             {
                 return AmmoEffectLookup[id].Clone();
             }
 
-            return new AmmoEffect();
+            return new CollisionEffect();
         }
 
         //[ProtoMember]
         //public List<WeaponEffects> WeaponEffects { get; set; } = new List<WeaponEffects>();
 
         [ProtoMember]
-        public List<AmmoEffect> AmmoEffects { get; set; } = new List<AmmoEffect>();
+        public List<CollisionEffect> AmmoEffects { get; set; } = new List<CollisionEffect>();
 
-        public static Dictionary<string, AmmoEffect> AmmoEffectLookup { get; set; } = new Dictionary<string, AmmoEffect>
+        public static Dictionary<string, CollisionEffect> AmmoEffectLookup { get; set; } = new Dictionary<string, CollisionEffect>
         {
-            { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new AmmoEffect()
+            { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new CollisionEffect()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars",
                     HasBulletDrop = true,
@@ -50,7 +50,7 @@ namespace ProjectilesImproved
                 }
             },
             {
-                "MyObjectBuilder_AmmoDefinition/OKI76mmAmmoPars", new AmmoEffect()
+                "MyObjectBuilder_AmmoDefinition/OKI76mmAmmoPars", new CollisionEffect()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI76mmAmmoPars",
                     HasBulletDrop = true,
@@ -59,7 +59,7 @@ namespace ProjectilesImproved
                     Explosive = new Explosive() { Offset = 1f, Angle = 20,  Radius = 7f, Resolution = 1.2f }
                 }
             },
-            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new AmmoEffect()
+            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new CollisionEffect()
                 {
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
@@ -68,7 +68,7 @@ namespace ProjectilesImproved
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars",
                 }
             },
-            { "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars", new AmmoEffect()
+            { "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars", new CollisionEffect()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars",
                     HasBulletDrop = true,
@@ -77,7 +77,7 @@ namespace ProjectilesImproved
                 }
             },
             {
-               "MyObjectBuilder_AmmoDefinition/LargeCaliber", new AmmoEffect()
+               "MyObjectBuilder_AmmoDefinition/LargeCaliber", new CollisionEffect()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/LargeCaliber",
                     HasBulletDrop = true,
@@ -88,7 +88,7 @@ namespace ProjectilesImproved
                 }
             },
             {
-               "MyObjectBuilder_AmmoDefinition/SmallCaliber", new AmmoEffect()
+               "MyObjectBuilder_AmmoDefinition/SmallCaliber", new CollisionEffect()
                 {
                     AmmoId = "MyObjectBuilder_AmmoDefinition/SmallCaliber",
                     HasBulletDrop = true,
@@ -160,7 +160,7 @@ namespace ProjectilesImproved
             //    s.WeaponEffects.Add(w);
             //}
 
-            foreach (AmmoEffect a in AmmoEffectLookup.Values)
+            foreach (CollisionEffect a in AmmoEffectLookup.Values)
             {
                 s.AmmoEffects.Add(a);
             }
@@ -182,7 +182,7 @@ namespace ProjectilesImproved
             //}
 
             AmmoEffectLookup.Clear();
-            foreach (AmmoEffect a in s.AmmoEffects)
+            foreach (CollisionEffect a in s.AmmoEffects)
             {
                 if (AmmoEffectLookup.ContainsKey(a.AmmoId.ToString()))
                 {

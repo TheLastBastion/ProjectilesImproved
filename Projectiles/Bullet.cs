@@ -78,7 +78,7 @@ namespace ProjectilesImproved.Projectiles
         [ProtoMember(18)]
         public MyStringId BulletMaterial = MyStringId.GetOrCompute("ProjectileTrailLine");
 
-        public ICollision CollisionEffect { get; set; }
+        public CollisionEffect CollisionEffect { get; set; }
 
         public IFlight FlightEffect { get; set; }
 

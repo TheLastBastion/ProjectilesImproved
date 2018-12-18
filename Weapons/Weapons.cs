@@ -123,9 +123,16 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        Weapons weps = block.GameLogic as Weapons;
-                        MyAPIGateway.Utilities.ShowNotification($"shoot action", 500);
-                        weps.terminalShooting = !weps.terminalShooting;
+                        try
+                        {
+                            Weapons weps = block.GameLogic as Weapons;
+                            MyAPIGateway.Utilities.ShowNotification($"shoot action", 500);
+                            weps.terminalShooting = !weps.terminalShooting;
+                        }
+                        catch
+                        {
+                            MyLog.Default.Warning("Failed in the Shoot!");
+                        }
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -134,10 +141,17 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        Weapons weapon = (block.GameLogic as Weapons);
-                        if (weapon.cooldownTime == 0 && weapon.timeTillNextShot >= 1)
+                        try
                         {
-                            weapon.FireWeapon();
+                            Weapons weapon = (block.GameLogic as Weapons);
+                            if (weapon.cooldownTime == 0 && weapon.timeTillNextShot >= 1)
+                            {
+                                weapon.FireWeapon();
+                            }
+                        }
+                        catch
+                        {
+                            MyLog.Default.Warning("Failed in the Shoot Once!");
                         }
                     };
 
@@ -146,7 +160,14 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        (block.GameLogic as Weapons).terminalShooting = true;
+                        try
+                        {
+                            (block.GameLogic as Weapons).terminalShooting = true;
+                        }
+                        catch
+                        {
+                            MyLog.Default.Warning("Failed in the Shoot_On!");
+                        }
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -155,8 +176,15 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is Weapons}", 500);
-                        (block.GameLogic as Weapons).terminalShooting = false;
+                        try
+                        {
+                            MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is Weapons}", 500);
+                            (block.GameLogic as Weapons).terminalShooting = false;
+                        }
+                        catch
+                        {
+                            MyLog.Default.Warning("Failed in the Shoot_Off!");
+                        }
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -181,12 +209,27 @@ namespace ProjectilesImproved.Weapons
 
                     onoff.Setter = (block, value) =>
                     {
-                        (block.GameLogic as Weapons).terminalShooting = value;
+                        try
+                        {
+                            (block.GameLogic as Weapons).terminalShooting = value;
+                        }
+                        catch
+                        {
+                            MyLog.Default.Warning("Failed in the terminal Shoot_On!");
+                        }
                     };
 
                     onoff.Getter = (block) =>
                     {
-                        return (block.GameLogic as Weapons).terminalShooting;
+                        try
+                        {
+                            return (block.GameLogic as Weapons).terminalShooting;
+                        }
+                        catch
+                        {
+                            MyLog.Default.Warning("Failed in the terminal Shoot_off!");
+                            return false;
+                        }
                     };
                 }
             }
@@ -262,7 +305,7 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
-                ICollision collisionEffect = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
+                CollisionEffect collisionEffect = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
 
                 IFlight flightEffect = new BulletDrop();
 

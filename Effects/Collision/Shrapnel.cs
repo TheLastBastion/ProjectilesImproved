@@ -24,7 +24,7 @@ namespace ProjectilesImproved.Effects.Collision
             string id = $"MyObjectBuilder_AmmoDefinition/{info.Type.String}";
             if (info.Type == MyDamageType.Bullet && Settings.AmmoEffectLookup.ContainsKey(id))
             {
-                AmmoEffect ammo = Settings.AmmoEffectLookup[id];
+                CollisionEffect ammo = Settings.AmmoEffectLookup[id];
                 if (ammo.UseOverKillSpread)
                 {
                     IMySlimBlock slim = target as IMySlimBlock;
@@ -60,7 +60,7 @@ namespace ProjectilesImproved.Effects.Collision
 
     internal class ShrapnelData
     {
-        public AmmoEffect Ammo { get; set; }
+        public CollisionEffect Ammo { get; set; }
         public float OverKill { get; set; }
         public List<IMySlimBlock> Neighbours { get; set; }
     }

@@ -11,7 +11,7 @@ using VRageMath;
 namespace ProjectilesImproved.Effects.Collision
 {
     [ProtoContract]
-    public class AmmoEffect : ICollision
+    public class CollisionEffect : ICollision
     {
         [ProtoMember(1)]
         public string AmmoId { get; set; }
@@ -98,9 +98,9 @@ namespace ProjectilesImproved.Effects.Collision
             }
         }
 
-        public AmmoEffect Clone()
+        public CollisionEffect Clone()
         {
-            return new AmmoEffect
+            return new CollisionEffect
             {
                 AmmoId = AmmoId,
                 HasBulletDrop = HasBulletDrop,

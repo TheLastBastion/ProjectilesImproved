@@ -23,7 +23,7 @@ namespace ProjectilesImproved.Effects.Collision
 
         public ExplosionShapeGenerator()
         {
-            foreach (KeyValuePair<string, AmmoEffect> set in Settings.AmmoEffectLookup)
+            foreach (KeyValuePair<string, CollisionEffect> set in Settings.AmmoEffectLookup)
             {
                 if (set.Value.Explosive == null) continue;
                 Generate(set.Key, set.Value.Explosive.Radius, set.Value.Explosive.Resolution, set.Value.Explosive.Angle);
