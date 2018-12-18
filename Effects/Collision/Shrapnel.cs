@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
-using VRage.Utils;
 
-namespace ProjectilesImproved.Effects
+namespace ProjectilesImproved.Effects.Collision
 {
     [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
     public class Shrapnel : MySessionComponentBase

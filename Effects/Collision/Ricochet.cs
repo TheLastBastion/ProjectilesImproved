@@ -1,19 +1,17 @@
-﻿using ProjectilesImproved.Bullets;
+﻿using ProjectilesImproved.Projectiles;
 using ProtoBuf;
 using Sandbox.ModAPI;
-using System;
 using System.Collections.Generic;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
-using VRage.Utils;
 using VRageMath;
 
-namespace ProjectilesImproved.Effects
+namespace ProjectilesImproved.Effects.Collision
 {
     [ProtoContract]
-    public class Ricochet : IEffect
+    public class Ricochet : ICollision
     {
         [ProtoMember(1)]
         public float DeflectionAngle { get; set; }
@@ -27,7 +25,7 @@ namespace ProjectilesImproved.Effects
         [ProtoMember(4)]
         public float RicochetChance { get; set; }
 
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
         {
             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
             if (hit.HitEntity is IMyCubeGrid)
@@ -129,6 +127,10 @@ namespace ProjectilesImproved.Effects
                 MaxVelocityTransfer = MaxVelocityTransfer,
                 RicochetChance = RicochetChance
             };
+        }
+
+        public void Update(Bullet bullet)
+        {
         }
     }
 }

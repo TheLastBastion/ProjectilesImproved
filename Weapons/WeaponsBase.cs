@@ -1,5 +1,6 @@
-﻿using ProjectilesImproved.Bullets;
-using ProjectilesImproved.Effects;
+﻿using ProjectilesImproved.Effects.Collision;
+using ProjectilesImproved.Effects.Flight;
+using ProjectilesImproved.Projectiles;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Definitions;
 using Sandbox.Game.Entities;
@@ -261,39 +262,23 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
-                AmmoEffect effects = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
+                ICollision collisionEffect = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
 
-                BulletBase fireData;
-                if (effects.HasBulletDrop)
+                IFlight flightEffect = new BulletDrop();
+
+                Bullet fireData = new Bullet
                 {
-                    fireData = new BulletDrop
-                    {
-                        GridId = cube.CubeGrid.EntityId,
-                        BlockId = Entity.EntityId,
-                        WeaponId = weapon.Id,
-                        MagazineId = gun.GunBase.CurrentAmmoMagazineId,
-                        AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
-                        InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
-                        Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
-                        PositionMatrix = positionMatrix,
-                        Effects = effects,
-                    };
-                }
-                else
-                {
-                    fireData = new BulletBase
-                    {
-                        GridId = cube.CubeGrid.EntityId,
-                        BlockId = Entity.EntityId,
-                        WeaponId = weapon.Id,
-                        MagazineId = gun.GunBase.CurrentAmmoMagazineId,
-                        AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
-                        InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
-                        Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
-                        PositionMatrix = positionMatrix,
-                        Effects = effects,
-                    };
-                }
+                    GridId = cube.CubeGrid.EntityId,
+                    BlockId = Entity.EntityId,
+                    WeaponId = weapon.Id,
+                    MagazineId = gun.GunBase.CurrentAmmoMagazineId,
+                    AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
+                    InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
+                    Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
+                    PositionMatrix = positionMatrix,
+                    CollisionEffect = collisionEffect,
+                    FlightEffect = flightEffect
+                };
 
                 while (timeTillNextShot >= 1)
                 {

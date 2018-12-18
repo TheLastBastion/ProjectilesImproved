@@ -1,4 +1,4 @@
-﻿using ProjectilesImproved.Bullets;
+﻿using ProjectilesImproved.Projectiles;
 using ProtoBuf;
 using Sandbox.Definitions;
 using Sandbox.Game;
@@ -13,10 +13,10 @@ using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-namespace ProjectilesImproved.Effects
+namespace ProjectilesImproved.Effects.Collision
 {
     [ProtoContract]
-    public class Explosive : IEffect
+    public class Explosive : ICollision
     {
         [ProtoMember(1)]
         public float Radius { get; set; }
@@ -61,7 +61,7 @@ namespace ProjectilesImproved.Effects
 
         //private Stopwatch watch = new Stopwatch();
 
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
         {
             epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
             bullet.HasExpired = true;
@@ -339,6 +339,10 @@ namespace ProjectilesImproved.Effects
                 Radius = Radius,
                 Resolution = Resolution
             };
+        }
+
+        public void Update(Bullet bullet)
+        {
         }
     }
 }

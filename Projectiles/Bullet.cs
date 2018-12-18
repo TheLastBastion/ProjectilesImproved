@@ -1,4 +1,5 @@
-﻿using ProjectilesImproved.Effects;
+﻿using ProjectilesImproved.Effects.Collision;
+using ProjectilesImproved.Effects.Flight;
 using ProtoBuf;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
@@ -9,14 +10,14 @@ using VRage.Game.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
-namespace ProjectilesImproved.Bullets
+namespace ProjectilesImproved.Projectiles
 {
     [ProtoContract]
-    public class BulletBase
+    public class Bullet
     {
-        public static MyStringHash Bullet = MyStringHash.GetOrCompute("bullet");
+        public static MyStringHash BulletStringHash = MyStringHash.GetOrCompute("bullet");
         public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ?
-            MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
+        MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
 
         public const float Tick = 1f / 60f;
         public Vector3D VelocityPerTick => Velocity * Tick;
@@ -77,8 +78,9 @@ namespace ProjectilesImproved.Bullets
         [ProtoMember(18)]
         public MyStringId BulletMaterial = MyStringId.GetOrCompute("ProjectileTrailLine");
 
-        [ProtoMember(19)]
-        public AmmoEffect Effects { get; set; }
+        public ICollision CollisionEffect { get; set; }
+
+        public IFlight FlightEffect { get; set; }
 
         public bool IsInitialized = false;
 
@@ -158,13 +160,15 @@ namespace ProjectilesImproved.Bullets
 
         public virtual void Update()
         {
-            PositionMatrix.Translation += VelocityPerTick;
-            DistanceTraveled += VelocityPerTick.LengthSquared();
+            FlightEffect.Update(this);
 
-            if (IsAtRange)
-            {
-                HasExpired = true;
-            }
+            //PositionMatrix.Translation += VelocityPerTick;
+            //DistanceTraveled += VelocityPerTick.LengthSquared();
+
+            //if (IsAtRange)
+            //{
+            //    HasExpired = true;
+            //}
         }
 
         /// <summary>
@@ -230,7 +234,7 @@ namespace ProjectilesImproved.Bullets
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
                 if (framesToWait < 1)
                 {
-                    Effects.Execute(hit, hitlist, this);
+                    CollisionEffect.Execute(hit, hitlist, this);
                 }
                 else
                 {

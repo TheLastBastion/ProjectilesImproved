@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using VRage.Game;
 using VRage.Game.Components;
 using ModNetworkAPI;
-using ProjectilesImproved.Bullets;
+using ProjectilesImproved.Projectiles;
 using ProjectilesImproved.Effects;
 using VRage.Game.ModAPI;
 
@@ -17,7 +17,7 @@ namespace ProjectilesImproved
         public bool SentInitialRequest = false;
         private int waitInterval = 0;
         public static event Action OnLoadComplete;
-        public static List<BulletBase> ActiveProjectiles = new List<BulletBase>();
+        public static List<Bullet> ActiveProjectiles = new List<Bullet>();
 
         public const string ModName = "Weapons Overhaul";
         public const ushort ModID = 4112;
@@ -89,7 +89,7 @@ namespace ProjectilesImproved
             IsInitialized = true;
         }
 
-        public static void SpawnProjectile(BulletBase data)
+        public static void SpawnProjectile(Bullet data)
         {
             ActiveProjectiles.Add(data);
         }
@@ -126,7 +126,7 @@ namespace ProjectilesImproved
                     continue;
                 }
 
-                BulletBase bullet = ActiveProjectiles[i];
+                Bullet bullet = ActiveProjectiles[i];
 
                 if (!bullet.IsInitialized)
                 {

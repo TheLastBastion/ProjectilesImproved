@@ -1,4 +1,4 @@
-﻿using ProjectilesImproved.Bullets;
+﻿using ProjectilesImproved.Projectiles;
 using ProtoBuf;
 using Sandbox.Definitions;
 using System;
@@ -8,15 +8,15 @@ using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRageMath;
 
-namespace ProjectilesImproved.Effects
+namespace ProjectilesImproved.Effects.Collision
 {
     [ProtoContract]
-    public class Penetration : IEffect
+    public class Penetration : ICollision
     {
         [ProtoMember]
         public float VelocityDecreasePerHp { get; set; }
 
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
         {
             for (int i = 0; i < hitlist.Count; i++)
             {
@@ -55,7 +55,7 @@ namespace ProjectilesImproved.Effects
 
                                 float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
                                 float trueIntegrity = block.Integrity * mult;
-                                if (bullet.Effects.IgnoreDamageReduction)
+                                if (bullet.CollisionEffect.IgnoreDamageReduction)
                                 {
                                     if (bullet.ProjectileMassDamage > block.Integrity)
                                     {
@@ -102,6 +102,11 @@ namespace ProjectilesImproved.Effects
             {
                 VelocityDecreasePerHp = VelocityDecreasePerHp
             };
+        }
+
+        public void Update(Bullet bullet)
+        {
+            return;
         }
     }
 }

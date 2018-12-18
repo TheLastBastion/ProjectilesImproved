@@ -1,4 +1,4 @@
-﻿using ProjectilesImproved.Bullets;
+﻿using ProjectilesImproved.Projectiles;
 using ProtoBuf;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
@@ -8,10 +8,10 @@ using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRageMath;
 
-namespace ProjectilesImproved.Effects
+namespace ProjectilesImproved.Effects.Collision
 {
     [ProtoContract]
-    public class AmmoEffect
+    public class AmmoEffect : ICollision
     {
         [ProtoMember(1)]
         public string AmmoId { get; set; }
@@ -41,7 +41,7 @@ namespace ProjectilesImproved.Effects
         public Explosive Explosive { get; set; }
 
 
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, BulletBase bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
         {
             if (Penetration != null)
             {

@@ -5,7 +5,7 @@ using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
 
-namespace ProjectilesImproved.Effects
+namespace ProjectilesImproved.Effects.Collision
 {
     public class ExplosionShapeGenerator
     {

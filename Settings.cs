@@ -1,4 +1,4 @@
-﻿using ProjectilesImproved.Effects;
+﻿using ProjectilesImproved.Effects.Collision;
 using ProjectilesImproved.Weapons;
 using ProtoBuf;
 using Sandbox.ModAPI;
