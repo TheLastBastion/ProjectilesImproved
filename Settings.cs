@@ -1,5 +1,4 @@
 ﻿using ProjectilesImproved.Effects.Collision;
-using ProjectilesImproved.Weapons;
 using ProtoBuf;
 using Sandbox.ModAPI;
 using System;
@@ -32,8 +31,8 @@ namespace ProjectilesImproved
             return new AmmoEffect();
         }
 
-        [ProtoMember]
-        public List<WeaponEffects> WeaponEffects { get; set; } = new List<WeaponEffects>();
+        //[ProtoMember]
+        //public List<WeaponEffects> WeaponEffects { get; set; } = new List<WeaponEffects>();
 
         [ProtoMember]
         public List<AmmoEffect> AmmoEffects { get; set; } = new List<AmmoEffect>();
@@ -100,10 +99,10 @@ namespace ProjectilesImproved
             }
         };
 
-        private static Dictionary<string, WeaponEffects> WeaponEffectLookup { get; set; } = new Dictionary<string, WeaponEffects>
-        {
+        //private static Dictionary<string, WeaponEffects> WeaponEffectLookup { get; set; } = new Dictionary<string, WeaponEffects>
+        //{
 
-        };
+        //};
 
         public static void Load()
         {
@@ -156,10 +155,10 @@ namespace ProjectilesImproved
         public static Settings GetCurrentSettings()
         {
             Settings s = new Settings();
-            foreach (WeaponEffects w in WeaponEffectLookup.Values)
-            {
-                s.WeaponEffects.Add(w);
-            }
+            //foreach (WeaponEffects w in WeaponEffectLookup.Values)
+            //{
+            //    s.WeaponEffects.Add(w);
+            //}
 
             foreach (AmmoEffect a in AmmoEffectLookup.Values)
             {
@@ -170,17 +169,17 @@ namespace ProjectilesImproved
 
         public static void SetNewSettings(Settings s)
         {
-            WeaponEffectLookup.Clear();
-            foreach (WeaponEffects w in s.WeaponEffects)
-            {
-                if (WeaponEffectLookup.ContainsKey(w.WeaponId.ToString()))
-                {
-                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{w.WeaponId}'. Already in dictionary");
-                    continue;
-                }
+            //WeaponEffectLookup.Clear();
+            //foreach (WeaponEffects w in s.WeaponEffects)
+            //{
+            //    if (WeaponEffectLookup.ContainsKey(w.WeaponId.ToString()))
+            //    {
+            //        MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{w.WeaponId}'. Already in dictionary");
+            //        continue;
+            //    }
 
-                WeaponEffectLookup.Add(w.WeaponId.ToString(), w);
-            }
+            //    WeaponEffectLookup.Add(w.WeaponId.ToString(), w);
+            //}
 
             AmmoEffectLookup.Clear();
             foreach (AmmoEffect a in s.AmmoEffects)

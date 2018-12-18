@@ -20,16 +20,16 @@ using VRageMath;
 namespace ProjectilesImproved.Weapons
 {
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LargeGatlingTurret), false)]
-    public class LargeTurret : WeaponsBase
+    public class LargeTurret : Weapons
     {
     }
 
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_SmallGatlingGun), false)]
-    public class SmallGatling : WeaponsBase
+    public class SmallGatling : Weapons
     {
     }
 
-    public class WeaponsBase : MyGameLogicComponent
+    public class Weapons : MyGameLogicComponent
     {
         public const float MillisecondPerFrame = 1000f / 60f;
         public const double FireRateMultiplayer = 1d / 60d / 60d;
@@ -123,7 +123,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        WeaponsBase weps = block.GameLogic as WeaponsBase;
+                        Weapons weps = block.GameLogic as Weapons;
                         MyAPIGateway.Utilities.ShowNotification($"shoot action", 500);
                         weps.terminalShooting = !weps.terminalShooting;
                     };
@@ -134,7 +134,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        WeaponsBase weapon = (block.GameLogic as WeaponsBase);
+                        Weapons weapon = (block.GameLogic as Weapons);
                         if (weapon.cooldownTime == 0 && weapon.timeTillNextShot >= 1)
                         {
                             weapon.FireWeapon();
@@ -146,7 +146,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        (block.GameLogic as WeaponsBase).terminalShooting = true;
+                        (block.GameLogic as Weapons).terminalShooting = true;
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -155,8 +155,8 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is WeaponsBase}", 500);
-                        (block.GameLogic as WeaponsBase).terminalShooting = false;
+                        MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is Weapons}", 500);
+                        (block.GameLogic as Weapons).terminalShooting = false;
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -181,12 +181,12 @@ namespace ProjectilesImproved.Weapons
 
                     onoff.Setter = (block, value) =>
                     {
-                        (block.GameLogic as WeaponsBase).terminalShooting = value;
+                        (block.GameLogic as Weapons).terminalShooting = value;
                     };
 
                     onoff.Getter = (block) =>
                     {
-                        return (block.GameLogic as WeaponsBase).terminalShooting;
+                        return (block.GameLogic as Weapons).terminalShooting;
                     };
                 }
             }
@@ -194,7 +194,7 @@ namespace ProjectilesImproved.Weapons
 
         private void WeaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
         {
-            if ((block.GameLogic as WeaponsBase).terminalShooting)
+            if ((block.GameLogic as Weapons).terminalShooting)
             {
                 str.Append("On");
             }
