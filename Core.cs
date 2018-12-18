@@ -5,8 +5,8 @@ using VRage.Game;
 using VRage.Game.Components;
 using ModNetworkAPI;
 using ProjectilesImproved.Projectiles;
-using ProjectilesImproved.Effects;
 using VRage.Game.ModAPI;
+using ProjectilesImproved.Effects.Collision;
 
 namespace ProjectilesImproved
 {
