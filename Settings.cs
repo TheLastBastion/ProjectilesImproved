@@ -1,4 +1,5 @@
 ﻿using ProjectilesImproved.Effects.Collision;
+using ProjectilesImproved.Effects.Weapon;
 using ProtoBuf;
 using Sandbox.ModAPI;
 using System;
@@ -31,8 +32,8 @@ namespace ProjectilesImproved
             return new CollisionEffect();
         }
 
-        //[ProtoMember]
-        //public List<WeaponEffects> WeaponEffects { get; set; } = new List<WeaponEffects>();
+        [ProtoMember]
+        public List<WeaponEffect> WeaponEffects { get; set; } = new List<WeaponEffect>();
 
         [ProtoMember]
         public List<CollisionEffect> AmmoEffects { get; set; } = new List<CollisionEffect>();
@@ -99,10 +100,14 @@ namespace ProjectilesImproved
             }
         };
 
-        //private static Dictionary<string, WeaponEffects> WeaponEffectLookup { get; set; } = new Dictionary<string, WeaponEffects>
-        //{
-
-        //};
+        private static Dictionary<string, WeaponEffect> WeaponEffectLookup { get; set; } = new Dictionary<string, WeaponEffect>
+        {
+            { "", new WeaponEffect()
+                {
+                    Ramping = new Ramping() { StartRPM = 200, MaxRPM = 1000, TimeToMax = 8000 }
+                }
+            }
+        };
 
         public static void Load()
         {
@@ -155,10 +160,10 @@ namespace ProjectilesImproved
         public static Settings GetCurrentSettings()
         {
             Settings s = new Settings();
-            //foreach (WeaponEffects w in WeaponEffectLookup.Values)
-            //{
-            //    s.WeaponEffects.Add(w);
-            //}
+            foreach (WeaponEffect w in WeaponEffectLookup.Values)
+            {
+                s.WeaponEffects.Add(w);
+            }
 
             foreach (CollisionEffect a in AmmoEffectLookup.Values)
             {
@@ -170,7 +175,7 @@ namespace ProjectilesImproved
         public static void SetNewSettings(Settings s)
         {
             //WeaponEffectLookup.Clear();
-            //foreach (WeaponEffects w in s.WeaponEffects)
+            //foreach (WeaponEffect w in s.WeaponEffects)
             //{
             //    if (WeaponEffectLookup.ContainsKey(w.WeaponId.ToString()))
             //    {

@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Effects.Collision;
 using ProjectilesImproved.Effects.Flight;
+using ProjectilesImproved.Effects.Weapon;
 using ProjectilesImproved.Projectiles;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Definitions;
@@ -9,6 +10,7 @@ using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using System.Collections.Generic;
 using System.Text;
+using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
@@ -20,16 +22,16 @@ using VRageMath;
 namespace ProjectilesImproved.Weapons
 {
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LargeGatlingTurret), false)]
-    public class LargeTurret : Weapons
+    public class LargeTurret : ProjectileWeapons
     {
     }
 
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_SmallGatlingGun), false)]
-    public class SmallGatling : Weapons
+    public class SmallGatling : ProjectileWeapons
     {
     }
 
-    public class Weapons : MyGameLogicComponent
+    public class ProjectileWeapons : MyGameLogicComponent
     {
         public const float MillisecondPerFrame = 1000f / 60f;
         public const double FireRateMultiplayer = 1d / 60d / 60d;
@@ -37,28 +39,45 @@ namespace ProjectilesImproved.Weapons
         public bool ControlsUpdated = false;
 
         public IMyGunObject<MyGunBase> gun { get; private set; } = null;
-        public bool IsShooting => gun.IsShooting || terminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
+        public bool IsShooting => gun.IsShooting || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
 
-        private MyWeaponDefinition weapon = null;
-        private IMyFunctionalBlock block = null;
-        private IMyCubeBlock cube = null;
+        public double TimeTillNextShot { get; set; } = 1d;
+        public int CurrentShotInBurst { get; set; } = 0;
+        public float CooldownTime { get; set; } = 0;
+
+        public MyDefinitionId Id { get; private set; }
+        public int ReloadTime { get; set; }
+        public float DeviateShotAngle { get; set; }
+        public float ReleaseTimeAfterFire { get; set; }
+        public int MuzzleFlashLifeSpan { get; set; }
+        public float DamageMultiplier { get; set; }
+
+        public int RateOfFire { get; set; }
+        public int ShotsInBurst { get; set; }
+        public MySoundPair ShootSound { get; set; }
+
+        public IWeapon WeaponEffect { get; private set; }
+
+        public MyWeaponDefinition Weapon { get; private set; } = null;
+        public IMyFunctionalBlock Block { get; private set; } = null;
+        public IMyCubeBlock Cube { get; private set; } = null;
+        public MyAmmoDefinition Ammo { get; private set; }
+
+        public bool IsFixedGun { get; private set; } = false;
+        public bool TerminalShooting { get; set; } = false;
+
         private MyEntity3DSoundEmitter soundEmitter;
-
-        private bool IsFixedGun = false;
-        private bool terminalShooting = false;
-
-        private double timeTillNextShot = 1d;
-        private int currentShotInBurst = 0;
-        private float cooldownTime = 0;
         private int FirstTimeCooldown = 0;
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
-            block = Entity as IMyFunctionalBlock;
-            cube = Entity as IMyCubeBlock;
+            Block = Entity as IMyFunctionalBlock;
+            Cube = Entity as IMyCubeBlock;
             gun = Entity as IMyGunObject<MyGunBase>;
             IsFixedGun = Entity is IMySmallGatlingGun;
             FirstTimeCooldown = 10;
+
+            Ammo = gun.GunBase.CurrentAmmoDefinition;
 
             soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
 
@@ -72,6 +91,8 @@ namespace ProjectilesImproved.Weapons
                 getWeaponDef();
                 NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
             }
+
+            MyLog.Default.Info($"{objectBuilder.TypeId}/{objectBuilder.SubtypeName}");
         }
 
         private void Init()
@@ -79,6 +100,8 @@ namespace ProjectilesImproved.Weapons
             Core.OnLoadComplete -= Init;
             OverrideDefaultControls();
             getWeaponDef();
+            WeaponEffect = new WeaponEffect();
+
             NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
         }
 
@@ -86,12 +109,21 @@ namespace ProjectilesImproved.Weapons
         {
             if (gun != null)
             {
-                weapon = MyDefinitionManager.Static.GetWeaponDefinition((block.SlimBlock.BlockDefinition as MyWeaponBlockDefinition).WeaponDefinitionId);
+                Weapon = MyDefinitionManager.Static.GetWeaponDefinition((Block.SlimBlock.BlockDefinition as MyWeaponBlockDefinition).WeaponDefinitionId);
+
+                Id = Weapon.Id;
+                ReloadTime = Weapon.ReloadTime;
+                DeviateShotAngle = Weapon.DeviateShotAngle;
+                ReleaseTimeAfterFire = Weapon.ReleaseTimeAfterFire;
+                MuzzleFlashLifeSpan = Weapon.MuzzleFlashLifeSpan;
+                DamageMultiplier = Weapon.DamageMultiplier;
+
+                GetMoreWeaponDef();
 
                 // Thanks for the help Digi
-                for (int i = 0; i < weapon.WeaponAmmoDatas.Length; i++)
+                for (int i = 0; i < Weapon.WeaponAmmoDatas.Length; i++)
                 {
-                    var ammoData = weapon.WeaponAmmoDatas[i];
+                    var ammoData = Weapon.WeaponAmmoDatas[i];
 
                     if (ammoData == null)
                         continue;
@@ -99,6 +131,15 @@ namespace ProjectilesImproved.Weapons
                     ammoData.ShootIntervalInMiliseconds = int.MaxValue;
                 }
             }
+        }
+
+        private void GetMoreWeaponDef()
+        {
+            MyWeaponDefinition.MyWeaponAmmoData moreDetails = Weapon.WeaponAmmoDatas[GetAmmoLookup()];
+
+            RateOfFire = moreDetails.RateOfFire;
+            ShotsInBurst = moreDetails.ShotsInBurst;
+            ShootSound = moreDetails.ShootSound;
         }
 
         private void OverrideDefaultControls()
@@ -125,9 +166,9 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            Weapons weps = block.GameLogic as Weapons;
+                            ProjectileWeapons weps = block.GameLogic as ProjectileWeapons;
                             MyAPIGateway.Utilities.ShowNotification($"shoot action", 500);
-                            weps.terminalShooting = !weps.terminalShooting;
+                            weps.TerminalShooting = !weps.TerminalShooting;
                         }
                         catch
                         {
@@ -143,8 +184,8 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            Weapons weapon = (block.GameLogic as Weapons);
-                            if (weapon.cooldownTime == 0 && weapon.timeTillNextShot >= 1)
+                            ProjectileWeapons weapon = (block.GameLogic as ProjectileWeapons);
+                            if (weapon.CooldownTime == 0 && weapon.TimeTillNextShot >= 1)
                             {
                                 weapon.FireWeapon();
                             }
@@ -162,7 +203,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            (block.GameLogic as Weapons).terminalShooting = true;
+                            (block.GameLogic as ProjectileWeapons).TerminalShooting = true;
                         }
                         catch
                         {
@@ -178,8 +219,8 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is Weapons}", 500);
-                            (block.GameLogic as Weapons).terminalShooting = false;
+                            MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is ProjectileWeapons}", 500);
+                            (block.GameLogic as ProjectileWeapons).TerminalShooting = false;
                         }
                         catch
                         {
@@ -211,7 +252,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            (block.GameLogic as Weapons).terminalShooting = value;
+                            (block.GameLogic as ProjectileWeapons).TerminalShooting = value;
                         }
                         catch
                         {
@@ -223,7 +264,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            return (block.GameLogic as Weapons).terminalShooting;
+                            return (block.GameLogic as ProjectileWeapons).TerminalShooting;
                         }
                         catch
                         {
@@ -237,7 +278,7 @@ namespace ProjectilesImproved.Weapons
 
         private void WeaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
         {
-            if ((block.GameLogic as Weapons).terminalShooting)
+            if ((block.GameLogic as ProjectileWeapons).TerminalShooting)
             {
                 str.Append("On");
             }
@@ -249,53 +290,68 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
-            bool shouldReturn = false;
-
-            if (timeTillNextShot < 1)
+            if (Ammo != gun.GunBase.CurrentAmmoDefinition)
             {
-                timeTillNextShot += weapon.WeaponAmmoDatas[GetAmmoLookup()].RateOfFire * FireRateMultiplayer;
+                Ammo = gun.GunBase.CurrentAmmoDefinition;
+                GetMoreWeaponDef();
             }
 
             if (FirstTimeCooldown > 0)
             {
                 FirstTimeCooldown--;
-                shouldReturn = true;
-            }
-
-            if (cooldownTime > 0)
-            {
-                cooldownTime -= MillisecondPerFrame;
-                shouldReturn = true;
-            }
-
-            if (!cube.IsFunctional)
-            {
-                terminalShooting = false;
-                shouldReturn = true;
-            }
-
-            if (gun.IsShooting)
-            {
-                terminalShooting = false;
-            }
-
-            if (!IsShooting ||
-                cube?.CubeGrid?.Physics == null ||
-                !gun.GunBase.HasEnoughAmmunition() ||
-                shouldReturn)
-            {
                 return;
             }
 
-            FireWeapon();
+            if (WeaponEffect.Update(this))
+            {
+                FireWeapon();
+            }
+
+            //if (TimeTillNextShot < 1)
+            //{            
+            //    TimeTillNextShot += RateOfFire * FireRateMultiplayer;
+            //}
+
+            //if (FirstTimeCooldown > 0)
+            //{
+            //    FirstTimeCooldown--;
+            //    shouldReturn = true;
+            //}
+
+            //if (CooldownTime > 0)
+            //{
+            //    CooldownTime -= MillisecondPerFrame;
+            //    shouldReturn = true;
+            //}
+
+            //if (!cube.IsFunctional)
+            //{
+            //    terminalShooting = false;
+            //    shouldReturn = true;
+            //}
+
+            //if (gun.IsShooting)
+            //{
+            //    terminalShooting = false;
+            //}
+
+            //if (!IsShooting ||
+            //    cube?.CubeGrid?.Physics == null ||
+            //    !gun.GunBase.HasEnoughAmmunition() ||
+            //    shouldReturn)
+            //{
+            //    return;
+            //}
+
+            //
         }
 
         private void FireWeapon()
         {
-            if (timeTillNextShot >= 1)
+            if (TimeTillNextShot >= 1)
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
-                Vector3D bonus = (block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
+                Vector3D bonus = (Block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
 
                 bonus.Rotate(muzzleMatrix);
                 muzzleMatrix.Translation += bonus;
@@ -311,32 +367,32 @@ namespace ProjectilesImproved.Weapons
 
                 Bullet fireData = new Bullet
                 {
-                    GridId = cube.CubeGrid.EntityId,
+                    GridId = Cube.CubeGrid.EntityId,
                     BlockId = Entity.EntityId,
-                    WeaponId = weapon.Id,
+                    WeaponId = Id,
                     MagazineId = gun.GunBase.CurrentAmmoMagazineId,
                     AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
-                    InitialGridVelocity = block.CubeGrid.Physics.LinearVelocity,
-                    Velocity = block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
+                    InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity,
+                    Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
                     PositionMatrix = positionMatrix,
                     CollisionEffect = collisionEffect,
                     FlightEffect = flightEffect
                 };
 
-                while (timeTillNextShot >= 1)
+                while (TimeTillNextShot >= 1)
                 {
                     Core.SpawnProjectile(fireData);
                     gun.GunBase.ConsumeAmmo();
-                    timeTillNextShot--;
+                    TimeTillNextShot--;
 
                     soundEmitter.PlaySound(gun.GunBase.ShootSound, false, false, false, false, false, null);
 
-                    currentShotInBurst++;
-                    if (currentShotInBurst == gun.GunBase.ShotsInBurst)
+                    CurrentShotInBurst++;
+                    if (CurrentShotInBurst == gun.GunBase.ShotsInBurst)
                     {
-                        timeTillNextShot = 0;
-                        currentShotInBurst = 0;
-                        cooldownTime = weapon.ReloadTime;
+                        TimeTillNextShot = 0;
+                        CurrentShotInBurst = 0;
+                        CooldownTime = ReloadTime;
                         break;
                     }
 
@@ -344,7 +400,7 @@ namespace ProjectilesImproved.Weapons
                 }
 
                 var forceVector = -positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.BackkickForce;
-                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, block.WorldAABB.Center, null);
+                Block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, Block.WorldAABB.Center, null);
             }
         }
 
