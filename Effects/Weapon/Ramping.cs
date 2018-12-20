@@ -1,6 +1,5 @@
 ﻿using ProjectilesImproved.Weapons;
 using ProtoBuf;
-using Sandbox.ModAPI;
 
 namespace ProjectilesImproved.Effects.Weapon
 {
@@ -82,8 +81,6 @@ namespace ProjectilesImproved.Effects.Weapon
                 {
                     currentTime = TimeToMax;
                 }
-
-                MyAPIGateway.Utilities.ShowNotification($"ROF: {weapon.RateOfFire} Time: {currentTime.ToString("n0")} MaxTime: {TimeToMax.ToString("n0")}", 1);
             }
             else
             {
@@ -94,13 +91,11 @@ namespace ProjectilesImproved.Effects.Weapon
                 }
             }
 
-            MyAPIGateway.Utilities.ShowNotification($"Time: {currentTime.ToString("n0")} willShoot {willShoot}", 1);
             return willShoot;
         }
 
         public int CurrentRPM()
         {
-
             return (int)(StartRPM + (MaxRPM - StartRPM) * ((currentTime <= TimeToMax) ? (currentTime / TimeToMax) : 1));
         }
     }
