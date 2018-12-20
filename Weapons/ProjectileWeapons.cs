@@ -90,9 +90,6 @@ namespace ProjectilesImproved.Weapons
                 OverrideDefaultControls();
                 getWeaponDef();
 
-
-                MyLog.Default.Info($"{Weapon.Id}");
-
                 NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
             }
         }
@@ -131,6 +128,11 @@ namespace ProjectilesImproved.Weapons
                         continue;
 
                     ammoData.ShootIntervalInMiliseconds = int.MaxValue;
+                }
+
+                if (Settings.WeaponEffectLookup.ContainsKey(Id.ToString()))
+                {
+                    WeaponEffect = Settings.WeaponEffectLookup[Id.ToString()];
                 }
             }
         }
@@ -308,44 +310,6 @@ namespace ProjectilesImproved.Weapons
             {
                 FireWeapon();
             }
-
-            //if (TimeTillNextShot < 1)
-            //{            
-            //    TimeTillNextShot += RateOfFire * FireRateMultiplayer;
-            //}
-
-            //if (FirstTimeCooldown > 0)
-            //{
-            //    FirstTimeCooldown--;
-            //    shouldReturn = true;
-            //}
-
-            //if (CooldownTime > 0)
-            //{
-            //    CooldownTime -= MillisecondPerFrame;
-            //    shouldReturn = true;
-            //}
-
-            //if (!cube.IsFunctional)
-            //{
-            //    terminalShooting = false;
-            //    shouldReturn = true;
-            //}
-
-            //if (gun.IsShooting)
-            //{
-            //    terminalShooting = false;
-            //}
-
-            //if (!IsShooting ||
-            //    cube?.CubeGrid?.Physics == null ||
-            //    !gun.GunBase.HasEnoughAmmunition() ||
-            //    shouldReturn)
-            //{
-            //    return;
-            //}
-
-            //
         }
 
         private void FireWeapon()

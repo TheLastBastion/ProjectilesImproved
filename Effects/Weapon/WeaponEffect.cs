@@ -9,8 +9,14 @@ namespace ProjectilesImproved.Effects.Weapon
         [ProtoMember]
         public Ramping Ramping;
 
-        public virtual bool Update(ProjectileWeapons weapon)
+        public bool Update(ProjectileWeapons weapon)
         {
+            if (Ramping != null)
+            {
+                return Ramping.Update(weapon);
+            }
+
+
             bool willShoot = true;
 
             // If cooldown is greater than 0 the gun is on cooldown and should not fire
