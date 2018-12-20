@@ -56,7 +56,7 @@ namespace ProjectilesImproved.Weapons
         public int ShotsInBurst { get; set; }
         public MySoundPair ShootSound { get; set; }
 
-        public IWeapon WeaponEffect { get; private set; }
+        public WeaponEffect WeaponEffect { get; private set; }
 
         public MyWeaponDefinition Weapon { get; private set; } = null;
         public IMyFunctionalBlock Block { get; private set; } = null;
