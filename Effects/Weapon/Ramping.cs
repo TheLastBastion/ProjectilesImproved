@@ -19,6 +19,7 @@ namespace ProjectilesImproved.Effects.Weapon
 
         public bool Update(ProjectileWeapons weapon)
         {
+            MyAPIGateway.Utilities.ShowNotification($"Time: {currentTime.ToString("n0")}", 1);
             bool willShoot = true;
 
             // If cooldown is greater than 0 the gun is on cooldown and should not fire
