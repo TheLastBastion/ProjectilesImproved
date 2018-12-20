@@ -89,10 +89,12 @@ namespace ProjectilesImproved.Weapons
             {
                 OverrideDefaultControls();
                 getWeaponDef();
+
+
+                MyLog.Default.Info($"{Weapon.Id}");
+
                 NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
             }
-
-            MyLog.Default.Info($"{objectBuilder.TypeId}/{objectBuilder.SubtypeName}");
         }
 
         private void Init()
