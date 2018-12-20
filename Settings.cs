@@ -32,6 +32,17 @@ namespace ProjectilesImproved
             return new CollisionEffect();
         }
 
+        public static WeaponEffect GetWeaponEffect(string id)
+        {
+            if (WeaponEffectLookup.ContainsKey(id))
+            {
+                return WeaponEffectLookup[id].Clone();
+            }
+
+            return new WeaponEffect();
+
+        }
+
         [ProtoMember]
         public List<WeaponEffect> WeaponEffects { get; set; } = new List<WeaponEffect>();
 
@@ -104,6 +115,7 @@ namespace ProjectilesImproved
         {
             { "MyObjectBuilder_WeaponDefinition/OKI23mmDG", new WeaponEffect()
                 {
+                    WeaponId = "MyObjectBuilder_WeaponDefinition/OKI23mmDG",
                     Ramping = new Ramping() { StartRPM = 200, MaxRPM = 1000, TimeToMax = 8000 }
                 }
             }
@@ -174,17 +186,17 @@ namespace ProjectilesImproved
 
         public static void SetNewSettings(Settings s)
         {
-            //WeaponEffectLookup.Clear();
-            //foreach (WeaponEffect w in s.WeaponEffects)
-            //{
-            //    if (WeaponEffectLookup.ContainsKey(w.WeaponId.ToString()))
-            //    {
-            //        MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{w.WeaponId}'. Already in dictionary");
-            //        continue;
-            //    }
+            WeaponEffectLookup.Clear();
+            foreach (WeaponEffect w in s.WeaponEffects)
+            {
+                if (WeaponEffectLookup.ContainsKey(w.WeaponId.ToString()))
+                {
+                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{w.WeaponId}'. Already in dictionary");
+                    continue;
+                }
 
-            //    WeaponEffectLookup.Add(w.WeaponId.ToString(), w);
-            //}
+                WeaponEffectLookup.Add(w.WeaponId.ToString(), w);
+            }
 
             AmmoEffectLookup.Clear();
             foreach (CollisionEffect a in s.AmmoEffects)

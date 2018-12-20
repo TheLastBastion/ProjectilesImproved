@@ -17,9 +17,18 @@ namespace ProjectilesImproved.Effects.Weapon
 
         private float currentTime = 0; // in miliseconds
 
+        public Ramping Clone()
+        {
+            return new Ramping
+            {
+                StartRPM = StartRPM,
+                MaxRPM = MaxRPM,
+                TimeToMax = TimeToMax
+            };
+        }
+
         public bool Update(ProjectileWeapons weapon)
         {
-            MyAPIGateway.Utilities.ShowNotification($"Time: {currentTime.ToString("n0")}", 1);
             bool willShoot = true;
 
             // If cooldown is greater than 0 the gun is on cooldown and should not fire
@@ -79,6 +88,7 @@ namespace ProjectilesImproved.Effects.Weapon
                 }
             }
 
+            MyAPIGateway.Utilities.ShowNotification($"Time: {currentTime.ToString("n0")} willShoot {willShoot}", 1);
             return willShoot;
         }
 

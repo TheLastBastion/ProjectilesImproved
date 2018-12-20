@@ -7,7 +7,10 @@ namespace ProjectilesImproved.Effects.Weapon
     public class WeaponEffect : IWeapon
     {
         [ProtoMember]
-        public Ramping Ramping;
+        public string WeaponId { get; set; }
+
+        [ProtoMember]
+        public Ramping Ramping { get; set; }
 
         public bool Update(ProjectileWeapons weapon)
         {
@@ -66,6 +69,15 @@ namespace ProjectilesImproved.Effects.Weapon
             }
 
             return willShoot;
+        }
+
+        public WeaponEffect Clone()
+        {
+            return new WeaponEffect
+            {
+                WeaponId = WeaponId,
+                Ramping = (Ramping == null) ? null : Ramping.Clone()
+            };
         }
     }
 }
