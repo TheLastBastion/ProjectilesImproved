@@ -97,7 +97,6 @@ namespace ProjectilesImproved.Weapons
         private void Init()
         {
             Core.OnLoadComplete -= Init;
-            WeaponEffect = new WeaponEffect();
             OverrideDefaultControls();
             getWeaponDef();
 
@@ -133,10 +132,7 @@ namespace ProjectilesImproved.Weapons
 
                 MyLog.Default.Info($"Count: {Settings.WeaponEffectLookup.Count}   Lookup: {Id.ToString()}   Contains: {Settings.WeaponEffectLookup.ContainsKey(Id.ToString())}");
 
-                if (Settings.WeaponEffectLookup.ContainsKey(Id.ToString()))
-                {
-                    WeaponEffect = Settings.WeaponEffectLookup[Id.ToString()];
-                }
+                WeaponEffect = Settings.GetWeaponEffect(Id.ToString());
             }
         }
 
