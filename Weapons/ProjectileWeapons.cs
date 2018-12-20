@@ -130,6 +130,9 @@ namespace ProjectilesImproved.Weapons
                     ammoData.ShootIntervalInMiliseconds = int.MaxValue;
                 }
 
+
+                MyLog.Default.Info($"Count: {Settings.WeaponEffectLookup.Count}   Lookup: {Id.ToString()}   Contains: {Settings.WeaponEffectLookup.ContainsKey(Id.ToString())}");
+
                 if (Settings.WeaponEffectLookup.ContainsKey(Id.ToString()))
                 {
                     WeaponEffect = Settings.WeaponEffectLookup[Id.ToString()];
