@@ -1,5 +1,6 @@
 ﻿using ProjectilesImproved.Weapons;
 using ProtoBuf;
+using Sandbox.ModAPI;
 
 namespace ProjectilesImproved.Effects.Weapon
 {
@@ -66,6 +67,7 @@ namespace ProjectilesImproved.Effects.Weapon
                 weapon.RateOfFire = CurrentRPM();
                 weapon.TimeTillNextShot += weapon.RateOfFire * ProjectileWeapons.FireRateMultiplayer;
                 currentTime += ProjectileWeapons.MillisecondPerFrame;
+                MyAPIGateway.Utilities.ShowNotification($"ROF: {weapon.RateOfFire} Time: {currentTime.ToString("n0")} MaxTime: {TimeToMax.ToString("n0")}", 1);
             }
             else
             {
