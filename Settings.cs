@@ -102,7 +102,7 @@ namespace ProjectilesImproved
 
         public static Dictionary<string, WeaponEffect> WeaponEffectLookup { get; set; } = new Dictionary<string, WeaponEffect>
         {
-            { "MyObjectBuilder_LargeGatlingTurret/OKI23mmDG", new WeaponEffect()
+            { "MyObjectBuilder_WeaponDefinition/OKI23mmDG", new WeaponEffect()
                 {
                     Ramping = new Ramping() { StartRPM = 200, MaxRPM = 1000, TimeToMax = 8000 }
                 }
