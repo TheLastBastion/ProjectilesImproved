@@ -97,9 +97,9 @@ namespace ProjectilesImproved.Weapons
         private void Init()
         {
             Core.OnLoadComplete -= Init;
+            WeaponEffect = new WeaponEffect();
             OverrideDefaultControls();
             getWeaponDef();
-            WeaponEffect = new WeaponEffect();
 
             NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
         }
