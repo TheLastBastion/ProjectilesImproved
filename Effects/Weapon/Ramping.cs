@@ -76,7 +76,13 @@ namespace ProjectilesImproved.Effects.Weapon
             {
                 weapon.RateOfFire = CurrentRPM();
                 weapon.TimeTillNextShot += weapon.RateOfFire * ProjectileWeapons.FireRateMultiplayer;
+
                 currentTime += ProjectileWeapons.MillisecondPerFrame;
+                if (currentTime > TimeToMax)
+                {
+                    currentTime = TimeToMax;
+                }
+
                 MyAPIGateway.Utilities.ShowNotification($"ROF: {weapon.RateOfFire} Time: {currentTime.ToString("n0")} MaxTime: {TimeToMax.ToString("n0")}", 1);
             }
             else
@@ -94,6 +100,7 @@ namespace ProjectilesImproved.Effects.Weapon
 
         public int CurrentRPM()
         {
+
             return (int)(StartRPM + (MaxRPM - StartRPM) * ((currentTime <= TimeToMax) ? (currentTime / TimeToMax) : 1));
         }
     }

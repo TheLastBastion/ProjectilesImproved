@@ -305,13 +305,9 @@ namespace ProjectilesImproved.Weapons
                 return;
             }
 
-            if (WeaponEffect.Ramping != null)
+            if (WeaponEffect.Update(this))
             {
-                WeaponEffect.Ramping.Update(this);
-            }
-            else
-            {
-                WeaponEffect.Update(this);
+                FireWeapon();
             }
         }
 
