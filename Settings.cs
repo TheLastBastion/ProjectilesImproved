@@ -34,11 +34,14 @@ namespace ProjectilesImproved
         {
             foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
             {
+                MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} IsProjectile {def is MyProjectileAmmoDefinition}");
                 try
                 {
                     if (def is MyProjectileAmmoDefinition)
                     {
                         MyProjectileAmmoDefinition p = def as MyProjectileAmmoDefinition;
+
+                        MyLog.Default.Info($"Trajectory: {p.MaxTrajectory} Mass Damage: {p.ProjectileMassDamage}");
 
                         ProjectileDefinition SBCProjectile = new ProjectileDefinition
                         {
