@@ -69,8 +69,6 @@ namespace ProjectilesImproved
                             IgnoreDamageReduction = false
                         };
 
-                        MyLog.Default.Info($"Trajectory: {SBCProjectile.MaxTrajectory} Mass Damage: {SBCProjectile.ProjectileMassDamage}");
-
                         if (ProjectileDefinitionLookup.ContainsKey(def.Id.SubtypeId.String))
                         {
                             ProjectileDefinition configProjectile = ProjectileDefinitionLookup[def.Id.SubtypeId.String];
@@ -86,7 +84,9 @@ namespace ProjectilesImproved
                                 SBCProjectile.Penetration = (configProjectile.Penetration == null) ? null : configProjectile.Penetration.Clone();
                                 SBCProjectile.Explosive = (configProjectile.Explosive == null) ? null : configProjectile.Explosive.Clone();
 
+                                MyLog.Default.Info($"Trajectory: {SBCProjectile.MaxTrajectory} Mass Damage: {SBCProjectile.ProjectileMassDamage}");
                                 ProjectileDefinitionLookup[def.Id.SubtypeId.String] = SBCProjectile;
+                                MyLog.Default.Info($"Trajectory: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].MaxTrajectory} Mass Damage: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].ProjectileMassDamage}");
                             }
                         }
                         else
