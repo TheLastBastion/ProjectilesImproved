@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ProjectilesImproved.Projectiles
+namespace ProjectilesImproved.Definitions
 {
-    public class Projectile
+    class WeaponDefinition
     {
-
     }
 }

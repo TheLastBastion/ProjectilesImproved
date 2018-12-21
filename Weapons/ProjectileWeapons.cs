@@ -1,5 +1,4 @@
-﻿using ProjectilesImproved.Effects.Collision;
-using ProjectilesImproved.Effects.Flight;
+﻿using ProjectilesImproved.Definitions;
 using ProjectilesImproved.Effects.Weapon;
 using ProjectilesImproved.Projectiles;
 using Sandbox.Common.ObjectBuilders;
@@ -326,27 +325,32 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
-                CollisionEffect collisionEffect = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
+                ProjectileDefinition bulletData = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
 
-                IFlight flightEffect = new BulletDrop();
+                Projectile bullet = bulletData.CreateProjectile();
 
-                Bullet fireData = new Bullet
-                {
-                    GridId = Cube.CubeGrid.EntityId,
-                    BlockId = Entity.EntityId,
-                    WeaponId = Id,
-                    MagazineId = gun.GunBase.CurrentAmmoMagazineId,
-                    AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
-                    InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity,
-                    Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
-                    PositionMatrix = positionMatrix,
-                    CollisionEffect = collisionEffect,
-                    FlightEffect = flightEffect
-                };
+                bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
+                bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed);
+                bullet.PositionMatrix = positionMatrix;
+
+
+                //Bullet fireData = new Bullet
+                //{
+                //    GridId = Cube.CubeGrid.EntityId,
+                //    BlockId = Entity.EntityId,
+                //    WeaponId = Id,
+                //    MagazineId = gun.GunBase.CurrentAmmoMagazineId,
+                //    AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
+                //    InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity,
+                //    Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
+                //    PositionMatrix = positionMatrix,
+                //    CollisionEffect = collisionEffect,
+                //    FlightEffect = flightEffect
+                //};
 
                 while (TimeTillNextShot >= 1)
                 {
-                    Core.SpawnProjectile(fireData);
+                    Core.SpawnProjectile(bullet);
                     gun.GunBase.ConsumeAmmo();
                     TimeTillNextShot--;
 

@@ -1,8 +1,8 @@
-﻿using Sandbox.Game;
+﻿using ProjectilesImproved.Definitions;
+using Sandbox.Game;
 using System;
 using System.Collections.Generic;
 using VRage.Game.ModAPI.Interfaces;
-using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects.Collision
@@ -23,7 +23,7 @@ namespace ProjectilesImproved.Effects.Collision
 
         public ExplosionShapeGenerator()
         {
-            foreach (KeyValuePair<string, CollisionEffect> set in Settings.AmmoEffectLookup)
+            foreach (KeyValuePair<string, ProjectileDefinition> set in Settings.ProjectileDefinitionLookup)
             {
                 if (set.Value.Explosive == null) continue;
                 Generate(set.Key, set.Value.Explosive.Radius, set.Value.Explosive.Resolution, set.Value.Explosive.Angle);

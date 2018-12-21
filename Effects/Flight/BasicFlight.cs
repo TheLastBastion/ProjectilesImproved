@@ -5,9 +5,9 @@ using VRage.Game.ModAPI;
 
 namespace ProjectilesImproved.Effects.Flight
 {
-    public class FlightEffect : IFlight
+    public class BasicFlight : IFlight
     {
-        public void Update(Bullet bullet)
+        public void Update(Projectile bullet)
         {
             bullet.PositionMatrix.Translation += bullet.VelocityPerTick;
             bullet.DistanceTraveled += bullet.VelocityPerTick.LengthSquared();
@@ -16,11 +16,6 @@ namespace ProjectilesImproved.Effects.Flight
             {
                 bullet.HasExpired = true;
             }
-        }
-
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
-        {
-            return;
         }
     }
 }

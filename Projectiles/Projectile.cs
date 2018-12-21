@@ -1,96 +1,47 @@
-﻿using ProjectilesImproved.Effects.Collision;
+﻿using ProjectilesImproved.Definitions;
 using ProjectilesImproved.Effects.Flight;
-using ProtoBuf;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using VRage.Game;
+using VRage.Game.Components;
 using VRage.Game.ModAPI;
+using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Projectiles
 {
-    [ProtoContract]
-    public class Bullet
+    public class Projectile : ProjectileDefinition
     {
-        public static MyStringHash BulletStringHash = MyStringHash.GetOrCompute("bullet");
         public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ?
-        MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
+            MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
 
         public const float Tick = 1f / 60f;
         public Vector3D VelocityPerTick => Velocity * Tick;
         public bool IsAtRange => DistanceTraveled * LifeTimeTicks > MaxTrajectory * MaxTrajectory;
-        public bool UseLongRaycast => ProjectileSpeed * Tick * CollisionCheckFrames > 50;
+        public bool UseLongRaycast => DesiredSpeed * Tick * CollisionCheckFrames > 50;
 
-        [ProtoMember(1)]
-        public long GridId;
-
-        [ProtoMember(2)]
         public long BlockId;
 
-        [ProtoMember(3)]
-        public MyDefinitionId WeaponId;
+        public IMySlimBlock Slim;
 
-        [ProtoMember(4)]
-        public MyDefinitionId MagazineId;
-
-        [ProtoMember(5)]
-        public MyDefinitionId AmmoId;
-
-        [ProtoMember(6)]
         public MatrixD PositionMatrix;
 
-        [ProtoMember(7)]
         public double DistanceTraveled;
 
-        [ProtoMember(8)]
-        public Vector3D Velocity;
-
-        [ProtoMember(9)]
         public Vector3D InitialGridVelocity;
 
-        [ProtoMember(10)]
-        public int LifeTimeTicks;
-
-        [ProtoMember(11)]
-        public float ProjectileMassDamage = -1;
-
-        [ProtoMember(12)]
-        public float ProjectileHealthDamage = -1;
-
-        [ProtoMember(13)]
-        public float ProjectileSpeed = -1;
-
-        [ProtoMember(14)]
-        public float ProjectileHitImpulse = -1;
-
-        [ProtoMember(15)]
-        public float ProjectileTrailScale = -1;
-
-        [ProtoMember(16)]
-        public float MaxTrajectory = -1;
-
-        [ProtoMember(17)]
-        public Vector3 ProjectileTrailColor = Vector3.Zero;
-
-        [ProtoMember(18)]
-        public MyStringId BulletMaterial = MyStringId.GetOrCompute("ProjectileTrailLine");
-
-        public CollisionEffect CollisionEffect { get; set; }
+        public Vector3D Velocity;
 
         public IFlight FlightEffect { get; set; }
+
+        public int LifeTimeTicks;
 
         public bool IsInitialized = false;
 
         public bool HasExpired = false;
-
-        public IMySlimBlock Slim;
-
-        public MyWeaponDefinition Weapon;
-
-        public MyAmmoMagazineDefinition Magazine;
 
         public Vector3D PreviousPosition;
         public Vector3D Start;
@@ -101,49 +52,19 @@ namespace ProjectilesImproved.Projectiles
         public int CollisionCheckFrames { get; private set; } = -1;
         public int CollisionCheckCounter = 0;
         public bool DoShortRaycast = false;
-        //private float VelocityPerTickLength = 0;
 
         /// <summary>
         /// Initializes all empty variables
         /// </summary>
         public void Init()
         {
-            if (Weapon == null)
+            if (HasBulletDrop)
             {
-                Weapon = MyDefinitionManager.Static.GetWeaponDefinition(WeaponId);
+                FlightEffect = new BulletDrop();
             }
-
-            if (Magazine == null)
+            else
             {
-                Magazine = MyDefinitionManager.Static.GetAmmoMagazineDefinition(MagazineId);
-            }
-
-            MyProjectileAmmoDefinition Ammo = (MyProjectileAmmoDefinition)MyDefinitionManager.Static.GetAmmoDefinition(AmmoId);
-
-            if (ProjectileMassDamage == -1)
-                ProjectileMassDamage = Ammo.ProjectileMassDamage;
-            if (ProjectileHealthDamage == -1)
-                ProjectileHealthDamage = Ammo.ProjectileHealthDamage;
-            if (ProjectileSpeed == -1)
-                ProjectileSpeed = Ammo.DesiredSpeed;
-            if (ProjectileHitImpulse == -1)
-                ProjectileHitImpulse = Ammo.ProjectileHitImpulse;
-            if (MaxTrajectory == -1)
-                MaxTrajectory = Ammo.MaxTrajectory;
-
-            if (Ammo.ProjectileTrailMaterial != null)
-            {
-                BulletMaterial = MyStringId.GetOrCompute(Ammo.ProjectileTrailMaterial);
-            }
-
-            if (ProjectileTrailColor == Vector3.Zero)
-            {
-                ProjectileTrailColor = Ammo.ProjectileTrailColor;
-            }
-
-            if (ProjectileTrailScale == -1)
-            {
-                ProjectileTrailScale = Ammo.ProjectileTrailScale;
+                FlightEffect = new BasicFlight();
             }
 
             IsInitialized = true;
@@ -161,20 +82,12 @@ namespace ProjectilesImproved.Projectiles
         public virtual void Update()
         {
             FlightEffect.Update(this);
-
-            //PositionMatrix.Translation += VelocityPerTick;
-            //DistanceTraveled += VelocityPerTick.LengthSquared();
-
-            //if (IsAtRange)
-            //{
-            //    HasExpired = true;
-            //}
         }
 
         /// <summary>
         /// Draws the projectile
         /// </summary>
-        public virtual void Draw()
+        public void Draw()
         {
             if (MyAPIGateway.Utilities.IsDedicated) return;
 
@@ -182,7 +95,7 @@ namespace ProjectilesImproved.Projectiles
             float length = 20f * ProjectileTrailScale;
 
             MyTransparentGeometry.AddLineBillboard(
-                    BulletMaterial,
+                    MyStringId.GetOrCompute(Material),
                     new Vector4(ProjectileTrailColor * 10f, 1f),
                     PositionMatrix.Translation + (PositionMatrix.Forward * length),
                     -PositionMatrix.Forward,
@@ -193,7 +106,7 @@ namespace ProjectilesImproved.Projectiles
         /// <summary>
         /// Define collision start and end points and other precalculation operations
         /// </summary>
-        public virtual void PreCollitionDetection()
+        public void PreCollitionDetection()
         {
             Start = PositionMatrix.Translation;
             if (DoShortRaycast)
@@ -210,7 +123,7 @@ namespace ProjectilesImproved.Projectiles
         /// <summary>
         /// Checks for collisions
         /// </summary>
-        public virtual void CollisionDetection()
+        public void CollisionDetection()
         {
             IHitInfo hit = null;
             List<IHitInfo> hitlist = new List<IHitInfo>();
@@ -234,7 +147,59 @@ namespace ProjectilesImproved.Projectiles
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)CollisionCheckFrames);
                 if (framesToWait < 1)
                 {
-                    CollisionEffect.Execute(hit, hitlist, this);
+                    if (Penetration != null)
+                    {
+                        Penetration.Execute(hit, hitlist, this);
+                    }
+                    else if (Ricochet != null)
+                    {
+                        Ricochet.Execute(hit, null, this);
+                    }
+                    else if (Explosive != null)
+                    {
+                        Explosive.Execute(hit, null, this);
+                    }
+                    else
+                    {
+                        if (!MyAPIGateway.Session.IsServer) return;
+
+                        if (hit.HitEntity is IMyDestroyableObject)
+                        {
+                            IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
+                            (hit.HitEntity as IMyDestroyableObject).DoDamage(ProjectileHealthDamage, MyStringHash.GetOrCompute(AmmoSubtypeId), true, default(MyHitInfo), BlockId);
+
+                            hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, PositionMatrix.Forward * ProjectileHitImpulse, hit.Position, null);
+
+                            LastPositionFraction = hit.Fraction;
+                        }
+                        else if (hit.HitEntity is IMyCubeGrid)
+                        {
+                            IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
+
+                            Vector3D direction = PositionMatrix.Forward;
+                            Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
+                            if (hitPos.HasValue)
+                            {
+                                IMySlimBlock block = grid.GetCubeBlock(hitPos.Value);
+                                if (IgnoreDamageReduction)
+                                {
+                                    float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
+
+                                    block.DoDamage(ProjectileMassDamage * mult, MyStringHash.GetOrCompute(AmmoSubtypeId), true, default(MyHitInfo), BlockId);
+                                }
+                                else
+                                {
+                                    block.DoDamage(ProjectileMassDamage, MyStringHash.GetOrCompute(AmmoSubtypeId), true, default(MyHitInfo), BlockId);
+                                }
+
+                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, PositionMatrix.Forward * ProjectileHitImpulse, hit.Position, null);
+
+                                LastPositionFraction = hit.Fraction;
+                            }
+                        }
+
+                        HasExpired = true;
+                    }
                 }
                 else
                 {
@@ -273,7 +238,7 @@ namespace ProjectilesImproved.Projectiles
                 }
                 else
                 {
-                    CollisionCheckFrames = 1 + (int)Math.Ceiling((ProjectileSpeed / MaxSpeedLimit) * 0.5f);
+                    CollisionCheckFrames = 1 + (int)Math.Ceiling((DesiredSpeed / MaxSpeedLimit) * 0.5f);
                 }
             }
 

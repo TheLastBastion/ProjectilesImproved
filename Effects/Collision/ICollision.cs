@@ -11,6 +11,6 @@ namespace ProjectilesImproved.Effects.Collision
         /// </summary>
         /// <param name="hit">The raycast information</param>
         /// <param name="bullet">The bullet that did the hitting</param>
-        void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet);
+        void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet);
     }
 }

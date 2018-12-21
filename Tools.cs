@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using VRage.Game.ModAPI;
-using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
 using VRageMath;
 

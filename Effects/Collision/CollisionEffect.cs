@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
+using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects.Collision
@@ -41,7 +42,7 @@ namespace ProjectilesImproved.Effects.Collision
         public Explosive Explosive { get; set; }
 
 
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {
             if (Penetration != null)
             {
@@ -62,7 +63,7 @@ namespace ProjectilesImproved.Effects.Collision
                 if (hit.HitEntity is IMyDestroyableObject)
                 {
                     IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                    (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                    (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true, default(MyHitInfo), bullet.BlockId);
 
                     hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
@@ -81,11 +82,11 @@ namespace ProjectilesImproved.Effects.Collision
                         {
                             float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                            block.DoDamage(bullet.ProjectileMassDamage * mult, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                            block.DoDamage(bullet.ProjectileMassDamage * mult, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true, default(MyHitInfo), bullet.BlockId);
                         }
                         else
                         {
-                            block.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true, default(MyHitInfo), bullet.BlockId);
+                            block.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true, default(MyHitInfo), bullet.BlockId);
                         }
 
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);

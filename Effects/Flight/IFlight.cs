@@ -8,6 +8,6 @@ namespace ProjectilesImproved.Effects.Flight
         /// Applies travel effects
         /// </summary>
         /// <param name="bullet">The bullet under effect</param>
-        void Update(Bullet bullet);
+        void Update(Projectile bullet);
     }
 }

@@ -1,5 +1,5 @@
-﻿using Sandbox.ModAPI;
-using System;
+﻿using ProjectilesImproved.Definitions;
+using Sandbox.ModAPI;
 using System.Collections.Generic;
 using VRage.Game;
 using VRage.Game.Components;
@@ -21,10 +21,10 @@ namespace ProjectilesImproved.Effects.Collision
         {
             if (!(target is IMySlimBlock)) return;
 
-            string id = $"MyObjectBuilder_AmmoDefinition/{info.Type.String}";
-            if (info.Type == MyDamageType.Bullet && Settings.AmmoEffectLookup.ContainsKey(id))
+            string id = $"{info.Type.String}";
+            if (info.Type == MyDamageType.Bullet && Settings.ProjectileDefinitionLookup.ContainsKey(id))
             {
-                CollisionEffect ammo = Settings.AmmoEffectLookup[id];
+                ProjectileDefinition ammo = Settings.ProjectileDefinitionLookup[id];
                 if (ammo.UseOverKillSpread)
                 {
                     IMySlimBlock slim = target as IMySlimBlock;
@@ -60,7 +60,7 @@ namespace ProjectilesImproved.Effects.Collision
 
     internal class ShrapnelData
     {
-        public CollisionEffect Ammo { get; set; }
+        public ProjectileDefinition Ammo { get; set; }
         public float OverKill { get; set; }
         public List<IMySlimBlock> Neighbours { get; set; }
     }

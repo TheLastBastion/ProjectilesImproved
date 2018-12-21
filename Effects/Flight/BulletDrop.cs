@@ -10,11 +10,11 @@ namespace ProjectilesImproved.Effects.Flight
     [ProtoContract]
     public class BulletDrop : IFlight
     {
-        public void Update(Bullet bullet)
+        public void Update(Projectile bullet)
         {
             ExternalForceData forceData = WorldPlanets.GetExternalForces(bullet.PositionMatrix.Translation);
 
-            bullet.Velocity = bullet.Velocity + (forceData.Gravity * bullet.CollisionEffect.BulletDropGravityScaler);
+            bullet.Velocity = bullet.Velocity + (forceData.Gravity * bullet.BulletDropGravityScaler);
             bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity - bullet.InitialGridVelocity);
 
             bullet.PositionMatrix.Translation += bullet.VelocityPerTick;
@@ -24,11 +24,6 @@ namespace ProjectilesImproved.Effects.Flight
             {
                 bullet.HasExpired = true;
             }
-        }
-
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
-        {
-            return;
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿using ProjectilesImproved.Effects.Collision;
+﻿using ProjectilesImproved.Definitions;
+using ProjectilesImproved.Effects.Collision;
 using ProjectilesImproved.Effects.Weapon;
 using ProtoBuf;
+using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using VRage.Game;
 using VRage.Utils;
 using VRageMath;
 
@@ -22,14 +25,85 @@ namespace ProjectilesImproved
 
         public const string Filename = "WeaponsOverhaul.cfg";
 
-        public static CollisionEffect GetAmmoEffect(string id)
+        public static void Init()
         {
-            if (AmmoEffectLookup.ContainsKey(id))
+            MergeSBCInfo();
+        }
+
+        private static void MergeSBCInfo()
+        {
+            foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
             {
-                return AmmoEffectLookup[id].Clone();
+                try
+                {
+                    if (def is MyProjectileAmmoDefinition)
+                    {
+                        MyProjectileAmmoDefinition p = def as MyProjectileAmmoDefinition;
+
+                        ProjectileDefinition SBCProjectile = new ProjectileDefinition
+                        {
+                            UseFromSBC = true,
+                            AmmoSubtypeId = p.Id.SubtypeId.String,
+                            DesiredSpeed = p.DesiredSpeed,
+                            SpeedVar = p.SpeedVar,
+                            MaxTrajectory = p.MaxTrajectory,
+                            BackkickForce = p.BackkickForce,
+                            Material = p.ProjectileTrailMaterial,
+                            ProjectileHitImpulse = p.ProjectileHitImpulse,
+                            ProjectileTrailScale = p.ProjectileTrailScale,
+                            ProjectileTrailColor = p.ProjectileTrailColor,
+                            ProjectileTrailProbability = p.ProjectileTrailProbability,
+                            ProjectileOnHitEffectName = p.ProjectileOnHitEffectName,
+                            ProjectileMassDamage = p.ProjectileMassDamage,
+                            ProjectileHealthDamage = p.ProjectileHealthDamage,
+                            ProjectileHeadShotDamage = p.ProjectileHeadShotDamage,
+                            HasBulletDrop = false,
+                            BulletDropGravityScaler = 0.3f,
+                            UseOverKillSpread = false,
+                            OverKillSpreadScaler = 1,
+                            IgnoreDamageReduction = false
+                        };
+
+                        if (ProjectileDefinitionLookup.ContainsKey(def.Id.SubtypeId.String))
+                        {
+                            ProjectileDefinition configProjectile = ProjectileDefinitionLookup[def.Id.SubtypeId.String];
+
+                            if (configProjectile.UseFromSBC)
+                            {
+                                SBCProjectile.HasBulletDrop = configProjectile.HasBulletDrop;
+                                SBCProjectile.BulletDropGravityScaler = configProjectile.BulletDropGravityScaler;
+                                SBCProjectile.UseOverKillSpread = configProjectile.UseOverKillSpread;
+                                SBCProjectile.OverKillSpreadScaler = configProjectile.OverKillSpreadScaler;
+                                SBCProjectile.IgnoreDamageReduction = configProjectile.IgnoreDamageReduction;
+                                SBCProjectile.Ricochet = (configProjectile.Ricochet == null) ? null : configProjectile.Ricochet.Clone();
+                                SBCProjectile.Penetration = (configProjectile.Penetration == null) ? null : configProjectile.Penetration.Clone();
+                                SBCProjectile.Explosive = (configProjectile.Explosive == null) ? null : configProjectile.Explosive.Clone();
+
+                                ProjectileDefinitionLookup[def.Id.SubtypeId.String] = SBCProjectile;
+                            }
+                        }
+                        else
+                        {
+                            ProjectileDefinitionLookup.Add(def.Id.SubtypeId.String, SBCProjectile);
+                        }
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    MyLog.Default.Error($"Failed to load definition: {def.Id.ToString()}\n{e.ToString()}");
+                }
+            }
+        }
+
+        public static ProjectileDefinition GetAmmoEffect(string id)
+        {
+            if (ProjectileDefinitionLookup.ContainsKey(id))
+            {
+                return ProjectileDefinitionLookup[id].Clone();
             }
 
-            return new CollisionEffect();
+            return new ProjectileDefinition();
         }
 
         public static WeaponEffect GetWeaponEffect(string id)
@@ -44,16 +118,17 @@ namespace ProjectilesImproved
         }
 
         [ProtoMember]
-        public List<WeaponEffect> WeaponEffects { get; set; } = new List<WeaponEffect>();
+        public List<WeaponEffect> WeaponDefinitions { get; set; } = new List<WeaponEffect>();
 
         [ProtoMember]
-        public List<CollisionEffect> AmmoEffects { get; set; } = new List<CollisionEffect>();
+        public List<ProjectileDefinition> ProjectileDefinitions { get; set; } = new List<ProjectileDefinition>();
 
-        public static Dictionary<string, CollisionEffect> AmmoEffectLookup { get; set; } = new Dictionary<string, CollisionEffect>
+        public static Dictionary<string, ProjectileDefinition> ProjectileDefinitionLookup { get; set; } = new Dictionary<string, ProjectileDefinition>
         {
-            { "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars", new CollisionEffect()
+            { "OKI230mmAmmoPars", new ProjectileDefinition()
                 {
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI230mmAmmoPars",
+                    UseFromSBC = true,
+                    AmmoSubtypeId = "OKI230mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
                     UseOverKillSpread = false,
@@ -62,36 +137,40 @@ namespace ProjectilesImproved
                 }
             },
             {
-                "MyObjectBuilder_AmmoDefinition/OKI76mmAmmoPars", new CollisionEffect()
+                "OKI76mmAmmoPars", new ProjectileDefinition()
                 {
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI76mmAmmoPars",
+                    UseFromSBC = true,
+                    AmmoSubtypeId = "OKI76mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
                     UseOverKillSpread = false,
                     Explosive = new Explosive() { Offset = 1f, Angle = 20,  Radius = 7f, Resolution = 1.2f }
                 }
             },
-            { "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars", new CollisionEffect()
+            { "OKI50mmAmmoPars", new ProjectileDefinition()
                 {
+                    UseFromSBC = true,
+                    AmmoSubtypeId = "OKI50mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
                     UseOverKillSpread = true,
                     OverKillSpreadScaler = 1,
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI50mmAmmoPars",
                 }
             },
-            { "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars", new CollisionEffect()
+            { "OKI23mmAmmoPars", new ProjectileDefinition()
                 {
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/OKI23mmAmmoPars",
+                    UseFromSBC = true,
+                    AmmoSubtypeId = "OKI23mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
                     Ricochet = new Ricochet { DeflectionAngle = 20, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 }
             },
             {
-               "MyObjectBuilder_AmmoDefinition/LargeCaliber", new CollisionEffect()
+               "LargeCaliber", new ProjectileDefinition()
                 {
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/LargeCaliber",
+                    UseFromSBC = true,
+                    AmmoSubtypeId = "LargeCaliber",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
                     UseOverKillSpread = true,
@@ -100,9 +179,10 @@ namespace ProjectilesImproved
                 }
             },
             {
-               "MyObjectBuilder_AmmoDefinition/SmallCaliber", new CollisionEffect()
+               "SmallCaliber", new ProjectileDefinition()
                 {
-                    AmmoId = "MyObjectBuilder_AmmoDefinition/SmallCaliber",
+                    UseFromSBC = true,
+                    AmmoSubtypeId = "SmallCaliber",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 0.3f,
                     UseOverKillSpread = false,
@@ -113,9 +193,9 @@ namespace ProjectilesImproved
 
         public static Dictionary<string, WeaponEffect> WeaponEffectLookup { get; set; } = new Dictionary<string, WeaponEffect>
         {
-            { "MyObjectBuilder_WeaponDefinition/OKI23mmDG", new WeaponEffect()
+            { "OKI23mmDG", new WeaponEffect()
                 {
-                    WeaponId = "MyObjectBuilder_WeaponDefinition/OKI23mmDG",
+                    WeaponId = "OKI23mmDG",
                     Ramping = new Ramping() { StartRPM = 200, MaxRPM = 1000, TimeToMax = 8000 }
                 }
             }
@@ -174,12 +254,12 @@ namespace ProjectilesImproved
             Settings s = new Settings();
             foreach (WeaponEffect w in WeaponEffectLookup.Values)
             {
-                s.WeaponEffects.Add(w);
+                s.WeaponDefinitions.Add(w);
             }
 
-            foreach (CollisionEffect a in AmmoEffectLookup.Values)
+            foreach (ProjectileDefinition a in ProjectileDefinitionLookup.Values)
             {
-                s.AmmoEffects.Add(a);
+                s.ProjectileDefinitions.Add(a);
             }
             return s;
         }
@@ -187,7 +267,7 @@ namespace ProjectilesImproved
         public static void SetNewSettings(Settings s)
         {
             WeaponEffectLookup.Clear();
-            foreach (WeaponEffect w in s.WeaponEffects)
+            foreach (WeaponEffect w in s.WeaponDefinitions)
             {
                 if (WeaponEffectLookup.ContainsKey(w.WeaponId.ToString()))
                 {
@@ -198,17 +278,19 @@ namespace ProjectilesImproved
                 WeaponEffectLookup.Add(w.WeaponId.ToString(), w);
             }
 
-            AmmoEffectLookup.Clear();
-            foreach (CollisionEffect a in s.AmmoEffects)
+            ProjectileDefinitionLookup.Clear();
+            foreach (ProjectileDefinition a in s.ProjectileDefinitions)
             {
-                if (AmmoEffectLookup.ContainsKey(a.AmmoId.ToString()))
+                if (ProjectileDefinitionLookup.ContainsKey(a.AmmoSubtypeId))
                 {
-                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{a.AmmoId}'. Already in dictionary");
+                    MyLog.Default.Warning($"[WeaponsOverhaul] Skipping '{a.AmmoSubtypeId}'. Already in dictionary");
                     continue;
                 }
 
-                AmmoEffectLookup.Add(a.AmmoId.ToString(), a);
+                ProjectileDefinitionLookup.Add(a.AmmoSubtypeId, a);
             }
+
+            MergeSBCInfo();
         }
 
     }

@@ -61,7 +61,7 @@ namespace ProjectilesImproved.Effects.Collision
 
         //private Stopwatch watch = new Stopwatch();
 
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {
             epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
             bullet.HasExpired = true;
@@ -106,7 +106,7 @@ namespace ProjectilesImproved.Effects.Collision
                 transformationMatrix.Translation = epicenter;
 
                 //watch.Start("Pull Rays");
-                ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoId.ToString(), transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
+                ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoSubtypeId, transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
                 //watch.Stop("Pull Rays");
 
                 //watch.Start("Get World Entities");
@@ -151,7 +151,7 @@ namespace ProjectilesImproved.Effects.Collision
                 //watch.Stop("Sort Hit Objects");
 
                 //watch.Start("Damage Time");
-                DamageBlocks(bullet.AmmoId.SubtypeId, bullet.BlockId);
+                DamageBlocks(MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), bullet.BlockId);
                 //watch.Stop("Damage Time");
                 //watch.Stop("Explode");
 
@@ -341,7 +341,7 @@ namespace ProjectilesImproved.Effects.Collision
             };
         }
 
-        public void Update(Bullet bullet)
+        public void Update(Projectile bullet)
         {
         }
     }

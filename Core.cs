@@ -7,6 +7,7 @@ using ModNetworkAPI;
 using ProjectilesImproved.Projectiles;
 using VRage.Game.ModAPI;
 using ProjectilesImproved.Effects.Collision;
+using Sandbox.Definitions;
 
 namespace ProjectilesImproved
 {
@@ -17,7 +18,7 @@ namespace ProjectilesImproved
         public bool SentInitialRequest = false;
         private int waitInterval = 0;
         public static event Action OnLoadComplete;
-        public static List<Bullet> ActiveProjectiles = new List<Bullet>();
+        public static List<Projectile> ActiveProjectiles = new List<Projectile>();
 
         public const string ModName = "Weapons Overhaul";
         public const ushort ModID = 4112;
@@ -84,12 +85,13 @@ namespace ProjectilesImproved
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
 
+            Settings.Init();
             OnLoadComplete?.Invoke();
             ExplosionShapeGenerator.Initialize();
             IsInitialized = true;
         }
 
-        public static void SpawnProjectile(Bullet data)
+        public static void SpawnProjectile(Projectile data)
         {
             ActiveProjectiles.Add(data);
         }
@@ -126,7 +128,7 @@ namespace ProjectilesImproved
                     continue;
                 }
 
-                Bullet bullet = ActiveProjectiles[i];
+                Projectile bullet = ActiveProjectiles[i];
 
                 if (!bullet.IsInitialized)
                 {

@@ -6,6 +6,7 @@ using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
+using VRage.Utils;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects.Collision
@@ -25,7 +26,7 @@ namespace ProjectilesImproved.Effects.Collision
         [ProtoMember(4)]
         public float RicochetChance { get; set; }
 
-        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Bullet bullet)
+        public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {
             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
             if (hit.HitEntity is IMyCubeGrid)
@@ -66,7 +67,7 @@ namespace ProjectilesImproved.Effects.Collision
                 float damage = bullet.ProjectileMassDamage * NotHitFraction * MaxDamageTransfer;
                 if (obj != null && MyAPIGateway.Session.IsServer)
                 {
-                    obj.DoDamage(damage, bullet.AmmoId.SubtypeId, true);
+                    obj.DoDamage(damage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true);
                 }
                 bullet.ProjectileMassDamage -= damage;
 
@@ -111,7 +112,7 @@ namespace ProjectilesImproved.Effects.Collision
             {
                 if (obj != null && MyAPIGateway.Session.IsServer)
                 {
-                    obj.DoDamage(bullet.ProjectileMassDamage, bullet.AmmoId.SubtypeId, true);
+                    obj.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true);
                 }
 
                 bullet.HasExpired = true;
@@ -129,7 +130,7 @@ namespace ProjectilesImproved.Effects.Collision
             };
         }
 
-        public void Update(Bullet bullet)
+        public void Update(Projectile bullet)
         {
         }
     }
