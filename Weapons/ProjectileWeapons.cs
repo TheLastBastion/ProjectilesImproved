@@ -325,31 +325,15 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
                     muzzleMatrix.Up);
 
-                ProjectileDefinition bulletData = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.ToString());
-
-                Projectile bullet = bulletData.CreateProjectile();
-
-                bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
-                bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed);
-                bullet.PositionMatrix = positionMatrix;
-
-
-                //Bullet fireData = new Bullet
-                //{
-                //    GridId = Cube.CubeGrid.EntityId,
-                //    BlockId = Entity.EntityId,
-                //    WeaponId = Id,
-                //    MagazineId = gun.GunBase.CurrentAmmoMagazineId,
-                //    AmmoId = gun.GunBase.CurrentAmmoDefinition.Id,
-                //    InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity,
-                //    Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed),
-                //    PositionMatrix = positionMatrix,
-                //    CollisionEffect = collisionEffect,
-                //    FlightEffect = flightEffect
-                //};
+                ProjectileDefinition bulletData = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId.String);
 
                 while (TimeTillNextShot >= 1)
                 {
+                    Projectile bullet = bulletData.CreateProjectile();
+                    bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
+                    bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed);
+                    bullet.PositionMatrix = positionMatrix;
+
                     Core.SpawnProjectile(bullet);
                     gun.GunBase.ConsumeAmmo();
                     TimeTillNextShot--;
@@ -364,8 +348,6 @@ namespace ProjectilesImproved.Weapons
                         CooldownTime = ReloadTime;
                         break;
                     }
-
-                    //positionMatrix.Translation += positionMatrix.Forward * (timeTillNextShot * 0.03);
                 }
 
                 var forceVector = -positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.BackkickForce;
