@@ -37,7 +37,7 @@ namespace ProjectilesImproved
                 MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} Type: {def.GetType()}");
                 try
                 {
-                    if (def is MyProjectileAmmoDefinition)
+                    if (def is MyAmmoDefinition && !(def as MyAmmoDefinition).IsExplosive)
                     {
                         MyProjectileAmmoDefinition p = def as MyProjectileAmmoDefinition;
 
