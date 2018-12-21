@@ -27,7 +27,7 @@ namespace ProjectilesImproved
 
         public static void Init()
         {
-            MergeSBCInfo();
+            DefaultSettings = GetCurrentSettings();
         }
 
         private static void MergeSBCInfo()
@@ -130,6 +130,8 @@ namespace ProjectilesImproved
 
         [ProtoMember]
         public List<ProjectileDefinition> ProjectileDefinitions { get; set; } = new List<ProjectileDefinition>();
+
+        private static Settings DefaultSettings = null;
 
         public static Dictionary<string, ProjectileDefinition> ProjectileDefinitionLookup { get; set; } = new Dictionary<string, ProjectileDefinition>
         {

@@ -7,7 +7,6 @@ using ModNetworkAPI;
 using ProjectilesImproved.Projectiles;
 using VRage.Game.ModAPI;
 using ProjectilesImproved.Effects.Collision;
-using Sandbox.Definitions;
 
 namespace ProjectilesImproved
 {
@@ -71,8 +70,7 @@ namespace ProjectilesImproved
                 }
             }
 
-            DefaultSettings = Settings.GetCurrentSettings();
-            Settings.Load();
+            Settings.Init();
             MyAPIGateway.Session.OnSessionReady += OnStartInit;
         }
 
@@ -85,7 +83,8 @@ namespace ProjectilesImproved
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
 
-            Settings.Init();
+            Settings.Load();
+
             OnLoadComplete?.Invoke();
             ExplosionShapeGenerator.Initialize();
             IsInitialized = true;
