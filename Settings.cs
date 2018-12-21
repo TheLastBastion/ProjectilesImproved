@@ -34,7 +34,7 @@ namespace ProjectilesImproved
         {
             foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
             {
-                MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} IsProjectile {def is MyProjectileAmmoDefinition}");
+                MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} Type: {def.GetType()}");
                 try
                 {
                     if (def is MyProjectileAmmoDefinition)
