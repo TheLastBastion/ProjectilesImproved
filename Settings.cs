@@ -45,7 +45,7 @@ namespace ProjectilesImproved
                         MyProjectileAmmoDefinition p = ammo as MyProjectileAmmoDefinition;
                         MyLog.Default.Info($"Trajectory: {p.MaxTrajectory} Mass Damage: {p.ProjectileMassDamage}");
 
-                        ProjectileDefinition SBCProjectile = new ProjectileDefinition
+                        ProjectileDefinition SBCProjectile = new ProjectileDefinition()
                         {
                             UseFromSBC = true,
                             AmmoSubtypeId = p.Id.SubtypeId.String,
@@ -68,6 +68,8 @@ namespace ProjectilesImproved
                             OverKillSpreadScaler = 1,
                             IgnoreDamageReduction = false
                         };
+
+                        MyLog.Default.Info($"Trajectory: {SBCProjectile.MaxTrajectory} Mass Damage: {SBCProjectile.ProjectileMassDamage}");
 
                         if (ProjectileDefinitionLookup.ContainsKey(def.Id.SubtypeId.String))
                         {

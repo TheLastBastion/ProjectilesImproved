@@ -83,7 +83,7 @@ namespace ProjectilesImproved.Definitions
 
         public ProjectileDefinition Clone()
         {
-            return new ProjectileDefinition
+            return new ProjectileDefinition()
             {
                 UseFromSBC = UseFromSBC,
                 AmmoSubtypeId = AmmoSubtypeId,
