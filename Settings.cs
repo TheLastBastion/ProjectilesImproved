@@ -37,10 +37,12 @@ namespace ProjectilesImproved
                 MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} Type: {def.GetType()}");
                 try
                 {
-                    if (def is MyAmmoDefinition && !(def as MyAmmoDefinition).IsExplosive)
+                    if (def is MyAmmoMagazineDefinition)
                     {
-                        MyProjectileAmmoDefinition p = def as MyProjectileAmmoDefinition;
+                        MyAmmoDefinition ammo = MyDefinitionManager.Static.GetAmmoDefinition((def as MyAmmoMagazineDefinition).AmmoDefinitionId);
+                        if (ammo.IsExplosive) continue;
 
+                        MyProjectileAmmoDefinition p = ammo as MyProjectileAmmoDefinition;
                         MyLog.Default.Info($"Trajectory: {p.MaxTrajectory} Mass Damage: {p.ProjectileMassDamage}");
 
                         ProjectileDefinition SBCProjectile = new ProjectileDefinition
