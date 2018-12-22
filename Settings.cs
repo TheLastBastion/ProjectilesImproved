@@ -223,17 +223,22 @@ namespace ProjectilesImproved
                     {
                         MyWeaponDefinition w = def as MyWeaponDefinition;
 
-                        List<MyDefinitionId> AmmoMagazinesId = new List<MyDefinitionId>();
-                        AmmoMagazinesId.AddArray(w.AmmoMagazinesId);
+                        //List<MyDefinitionId> AmmoMagazinesId = new List<MyDefinitionId>();
+                        //AmmoMagazinesId.AddArray(w.AmmoMagazinesId);
 
-                        List<MyWeaponAmmoData> WeaponAmmoDatas = new List<MyWeaponAmmoData>();
-                        WeaponAmmoDatas.AddArray(w.WeaponAmmoDatas);
+                        //List<MyWeaponAmmoData> WeaponAmmoDatas = new List<MyWeaponAmmoData>();
+                        //WeaponAmmoDatas.AddArray(w.WeaponAmmoDatas);
 
-                        List<MyWeaponEffect> WeaponEffects = new List<MyWeaponEffect>();
-                        WeaponEffects.AddArray(w.WeaponEffects);
+                        //List<MyWeaponEffect> WeaponEffects = new List<MyWeaponEffect>();
+                        //WeaponEffects.AddArray(w.WeaponEffects);
+
+                        MyAmmoMagazineDefinition mag = MyDefinitionManager.Static.GetAmmoMagazineDefinition(w.AmmoMagazinesId[0]);
+
+                        MyAmmoDefinition ammo = MyDefinitionManager.Static.GetAmmoDefinition(mag.AmmoDefinitionId);
 
                         WeaponDefinition SBCWeapon = new WeaponDefinition
                         {
+                            UseDefaultsFromSBC = true,
                             SubtypeId = w.Id.SubtypeId.String,
                             NoAmmoSound = w.NoAmmoSound,
                             ReloadSound = w.ReloadSound,
@@ -244,9 +249,9 @@ namespace ProjectilesImproved
                             UseDefaultMuzzleFlash = w.UseDefaultMuzzleFlash,
                             ReloadTime = w.ReloadTime,
                             DamageMultiplier = w.DamageMultiplier,
-                            AmmoMagazinesId = AmmoMagazinesId,
-                            WeaponAmmoDatas = WeaponAmmoDatas,
-                            WeaponEffects = WeaponEffects
+                            RateOfFire = w.WeaponAmmoDatas[(int)ammo.AmmoType].RateOfFire,
+                            ShootSound = w.WeaponAmmoDatas[(int)ammo.AmmoType].ShootSound,
+                            ShotsInBurst = w.WeaponAmmoDatas[(int)ammo.AmmoType].ShotsInBurst,
                         };
 
                         if (WeaponDefinitionLookup.ContainsKey(w.Id.SubtypeId.String))
