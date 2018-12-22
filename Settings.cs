@@ -222,9 +222,11 @@ namespace ProjectilesImproved
 
                 try
                 {
-                    if (def is MyWeaponDefinition)
+                    if (def is MyWeaponBlockDefinition)
                     {
-                        MyWeaponDefinition w = def as MyWeaponDefinition;
+                        MyWeaponBlockDefinition block = def as MyWeaponBlockDefinition;
+
+                        MyWeaponDefinition w = MyDefinitionManager.Static.GetWeaponDefinition(block.WeaponDefinitionId);
 
                         MyAmmoMagazineDefinition mag = MyDefinitionManager.Static.GetAmmoMagazineDefinition(w.AmmoMagazinesId[0]);
 
