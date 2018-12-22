@@ -102,7 +102,6 @@ namespace ProjectilesImproved
                     MyLog.Default.Error($"Failed to load definition: {def.Id.ToString()}\n{e.ToString()}");
                 }
             }
-            Save();
         }
 
         public static ProjectileDefinition GetAmmoEffect(string id)
