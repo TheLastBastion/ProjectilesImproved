@@ -217,9 +217,6 @@ namespace ProjectilesImproved
         {
             foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
             {
-
-                MyLog.Default.Info($"Definition: {def.GetType()}");
-
                 try
                 {
                     if (def is MyWeaponBlockDefinition)
@@ -231,6 +228,8 @@ namespace ProjectilesImproved
                         MyAmmoMagazineDefinition mag = MyDefinitionManager.Static.GetAmmoMagazineDefinition(w.AmmoMagazinesId[0]);
 
                         MyAmmoDefinition ammo = MyDefinitionManager.Static.GetAmmoDefinition(mag.AmmoDefinitionId);
+
+                        MyLog.Default.Info($"Weapon: {w.Id.SubtypeId.String} NoAmmoSound: {w.NoAmmoSound == null}");
 
                         WeaponDefinition SBCWeapon = new WeaponDefinition()
                         {
