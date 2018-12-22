@@ -224,6 +224,7 @@ namespace ProjectilesImproved
 
                     Settings s = MyAPIGateway.Utilities.SerializeFromXML<Settings>(text);
                     SetNewSettings(s);
+                    Save();
                 }
                 else
                 {

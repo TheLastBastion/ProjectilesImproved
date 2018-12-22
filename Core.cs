@@ -24,8 +24,6 @@ namespace ProjectilesImproved
 
         private NetworkAPI Network => NetworkAPI.Instance;
 
-        private Settings DefaultSettings = null;
-
         public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
         {
             if (!NetworkAPI.IsInitialized)
@@ -57,7 +55,7 @@ namespace ProjectilesImproved
 
                         Network.RegisterChatCommand("reset_default", (args) =>
                         {
-                            Settings.SetNewSettings(DefaultSettings);
+                            //Settings.SetNewSettings(DefaultSettings);
                             MyAPIGateway.Utilities.ShowMessage(ModName, "Reset default settings. This has not been saved yet.");
                         });
 
@@ -189,7 +187,7 @@ namespace ProjectilesImproved
         {
             if (IsAllowedSpecialOperations(steamId))
             {
-                Settings.SetNewSettings(DefaultSettings);
+                //Settings.SetNewSettings(DefaultSettings);
                 Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
             }
             else
