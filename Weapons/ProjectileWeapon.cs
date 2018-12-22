@@ -312,12 +312,12 @@ namespace ProjectilesImproved.Weapons
                 {
                     MatrixD positionMatrix = Matrix.CreateWorld(
                         muzzleMatrix.Translation,
-                        gun.GunBase.GetDeviatedVector(gun.GunBase.DeviateAngle, muzzleMatrix.Forward),
+                        gun.GunBase.GetDeviatedVector(Definition.DeviateShotAngle, muzzleMatrix.Forward),
                         muzzleMatrix.Up);
 
                     Projectile bullet = bulletData.CreateProjectile();
                     bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
-                    bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.DesiredSpeed);
+                    bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * bulletData.DesiredSpeed);
                     bullet.PositionMatrix = positionMatrix;
 
                     Core.SpawnProjectile(bullet);
@@ -327,7 +327,7 @@ namespace ProjectilesImproved.Weapons
                     soundEmitter.PlaySound(gun.GunBase.ShootSound, false, false, false, false, false, null);
 
                     CurrentShotInBurst++;
-                    if (CurrentShotInBurst == gun.GunBase.ShotsInBurst)
+                    if (CurrentShotInBurst == Definition.ShotsInBurst)
                     {
                         TimeTillNextShot = 0;
                         CurrentShotInBurst = 0;
@@ -335,7 +335,7 @@ namespace ProjectilesImproved.Weapons
                         break;
                     }
 
-                    var forceVector = -positionMatrix.Forward * gun.GunBase.CurrentAmmoDefinition.BackkickForce;
+                    var forceVector = -positionMatrix.Forward * bulletData.BackkickForce;
                     Block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, Block.WorldAABB.Center, null);
                 }
             }
