@@ -88,9 +88,9 @@ namespace ProjectilesImproved.Definitions
                 UseDefaultMuzzleFlash = UseDefaultMuzzleFlash,
                 ReloadTime = ReloadTime,
                 DamageMultiplier = DamageMultiplier,
-                AmmoMagazinesId = AmmoMagazinesId,
-                WeaponAmmoDatas = WeaponAmmoDatas,
-                WeaponEffects = WeaponEffects,
+                //AmmoMagazinesId = AmmoMagazinesId,
+                //WeaponAmmoDatas = WeaponAmmoDatas,
+                //WeaponEffects = WeaponEffects,
 
                 Ramping = (Ramping == null) ? null : Ramping.Clone()
             };
