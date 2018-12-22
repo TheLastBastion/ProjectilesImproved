@@ -217,6 +217,9 @@ namespace ProjectilesImproved
         {
             foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
             {
+
+                MyLog.Default.Info($"Definition: {def.GetType()}");
+
                 try
                 {
                     if (def is MyWeaponDefinition)
