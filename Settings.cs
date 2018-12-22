@@ -33,9 +33,10 @@ namespace ProjectilesImproved
 
         private static void MergeSBCInfo()
         {
+            MyLog.Default.Info($"Merge Start");
             foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
             {
-                MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} Type: {def.GetType()}");
+                //MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} Type: {def.GetType()}");
                 try
                 {
                     if (def is MyAmmoMagazineDefinition)
@@ -44,8 +45,6 @@ namespace ProjectilesImproved
                         if (ammo.IsExplosive) continue;
 
                         MyProjectileAmmoDefinition p = ammo as MyProjectileAmmoDefinition;
-                        MyLog.Default.Info($"Trajectory: {p.MaxTrajectory} Mass Damage: {p.ProjectileMassDamage}");
-
                         ProjectileDefinition SBCProjectile = new ProjectileDefinition()
                         {
                             UseFromSBC = true,
@@ -85,14 +84,14 @@ namespace ProjectilesImproved
                                 SBCProjectile.Penetration = (configProjectile.Penetration == null) ? null : configProjectile.Penetration.Clone();
                                 SBCProjectile.Explosive = (configProjectile.Explosive == null) ? null : configProjectile.Explosive.Clone();
 
-                                MyLog.Default.Info($"Trajectory: {SBCProjectile.MaxTrajectory} Mass Damage: {SBCProjectile.ProjectileMassDamage}");
                                 ProjectileDefinitionLookup[def.Id.SubtypeId.String] = SBCProjectile;
-                                MyLog.Default.Info($"Trajectory: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].MaxTrajectory} Mass Damage: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].ProjectileMassDamage}");
+                                MyLog.Default.Info($"Updateing Trajectory [{p.Id.SubtypeName}]: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].MaxTrajectory} Mass Damage: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].ProjectileMassDamage}");
                             }
                         }
                         else
                         {
                             ProjectileDefinitionLookup.Add(def.Id.SubtypeId.String, SBCProjectile);
+                            MyLog.Default.Info($"New Trajectory [{p.Id.SubtypeName}]: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].MaxTrajectory} Mass Damage: {ProjectileDefinitionLookup[def.Id.SubtypeId.String].ProjectileMassDamage}");
                         }
 
                     }
