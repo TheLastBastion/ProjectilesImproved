@@ -28,6 +28,7 @@ namespace ProjectilesImproved
         public static void Init()
         {
             DefaultSettings = GetCurrentSettings();
+            Load();
         }
 
         private static void MergeSBCInfo()
@@ -246,6 +247,7 @@ namespace ProjectilesImproved
                 try
                 {
                     MyLog.Default.Info("[WeaponsOverhaul] Saving Settings");
+                    MergeSBCInfo();
                     Settings s = GetCurrentSettings();
 
                     TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(Filename, typeof(Settings));

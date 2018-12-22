@@ -82,7 +82,6 @@ namespace ProjectilesImproved
         private void OnStartInit()
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
-
             Settings.Load();
 
             OnLoadComplete?.Invoke();
@@ -145,37 +144,6 @@ namespace ProjectilesImproved
                 bullet.Draw();
                 bullet.Update();
             }
-
-            //for (int i = 0; i < ActiveProjectiles.Count; i++)
-            //{
-            //    if (ActiveProjectiles[i].HasExpired)
-            //    {
-            //        ActiveProjectiles.RemoveAt(i);
-            //        i--;
-            //        continue;
-            //    }
-            //}
-
-            //MyAPIGateway.Parallel.For(0, ActiveProjectiles.Count, (i) =>
-            //{
-            //        BulletBase bullet = ActiveProjectiles[i];
-
-            //        if (!bullet.IsInitialized)
-            //        {
-            //            bullet.Init();
-            //        }
-
-            //        bullet.PreUpdate();
-
-            //        if (bullet.DoCollisionCheck())
-            //        {
-            //            bullet.PreCollitionDetection();
-            //            bullet.CollisionDetection();
-            //        }
-
-            //        bullet.Draw();
-            //        bullet.Update();
-            //}, 50);
         }
 
         private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)
