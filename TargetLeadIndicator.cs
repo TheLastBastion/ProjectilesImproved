@@ -126,7 +126,7 @@ namespace ProjectilesImproved
         {
             Vector3D current = new Vector3D(position); // current bullet poistion 
             Vector3D direction = Vector3D.Normalize(target - position); // direction the bullet is facing
-            Vector3D velocity = (direction * bulletSpeed) - gridVelocity; // starting bullet velocity
+            Vector3D velocity = (direction * bulletSpeed) + gridVelocity; // starting bullet velocity
 
             double speed = velocity.Length();
 
@@ -142,12 +142,12 @@ namespace ProjectilesImproved
             {
                 velocity = Vector3D.Normalize(velocity + gravity) * speed;
 
-                current += velocity;
+                current += velocity * Tools.Tick;
 
                 currentTick++;
             }
 
-            return target + ((current - target).Length() * -gravity);
+            return target + ((current - target).Length() * -Vector3D.Normalize(gravity));
 
         }
 
