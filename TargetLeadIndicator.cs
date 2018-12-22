@@ -111,9 +111,8 @@ namespace ProjectilesImproved
                     gridLoc);
 
                 interceptPoint = BulletDropAdjustment(
-                    CurrentData.PositionMatrix,
+                    CurrentData.Position,
                     interceptPoint,
-                    CurrentData.Velocity,
                     grid.Physics.LinearVelocity,
                     CurrentData.Ammo.BulletDropGravityScaler,
                     projectileSpeed,
