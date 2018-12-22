@@ -1,11 +1,8 @@
 ﻿using ProjectilesImproved.Effects.Weapon;
 using ProtoBuf;
 using Sandbox.Game.Entities;
-using System.Collections.Generic;
 using System.Xml.Serialization;
-using VRage.Game;
 using VRage.Utils;
-using static Sandbox.Definitions.MyWeaponDefinition;
 
 namespace ProjectilesImproved.Definitions
 {
@@ -88,9 +85,6 @@ namespace ProjectilesImproved.Definitions
                 UseDefaultMuzzleFlash = UseDefaultMuzzleFlash,
                 ReloadTime = ReloadTime,
                 DamageMultiplier = DamageMultiplier,
-                //AmmoMagazinesId = AmmoMagazinesId,
-                //WeaponAmmoDatas = WeaponAmmoDatas,
-                //WeaponEffects = WeaponEffects,
 
                 Ramping = (Ramping == null) ? null : Ramping.Clone()
             };

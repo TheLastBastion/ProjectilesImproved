@@ -223,20 +223,11 @@ namespace ProjectilesImproved
                     {
                         MyWeaponDefinition w = def as MyWeaponDefinition;
 
-                        //List<MyDefinitionId> AmmoMagazinesId = new List<MyDefinitionId>();
-                        //AmmoMagazinesId.AddArray(w.AmmoMagazinesId);
-
-                        //List<MyWeaponAmmoData> WeaponAmmoDatas = new List<MyWeaponAmmoData>();
-                        //WeaponAmmoDatas.AddArray(w.WeaponAmmoDatas);
-
-                        //List<MyWeaponEffect> WeaponEffects = new List<MyWeaponEffect>();
-                        //WeaponEffects.AddArray(w.WeaponEffects);
-
                         MyAmmoMagazineDefinition mag = MyDefinitionManager.Static.GetAmmoMagazineDefinition(w.AmmoMagazinesId[0]);
 
                         MyAmmoDefinition ammo = MyDefinitionManager.Static.GetAmmoDefinition(mag.AmmoDefinitionId);
 
-                        WeaponDefinition SBCWeapon = new WeaponDefinition
+                        WeaponDefinition SBCWeapon = new WeaponDefinition()
                         {
                             UseDefaultsFromSBC = true,
                             SubtypeId = w.Id.SubtypeId.String,
@@ -343,7 +334,7 @@ namespace ProjectilesImproved
             return new ProjectileDefinition();
         }
 
-        public static WeaponDefinition GetWeaponEffect(string id)
+        public static WeaponDefinition GetWeaponDefinition(string id)
         {
             if (WeaponDefinitionLookup.ContainsKey(id))
             {

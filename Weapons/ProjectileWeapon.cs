@@ -97,7 +97,7 @@ namespace ProjectilesImproved.Weapons
             {
                 Weapon = MyDefinitionManager.Static.GetWeaponDefinition((Block.SlimBlock.BlockDefinition as MyWeaponBlockDefinition).WeaponDefinitionId);
 
-                Definition = Settings.GetWeaponEffect(Weapon.Id.SubtypeId.String);
+                Definition = Settings.GetWeaponDefinition(Weapon.Id.SubtypeId.String);
                 GetMoreWeaponDef();
 
                 // Thanks for the help Digi
