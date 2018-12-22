@@ -125,7 +125,7 @@ namespace ProjectilesImproved
         public static Vector3D BulletDropAdjustment(Vector3D position, Vector3D target, Vector3D gridVelocity, float gravityScaler, float bulletSpeed, float maxTrajectory)
         {
             Vector3D current = new Vector3D(position); // current bullet poistion 
-            Vector3D direction = Vector3D.Normalize(position - target); // direction the bullet is facing
+            Vector3D direction = Vector3D.Normalize(target - position); // direction the bullet is facing
             Vector3D velocity = (direction * bulletSpeed) - gridVelocity; // starting bullet velocity
 
             double speed = velocity.Length();
@@ -134,12 +134,11 @@ namespace ProjectilesImproved
             Vector3D grav2 = WorldPlanets.GetExternalForces(target).Gravity;
             Vector3D gravity = (grav1 + grav2) * 0.5f * gravityScaler;
 
+            double distance = (target - position).LengthSquared();
             int maxTick = (int)(maxTrajectory / bulletSpeed) + 5;
             int currentTick = 0;
-            double distance = (position - target).LengthSquared();
 
-
-            while (distance > (position - current).LengthSquared() && maxTick > currentTick)
+            while (distance > (current - position).LengthSquared() && maxTick > currentTick)
             {
                 velocity = Vector3D.Normalize(velocity + gravity) * speed;
 
@@ -148,7 +147,7 @@ namespace ProjectilesImproved
                 currentTick++;
             }
 
-            return target + ((target - current).Length() * -gravity);
+            return target + ((current - target).Length() * -gravity);
 
         }
 
