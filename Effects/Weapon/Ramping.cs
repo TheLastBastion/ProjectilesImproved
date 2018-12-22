@@ -26,7 +26,7 @@ namespace ProjectilesImproved.Effects.Weapon
             };
         }
 
-        public bool Update(ProjectileWeapons weapon)
+        public bool Update(ProjectileWeapon weapon)
         {
             bool willShoot = true;
 
@@ -34,7 +34,7 @@ namespace ProjectilesImproved.Effects.Weapon
             // reduce cooldown and dont fire projectiles
             if (weapon.CooldownTime > 0)
             {
-                weapon.CooldownTime -= ProjectileWeapons.MillisecondPerFrame;
+                weapon.CooldownTime -= Tools.MillisecondPerFrame;
                 willShoot = false;
             }
 
@@ -60,7 +60,7 @@ namespace ProjectilesImproved.Effects.Weapon
                 // this makes sure the gun will fire instantly when fire condisions are met
                 if (weapon.TimeTillNextShot < 1)
                 {
-                    weapon.TimeTillNextShot += weapon.RateOfFire * ProjectileWeapons.FireRateMultiplayer;
+                    weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
                 }
 
                 if (weapon.TimeTillNextShot > 1)
@@ -73,10 +73,10 @@ namespace ProjectilesImproved.Effects.Weapon
 
             if (willShoot)
             {
-                weapon.RateOfFire = CurrentRPM();
-                weapon.TimeTillNextShot += weapon.RateOfFire * ProjectileWeapons.FireRateMultiplayer;
+                weapon.Definition.RateOfFire = CurrentRPM();
+                weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
 
-                currentTime += ProjectileWeapons.MillisecondPerFrame;
+                currentTime += Tools.MillisecondPerFrame;
                 if (currentTime > TimeToMax)
                 {
                     currentTime = TimeToMax;
@@ -84,7 +84,7 @@ namespace ProjectilesImproved.Effects.Weapon
             }
             else
             {
-                currentTime -= ProjectileWeapons.MillisecondPerFrame;
+                currentTime -= Tools.MillisecondPerFrame;
                 if (currentTime < 0)
                 {
                     currentTime = 0;

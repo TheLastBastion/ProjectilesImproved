@@ -67,7 +67,7 @@ namespace ProjectilesImproved.Effects.Collision
                 float damage = bullet.ProjectileMassDamage * NotHitFraction * MaxDamageTransfer;
                 if (obj != null && MyAPIGateway.Session.IsServer)
                 {
-                    obj.DoDamage(damage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true);
+                    obj.DoDamage(damage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
                 }
                 bullet.ProjectileMassDamage -= damage;
 
@@ -112,7 +112,7 @@ namespace ProjectilesImproved.Effects.Collision
             {
                 if (obj != null && MyAPIGateway.Session.IsServer)
                 {
-                    obj.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true);
+                    obj.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
                 }
 
                 bullet.HasExpired = true;

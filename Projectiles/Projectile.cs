@@ -168,7 +168,7 @@ namespace ProjectilesImproved.Projectiles
                         if (hit.HitEntity is IMyDestroyableObject)
                         {
                             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                            (hit.HitEntity as IMyDestroyableObject).DoDamage(ProjectileHealthDamage, MyStringHash.GetOrCompute(AmmoSubtypeId), true, default(MyHitInfo), BlockId);
+                            (hit.HitEntity as IMyDestroyableObject).DoDamage(ProjectileHealthDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), BlockId);
 
                             hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, PositionMatrix.Forward * ProjectileHitImpulse, hit.Position, null);
 
@@ -187,11 +187,11 @@ namespace ProjectilesImproved.Projectiles
                                 {
                                     float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                                    block.DoDamage(ProjectileMassDamage * mult, MyStringHash.GetOrCompute(AmmoSubtypeId), true, default(MyHitInfo), BlockId);
+                                    block.DoDamage(ProjectileMassDamage * mult, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), BlockId);
                                 }
                                 else
                                 {
-                                    block.DoDamage(ProjectileMassDamage, MyStringHash.GetOrCompute(AmmoSubtypeId), true, default(MyHitInfo), BlockId);
+                                    block.DoDamage(ProjectileMassDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), BlockId);
                                 }
 
                                 block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, PositionMatrix.Forward * ProjectileHitImpulse, hit.Position, null);

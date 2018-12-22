@@ -1,32 +1,22 @@
-﻿using ProjectilesImproved.Weapons;
+﻿using ProjectilesImproved.Definitions;
+using ProjectilesImproved.Weapons;
 using ProtoBuf;
 
 namespace ProjectilesImproved.Effects.Weapon
 {
     [ProtoContract]
-    public class WeaponEffect : IWeapon
+    public class DefaultWeaponEffect : IWeapon
     {
-        [ProtoMember]
-        public string WeaponId { get; set; }
 
-        [ProtoMember]
-        public Ramping Ramping { get; set; }
-
-        public bool Update(ProjectileWeapons weapon)
+        public bool Update(ProjectileWeapon weapon)
         {
-            if (Ramping != null)
-            {
-                return Ramping.Update(weapon);
-            }
-
-
             bool willShoot = true;
 
             // If cooldown is greater than 0 the gun is on cooldown and should not fire
             // reduce cooldown and dont fire projectiles
             if (weapon.CooldownTime > 0)
             {
-                weapon.CooldownTime -= ProjectileWeapons.MillisecondPerFrame;
+                weapon.CooldownTime -= Tools.MillisecondPerFrame;
                 willShoot = false;
             }
 
@@ -52,7 +42,7 @@ namespace ProjectilesImproved.Effects.Weapon
                 // this makes sure the gun will fire instantly when fire condisions are met
                 if (weapon.TimeTillNextShot < 1)
                 {
-                    weapon.TimeTillNextShot += weapon.RateOfFire * ProjectileWeapons.FireRateMultiplayer;
+                    weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
                 }
 
                 if (weapon.TimeTillNextShot > 1)
@@ -65,19 +55,10 @@ namespace ProjectilesImproved.Effects.Weapon
 
             if (willShoot)
             {
-                weapon.TimeTillNextShot += weapon.RateOfFire * ProjectileWeapons.FireRateMultiplayer;
+                weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
             }
 
             return willShoot;
-        }
-
-        public WeaponEffect Clone()
-        {
-            return new WeaponEffect
-            {
-                WeaponId = WeaponId,
-                Ramping = (Ramping == null) ? null : Ramping.Clone()
-            };
         }
     }
 }

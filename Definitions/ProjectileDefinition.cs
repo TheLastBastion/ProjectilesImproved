@@ -10,10 +10,10 @@ namespace ProjectilesImproved.Definitions
     public class ProjectileDefinition
     {
         [ProtoMember]
-        public bool UseFromSBC;
+        public bool UseDefaultsFromSBC;
 
         [ProtoMember]
-        public string AmmoSubtypeId;
+        public string SubtypeId;
 
         [ProtoMember]
         public float DesiredSpeed;
@@ -85,8 +85,8 @@ namespace ProjectilesImproved.Definitions
         {
             return new ProjectileDefinition()
             {
-                UseFromSBC = UseFromSBC,
-                AmmoSubtypeId = AmmoSubtypeId,
+                UseDefaultsFromSBC = UseDefaultsFromSBC,
+                SubtypeId = SubtypeId,
                 DesiredSpeed = DesiredSpeed,
                 SpeedVar = SpeedVar,
                 MaxTrajectory = MaxTrajectory,
@@ -117,8 +117,8 @@ namespace ProjectilesImproved.Definitions
         {
             return new Projectile
             {
-                UseFromSBC = UseFromSBC,
-                AmmoSubtypeId = AmmoSubtypeId,
+                UseDefaultsFromSBC = UseDefaultsFromSBC,
+                SubtypeId = SubtypeId,
                 DesiredSpeed = DesiredSpeed,
                 SpeedVar = SpeedVar,
                 MaxTrajectory = MaxTrajectory,

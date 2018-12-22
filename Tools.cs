@@ -10,6 +10,8 @@ namespace ProjectilesImproved
     {
 
         public const float Tick = 1f / 60f;
+        public const float MillisecondPerFrame = 1000f / 60f;
+        public const double FireRateMultiplayer = 1d / 60d / 60d;
 
         /// <summary>
         /// Gets the octant this vector occupies 

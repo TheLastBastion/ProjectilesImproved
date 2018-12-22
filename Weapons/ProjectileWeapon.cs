@@ -21,52 +21,41 @@ using VRageMath;
 namespace ProjectilesImproved.Weapons
 {
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LargeGatlingTurret), false)]
-    public class LargeTurret : ProjectileWeapons
+    public class LargeTurret : ProjectileWeapon
     {
     }
 
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_SmallGatlingGun), false)]
-    public class SmallGatling : ProjectileWeapons
+    public class SmallGatling : ProjectileWeapon
     {
     }
 
-    public class ProjectileWeapons : MyGameLogicComponent
+    public class ProjectileWeapon : MyGameLogicComponent
     {
-        public const float MillisecondPerFrame = 1000f / 60f;
-        public const double FireRateMultiplayer = 1d / 60d / 60d;
 
-        public bool ControlsUpdated = false;
+        public static DefaultWeaponEffect DefaultEffect = new DefaultWeaponEffect();
 
-        public IMyGunObject<MyGunBase> gun { get; private set; } = null;
+        public bool ControlsUpdated = false; // TODO: change this to static?
+
         public bool IsShooting => gun.IsShooting || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
 
-        public double TimeTillNextShot { get; set; } = 1d;
-        public int CurrentShotInBurst { get; set; } = 0;
-        public float CooldownTime { get; set; } = 0;
+        public  double TimeTillNextShot = 1d;
+        public int CurrentShotInBurst = 0;
+        public float CooldownTime = 0;
+        public int FirstTimeCooldown = 0;
 
-        public MyDefinitionId Id { get; private set; }
-        public int ReloadTime { get; set; }
-        public float DeviateShotAngle { get; set; }
-        public float ReleaseTimeAfterFire { get; set; }
-        public int MuzzleFlashLifeSpan { get; set; }
-        public float DamageMultiplier { get; set; }
+        public bool IsFixedGun = false;
+        public bool TerminalShooting = false;
 
-        public int RateOfFire { get; set; }
-        public int ShotsInBurst { get; set; }
-        public MySoundPair ShootSound { get; set; }
+        public IMyFunctionalBlock Block;
+        public IMyCubeBlock Cube;
+        public IMyGunObject<MyGunBase> gun;
 
-        public WeaponEffect WeaponEffect { get; private set; }
-
-        public MyWeaponDefinition Weapon { get; private set; } = null;
-        public IMyFunctionalBlock Block { get; private set; } = null;
-        public IMyCubeBlock Cube { get; private set; } = null;
-        public MyAmmoDefinition Ammo { get; private set; }
-
-        public bool IsFixedGun { get; private set; } = false;
-        public bool TerminalShooting { get; set; } = false;
+        private MyWeaponDefinition Weapon;
+        private MyAmmoDefinition Ammo;
+        public WeaponDefinition Definition;
 
         private MyEntity3DSoundEmitter soundEmitter;
-        private int FirstTimeCooldown = 0;
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
@@ -82,39 +71,33 @@ namespace ProjectilesImproved.Weapons
 
             if (!Core.IsInitialized)
             {
-                Core.OnLoadComplete += Init;
+                Core.OnLoadComplete += LoadComplete;
             }
             else
             {
                 OverrideDefaultControls();
-                getWeaponDef();
+                GetWeaponDef();
 
                 NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
             }
         }
 
-        private void Init()
+        private void LoadComplete()
         {
-            Core.OnLoadComplete -= Init;
+            Core.OnLoadComplete -= LoadComplete;
             OverrideDefaultControls();
-            getWeaponDef();
+            GetWeaponDef();
 
             NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
         }
 
-        private void getWeaponDef()
+        private void GetWeaponDef()
         {
             if (gun != null)
             {
                 Weapon = MyDefinitionManager.Static.GetWeaponDefinition((Block.SlimBlock.BlockDefinition as MyWeaponBlockDefinition).WeaponDefinitionId);
 
-                Id = Weapon.Id;
-                ReloadTime = Weapon.ReloadTime;
-                DeviateShotAngle = Weapon.DeviateShotAngle;
-                ReleaseTimeAfterFire = Weapon.ReleaseTimeAfterFire;
-                MuzzleFlashLifeSpan = Weapon.MuzzleFlashLifeSpan;
-                DamageMultiplier = Weapon.DamageMultiplier;
-
+                Definition = Settings.GetWeaponEffect(Weapon.Id.SubtypeId.String);
                 GetMoreWeaponDef();
 
                 // Thanks for the help Digi
@@ -127,11 +110,6 @@ namespace ProjectilesImproved.Weapons
 
                     ammoData.ShootIntervalInMiliseconds = int.MaxValue;
                 }
-
-
-                MyLog.Default.Info($"Count: {Settings.WeaponEffectLookup.Count}   Lookup: {Id.ToString()}   Contains: {Settings.WeaponEffectLookup.ContainsKey(Id.ToString())}");
-
-                WeaponEffect = Settings.GetWeaponEffect(Id.SubtypeId.String);
             }
         }
 
@@ -139,9 +117,9 @@ namespace ProjectilesImproved.Weapons
         {
             MyWeaponDefinition.MyWeaponAmmoData moreDetails = Weapon.WeaponAmmoDatas[GetAmmoLookup()];
 
-            RateOfFire = moreDetails.RateOfFire;
-            ShotsInBurst = moreDetails.ShotsInBurst;
-            ShootSound = moreDetails.ShootSound;
+            Definition.RateOfFire = moreDetails.RateOfFire;
+            Definition.ShotsInBurst = moreDetails.ShotsInBurst;
+            Definition.ShootSound = moreDetails.ShootSound;
         }
 
         private void OverrideDefaultControls()
@@ -168,7 +146,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            ProjectileWeapons weps = block.GameLogic as ProjectileWeapons;
+                            ProjectileWeapon weps = block.GameLogic as ProjectileWeapon;
                             MyAPIGateway.Utilities.ShowNotification($"shoot action", 500);
                             weps.TerminalShooting = !weps.TerminalShooting;
                         }
@@ -186,7 +164,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            ProjectileWeapons weapon = (block.GameLogic as ProjectileWeapons);
+                            ProjectileWeapon weapon = (block.GameLogic as ProjectileWeapon);
                             if (weapon.CooldownTime == 0 && weapon.TimeTillNextShot >= 1)
                             {
                                 weapon.FireWeapon();
@@ -205,7 +183,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            (block.GameLogic as ProjectileWeapons).TerminalShooting = true;
+                            (block.GameLogic as ProjectileWeapon).TerminalShooting = true;
                         }
                         catch
                         {
@@ -221,8 +199,8 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is ProjectileWeapons}", 500);
-                            (block.GameLogic as ProjectileWeapons).TerminalShooting = false;
+                            MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is ProjectileWeapon}", 500);
+                            (block.GameLogic as ProjectileWeapon).TerminalShooting = false;
                         }
                         catch
                         {
@@ -254,7 +232,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            (block.GameLogic as ProjectileWeapons).TerminalShooting = value;
+                            (block.GameLogic as ProjectileWeapon).TerminalShooting = value;
                         }
                         catch
                         {
@@ -266,7 +244,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         try
                         {
-                            return (block.GameLogic as ProjectileWeapons).TerminalShooting;
+                            return (block.GameLogic as ProjectileWeapon).TerminalShooting;
                         }
                         catch
                         {
@@ -280,7 +258,7 @@ namespace ProjectilesImproved.Weapons
 
         private void WeaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
         {
-            if ((block.GameLogic as ProjectileWeapons).TerminalShooting)
+            if ((block.GameLogic as ProjectileWeapon).TerminalShooting)
             {
                 str.Append("On");
             }
@@ -304,10 +282,18 @@ namespace ProjectilesImproved.Weapons
                 return;
             }
 
-            if (WeaponEffect.Update(this))
+            if (Definition.Ramping != null)
+            {
+                if (Definition.Ramping.Update(this))
+                {
+                    FireWeapon();
+                }
+            }
+            else if (DefaultEffect.Update(this))
             {
                 FireWeapon();
             }
+            
         }
 
         private void FireWeapon()
@@ -320,7 +306,7 @@ namespace ProjectilesImproved.Weapons
                 bonus.Rotate(muzzleMatrix);
                 muzzleMatrix.Translation += bonus;
 
-                ProjectileDefinition bulletData = Settings.GetAmmoEffect(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId.String);
+                ProjectileDefinition bulletData = Settings.GetAmmoDefinition(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId.String);
 
                 while (TimeTillNextShot >= 1)
                 {
@@ -345,7 +331,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         TimeTillNextShot = 0;
                         CurrentShotInBurst = 0;
-                        CooldownTime = ReloadTime;
+                        CooldownTime = Definition.ReloadTime;
                         break;
                     }
 

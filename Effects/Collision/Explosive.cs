@@ -106,7 +106,7 @@ namespace ProjectilesImproved.Effects.Collision
                 transformationMatrix.Translation = epicenter;
 
                 //watch.Start("Pull Rays");
-                ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.AmmoSubtypeId, transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
+                ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.SubtypeId, transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
                 //watch.Stop("Pull Rays");
 
                 //watch.Start("Get World Entities");
@@ -151,7 +151,7 @@ namespace ProjectilesImproved.Effects.Collision
                 //watch.Stop("Sort Hit Objects");
 
                 //watch.Start("Damage Time");
-                DamageBlocks(MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), bullet.BlockId);
+                DamageBlocks(MyStringHash.GetOrCompute(bullet.SubtypeId), bullet.BlockId);
                 //watch.Stop("Damage Time");
                 //watch.Stop("Explode");
 

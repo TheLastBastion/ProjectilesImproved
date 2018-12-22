@@ -12,7 +12,7 @@ using VRageMath;
 namespace ProjectilesImproved.Effects.Collision
 {
     [ProtoContract]
-    public class CollisionEffect : ICollision
+    public class DefaultCollisionEffect : ICollision
     {
         [ProtoMember(1)]
         public string AmmoId { get; set; }
@@ -63,7 +63,7 @@ namespace ProjectilesImproved.Effects.Collision
                 if (hit.HitEntity is IMyDestroyableObject)
                 {
                     IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                    (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                    (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
 
                     hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
 
@@ -82,11 +82,11 @@ namespace ProjectilesImproved.Effects.Collision
                         {
                             float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                            block.DoDamage(bullet.ProjectileMassDamage * mult, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                            block.DoDamage(bullet.ProjectileMassDamage * mult, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
                         }
                         else
                         {
-                            block.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.AmmoSubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                            block.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
                         }
 
                         block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
@@ -99,9 +99,9 @@ namespace ProjectilesImproved.Effects.Collision
             }
         }
 
-        public CollisionEffect Clone()
+        public DefaultCollisionEffect Clone()
         {
-            return new CollisionEffect
+            return new DefaultCollisionEffect
             {
                 AmmoId = AmmoId,
                 HasBulletDrop = HasBulletDrop,

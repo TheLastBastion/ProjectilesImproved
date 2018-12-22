@@ -7,6 +7,6 @@ namespace ProjectilesImproved.Effects.Weapon
 {
     public interface IWeapon
     {
-        bool Update(ProjectileWeapons weapon);
+        bool Update(ProjectileWeapon weapon);
     }
 }
