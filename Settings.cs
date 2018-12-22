@@ -26,6 +26,14 @@ namespace ProjectilesImproved
 
         public const string Filename = "WeaponsOverhaul.cfg";
 
+        public static Settings Instance = new Settings();
+
+        [ProtoMember]
+        public bool UseTurretLeadIndicators;
+
+        [ProtoMember]
+        public bool UseFixedGunLeadIndicators;
+
         [ProtoMember]
         public List<WeaponDefinition> WeaponDefinitions { get; set; } = new List<WeaponDefinition>();
 
@@ -205,6 +213,14 @@ namespace ProjectilesImproved
             }
 
             MergeSBCInfo();
+
+
+
+            Settings current = GetCurrentSettings();
+            current.UseTurretLeadIndicators = s.UseTurretLeadIndicators;
+            current.UseFixedGunLeadIndicators = s.UseFixedGunLeadIndicators;
+
+            Instance = current;
         }
 
         public static void Init()
@@ -228,8 +244,6 @@ namespace ProjectilesImproved
                         MyAmmoMagazineDefinition mag = MyDefinitionManager.Static.GetAmmoMagazineDefinition(w.AmmoMagazinesId[0]);
 
                         MyAmmoDefinition ammo = MyDefinitionManager.Static.GetAmmoDefinition(mag.AmmoDefinitionId);
-
-                        MyLog.Default.Info($"Weapon: {w.Id.SubtypeId.String} NoAmmoSound: {w.NoAmmoSound == null}");
 
                         WeaponDefinition SBCWeapon = new WeaponDefinition()
                         {
