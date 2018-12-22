@@ -36,7 +36,6 @@ namespace ProjectilesImproved
             MyLog.Default.Info($"Merge Start");
             foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
             {
-                //MyLog.Default.Info($"Definition: {def.Id.SubtypeId.String} Type: {def.GetType()}");
                 try
                 {
                     if (def is MyAmmoMagazineDefinition)
@@ -85,13 +84,11 @@ namespace ProjectilesImproved
                                 SBCProjectile.Explosive = (configProjectile.Explosive == null) ? null : configProjectile.Explosive.Clone();
 
                                 ProjectileDefinitionLookup[p.Id.SubtypeId.String] = SBCProjectile;
-                                MyLog.Default.Info($"Updateing Trajectory [{p.Id.SubtypeName}]: {ProjectileDefinitionLookup[p.Id.SubtypeId.String].MaxTrajectory} Mass Damage: {ProjectileDefinitionLookup[p.Id.SubtypeId.String].ProjectileMassDamage}");
                             }
                         }
                         else
                         {
                             ProjectileDefinitionLookup.Add(p.Id.SubtypeId.String, SBCProjectile);
-                            MyLog.Default.Info($"New Trajectory [{p.Id.SubtypeName}]: {ProjectileDefinitionLookup[p.Id.SubtypeId.String].MaxTrajectory} Mass Damage: {ProjectileDefinitionLookup[p.Id.SubtypeId.String].ProjectileMassDamage}");
                         }
 
                     }
