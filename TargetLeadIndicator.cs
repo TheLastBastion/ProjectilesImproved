@@ -110,8 +110,41 @@ namespace ProjectilesImproved
                     grid.Physics.LinearVelocity,
                     gridLoc);
 
+                interceptPoint = BulletDropAdjustment(
+                    CurrentData.PositionMatrix,
+                    interceptPoint,
+                    CurrentData.Velocity,
+                    grid.Physics.LinearVelocity,
+                    CurrentData.Ammo.BulletDropGravityScaler,
+                    projectileSpeed,
+                    CurrentData.Ammo.MaxTrajectory);
+
                 AddGPS(grid.EntityId, interceptPoint);
             }
+        }
+
+        public static Vector3D BulletDropAdjustment(MatrixD positionMatrix, Vector3D target, Vector3D velocity, Vector3D gridVelocity, float gravityScaler, float bulletSpeed, float maxTrajectory)
+        {
+            Vector3D current = new Vector3D(positionMatrix.Translation);
+
+            Vector3D grav1 = WorldPlanets.GetExternalForces(positionMatrix.Translation).Gravity;
+            Vector3D grav2 = WorldPlanets.GetExternalForces(target).Gravity;
+            Vector3D gravity = (grav1 + grav2) * 0.5f * gravityScaler;
+
+            int maxTick = (int)(maxTrajectory / bulletSpeed) + 5;
+            int currentTick = 0;
+            double distance = (positionMatrix.Translation - target).LengthSquared();
+
+            while (distance > (positionMatrix.Translation - current).LengthSquared() && maxTick > currentTick)
+            {
+                velocity = velocity + (gravity * gravityScaler);
+                positionMatrix.Forward = Vector3D.Normalize(velocity - gridVelocity);
+
+                positionMatrix.Translation += velocity * Tools.Tick;
+            }
+
+            return target + ((target - positionMatrix.Translation).Length() * -gravity);
+
         }
 
         public static bool GridHasHostileOwners(IMyCubeGrid grid)
@@ -200,6 +233,7 @@ namespace ProjectilesImproved
         public ProjectileDefinition Ammo = null;
         public Vector3D Position = Vector3D.Zero;
         public Vector3D Velocity = Vector3D.Zero;
+        public MatrixD PositionMatrix = MatrixD.Zero;
 
         internal Vector3D offset = Vector3D.Zero;
         internal int toolbarIndex = -1;
@@ -211,8 +245,9 @@ namespace ProjectilesImproved
                 if (block is IMyLargeTurretBase && Settings.Instance.UseTurretLeadIndicators)
                 {
                     IMyLargeTurretBase turret = block as IMyLargeTurretBase;
+                    IMyGunObject<MyGunBase> gun = (turret as IMyGunObject<MyGunBase>);
 
-                    MyAmmoDefinition ammo = (turret as IMyGunObject<MyGunBase>).GunBase.CurrentAmmoDefinition;
+                    MyAmmoDefinition ammo = gun.GunBase.CurrentAmmoDefinition;
 
                     ProjectileDefinition def = null;
 
@@ -226,6 +261,7 @@ namespace ProjectilesImproved
                         EntityId = turret.EntityId,
                         Position = turret.GetPosition(),
                         Velocity = turret.CubeGrid.Physics.LinearVelocity,
+                        PositionMatrix = gun.GunBase.GetMuzzleWorldMatrix(),
                         Ammo = def
                     };
                 }
@@ -282,6 +318,7 @@ namespace ProjectilesImproved
                     }
 
                     data.Position = data.Position - data.offset;
+                    data.PositionMatrix = MatrixD.CreateWorld(data.Position, cockpit.WorldMatrix.Forward, cockpit.WorldMatrix.Up);
                     return data;
                 }
             }

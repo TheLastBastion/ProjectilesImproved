@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using ProjectilesImproved.Effects;
-using ProjectilesImproved.Projectiles;
+﻿using ProjectilesImproved.Projectiles;
 using ProtoBuf;
-using VRage.Game.ModAPI;
 using VRageMath;
 
 namespace ProjectilesImproved.Effects.Flight

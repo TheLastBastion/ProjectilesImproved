@@ -174,6 +174,10 @@ namespace ProjectilesImproved
         public static Settings GetCurrentSettings()
         {
             Settings s = new Settings();
+
+            s.UseTurretLeadIndicators = Instance.UseTurretLeadIndicators;
+            s.UseFixedGunLeadIndicators = Instance.UseFixedGunLeadIndicators;
+
             foreach (WeaponDefinition w in WeaponDefinitionLookup.Values)
             {
                 s.WeaponDefinitions.Add(w);
