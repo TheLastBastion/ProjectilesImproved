@@ -48,11 +48,11 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public MyStringHash PhysicalMaterial;
 
-        public List<MyDefinitionId> AmmoMagazinesId = new List<MyDefinitionId>();
+        //public List<MyDefinitionId> AmmoMagazinesId = new List<MyDefinitionId>();
 
-        public List<MyWeaponAmmoData> WeaponAmmoDatas = new List<MyWeaponAmmoData>();
+        //public List<MyWeaponAmmoData> WeaponAmmoDatas = new List<MyWeaponAmmoData>();
 
-        public List<MyWeaponEffect> WeaponEffects = new List<MyWeaponEffect>();
+        //public List<MyWeaponEffect> WeaponEffects = new List<MyWeaponEffect>();
 
         [XmlIgnore]
         public int RateOfFire;
