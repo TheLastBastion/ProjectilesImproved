@@ -18,7 +18,7 @@ namespace ProjectilesImproved.Projectiles
         public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ?
             MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
 
-        public static MyStringId DefaultBullet = MyStringId.GetOrCompute("bullet");
+        public static MyStringId DefaultProjectileTrail = MyStringId.GetOrCompute("ProjectileTrailLine");
 
         public const float Tick = 1f / 60f;
         public Vector3D VelocityPerTick => Velocity * Tick;
@@ -97,7 +97,7 @@ namespace ProjectilesImproved.Projectiles
             float length = 20f * ProjectileTrailScale;
 
             MyTransparentGeometry.AddLineBillboard(
-                    string.IsNullOrWhiteSpace(Material) ? DefaultBullet : MyStringId.GetOrCompute(Material),
+                    string.IsNullOrWhiteSpace(Material) ? DefaultProjectileTrail : MyStringId.GetOrCompute(Material),
                     new Vector4(ProjectileTrailColor * 10f, 1f),
                     PositionMatrix.Translation + (PositionMatrix.Forward * length),
                     -PositionMatrix.Forward,
