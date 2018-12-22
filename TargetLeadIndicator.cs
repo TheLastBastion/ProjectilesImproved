@@ -123,27 +123,33 @@ namespace ProjectilesImproved
             }
         }
 
-        public static Vector3D BulletDropAdjustment(MatrixD positionMatrix, Vector3D target, Vector3D velocity, Vector3D gridVelocity, float gravityScaler, float bulletSpeed, float maxTrajectory)
+        public static Vector3D BulletDropAdjustment(Vector3D position, Vector3D target, Vector3D gridVelocity, float gravityScaler, float bulletSpeed, float maxTrajectory)
         {
-            Vector3D current = new Vector3D(positionMatrix.Translation);
+            Vector3D current = new Vector3D(position); // current bullet poistion 
+            Vector3D direction = Vector3D.Normalize(position - target); // direction the bullet is facing
+            Vector3D velocity = (direction * bulletSpeed) - gridVelocity; // starting bullet velocity
 
-            Vector3D grav1 = WorldPlanets.GetExternalForces(positionMatrix.Translation).Gravity;
+            double speed = velocity.Length();
+
+            Vector3D grav1 = WorldPlanets.GetExternalForces(position).Gravity;
             Vector3D grav2 = WorldPlanets.GetExternalForces(target).Gravity;
             Vector3D gravity = (grav1 + grav2) * 0.5f * gravityScaler;
 
             int maxTick = (int)(maxTrajectory / bulletSpeed) + 5;
             int currentTick = 0;
-            double distance = (positionMatrix.Translation - target).LengthSquared();
+            double distance = (position - target).LengthSquared();
 
-            while (distance > (positionMatrix.Translation - current).LengthSquared() && maxTick > currentTick)
+
+            while (distance > (position - current).LengthSquared() && maxTick > currentTick)
             {
-                velocity = velocity + (gravity * gravityScaler);
-                positionMatrix.Forward = Vector3D.Normalize(velocity - gridVelocity);
+                velocity = Vector3D.Normalize(velocity + gravity) * speed;
 
-                positionMatrix.Translation += velocity * Tools.Tick;
+                current += velocity;
+
+                currentTick++;
             }
 
-            return target + ((target - positionMatrix.Translation).Length() * -gravity);
+            return target + ((target - current).Length() * -gravity);
 
         }
 
