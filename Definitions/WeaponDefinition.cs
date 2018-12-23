@@ -16,13 +16,13 @@ namespace ProjectilesImproved.Definitions
         public string SubtypeId;
 
         [ProtoMember]
-        public MySoundPair NoAmmoSound;
+        public string NoAmmoSound;
 
         [ProtoMember]
-        public MySoundPair ReloadSound;
+        public string ReloadSound;
 
         [ProtoMember]
-        public MySoundPair SecondarySound;
+        public string SecondarySound;
 
         [ProtoMember]
         public float DeviateShotAngle;

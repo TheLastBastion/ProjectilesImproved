@@ -253,9 +253,9 @@ namespace ProjectilesImproved
                         {
                             UseDefaultsFromSBC = true,
                             SubtypeId = w.Id.SubtypeId.String,
-                            NoAmmoSound = w.NoAmmoSound,
-                            ReloadSound = w.ReloadSound,
-                            SecondarySound = w.SecondarySound,
+                            //NoAmmoSound = w.NoAmmoSound,
+                            //ReloadSound = w.ReloadSound,
+                            //SecondarySound = w.SecondarySound,
                             DeviateShotAngle = w.DeviateShotAngle,
                             ReleaseTimeAfterFire = w.ReleaseTimeAfterFire,
                             MuzzleFlashLifeSpan = w.MuzzleFlashLifeSpan,
