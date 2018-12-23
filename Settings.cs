@@ -112,10 +112,10 @@ namespace ProjectilesImproved
 
         public static Dictionary<string, WeaponDefinition> WeaponDefinitionLookup { get; set; } = new Dictionary<string, WeaponDefinition>
         {
-            { "OKI23mmDG", new WeaponDefinition()
+            { "PDCTurret", new WeaponDefinition()
                 {
                     UseDefaultsFromSBC = true,
-                    SubtypeId = "OKI23mmDG",
+                    SubtypeId = "PDCTurret",
                     Ramping = new Ramping() { StartRPM = 1, MaxRPM = 2000, TimeToMax = 25000, RampDownScaler = 5f }
                 }
             }
