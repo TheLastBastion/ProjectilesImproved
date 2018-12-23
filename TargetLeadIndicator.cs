@@ -165,15 +165,14 @@ namespace ProjectilesImproved
             if (hasBulletDrop)
             {
                 Vector3D current = shooterPosition;
+                double distance = directHeading.LengthSquared();
 
-                double distance = (target - shooterPosition).LengthSquared();
-                int currentStep = 0;
-
-                Vector3D velocity = (directHeading * projectileSpeed) + shooterVelocity; // starting bullet velocity
+                Vector3D velocity = (directHeadingNorm * projectileSpeed) + shooterVelocity; // starting bullet velocity
                 Vector3D grav1 = WorldPlanets.GetExternalForces(shooterPosition).Gravity;
-                Vector3D grav2 = WorldPlanets.GetExternalForces(target).Gravity;
+                Vector3D grav2 = WorldPlanets.GetExternalForces(targetPos).Gravity;
                 Vector3D gravity = (grav1 + grav2) * 0.5f * gravityScaler;
 
+                int currentStep = 0;
                 while (distance > (current - shooterPosition).LengthSquared() && maxPredictionSteps > currentStep)
                 {
                     velocity += gravity * Tools.Tick;
