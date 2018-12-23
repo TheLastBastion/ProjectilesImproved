@@ -49,7 +49,7 @@ namespace ProjectilesImproved
                     UseDefaultsFromSBC = true,
                     SubtypeId = "OKI230mmAmmoPars",
                     HasBulletDrop = true,
-                    BulletDropGravityScaler = 0.3f,
+                    BulletDropGravityScaler = 1f,
                     UseOverKillSpread = false,
                     IgnoreDamageReduction = true,
                     Penetration = new Penetration() { VelocityDecreasePerHp = 0 },
@@ -61,9 +61,9 @@ namespace ProjectilesImproved
                     UseDefaultsFromSBC = true,
                     SubtypeId = "OKI76mmAmmoPars",
                     HasBulletDrop = true,
-                    BulletDropGravityScaler = 0.3f,
+                    BulletDropGravityScaler = 1f,
                     UseOverKillSpread = false,
-                    Explosive = new Explosive() { Offset = 1f, Angle = 20,  Radius = 7f, Resolution = 1.2f }
+                    //Explosive = new Explosive() { Offset = 1f, Angle = 20,  Radius = 7f, Resolution = 1.2f }
                 }
             },
             { "OKI50mmAmmoPars", new ProjectileDefinition()
@@ -71,7 +71,7 @@ namespace ProjectilesImproved
                     UseDefaultsFromSBC = true,
                     SubtypeId = "OKI50mmAmmoPars",
                     HasBulletDrop = true,
-                    BulletDropGravityScaler = 0.3f,
+                    BulletDropGravityScaler = 1f,
                     UseOverKillSpread = true,
                     OverKillSpreadScaler = 1,
                 }
@@ -81,8 +81,8 @@ namespace ProjectilesImproved
                     UseDefaultsFromSBC = true,
                     SubtypeId = "OKI23mmAmmoPars",
                     HasBulletDrop = true,
-                    BulletDropGravityScaler = 0.3f,
-                    Ricochet = new Ricochet { DeflectionAngle = 20, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
+                    BulletDropGravityScaler = 1f,
+                    Ricochet = new Ricochet { DeflectionAngle = 45, MaxDamageTransfer = 0.5f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 }
             },
             {
@@ -94,7 +94,7 @@ namespace ProjectilesImproved
                     BulletDropGravityScaler = 0.3f,
                     UseOverKillSpread = true,
                     OverKillSpreadScaler = 1,
-                    Ricochet = new Ricochet { DeflectionAngle = 45, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.35f },
+                    Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.5f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 }
             },
             {
@@ -116,7 +116,7 @@ namespace ProjectilesImproved
                 {
                     UseDefaultsFromSBC = true,
                     SubtypeId = "OKI23mmDG",
-                    Ramping = new Ramping() { StartRPM = 200, MaxRPM = 1000, TimeToMax = 8000 }
+                    Ramping = new Ramping() { StartRPM = 1, MaxRPM = 1500, TimeToMax = 15000, RampDownScaler = 1.3f }
                 }
             }
         };

@@ -8,11 +8,22 @@ namespace ProjectilesImproved.Effects.Weapon
     {
         [ProtoMember]
         public float StartRPM;
+
         [ProtoMember]
         public float MaxRPM;
 
         [ProtoMember]
         public float TimeToMax; // in miliseconds
+
+        [ProtoMember]
+        public float RampDownScaler
+        {
+            get { return rampDownScaler; }
+            set { rampDownScaler = (value <= 0) ? 1 : value; }
+        }
+
+        private float rampDownScaler;
+
 
         private float currentTime = 0; // in miliseconds
 
@@ -22,7 +33,8 @@ namespace ProjectilesImproved.Effects.Weapon
             {
                 StartRPM = StartRPM,
                 MaxRPM = MaxRPM,
-                TimeToMax = TimeToMax
+                TimeToMax = TimeToMax,
+                RampDownScaler = RampDownScaler
             };
         }
 
@@ -84,7 +96,7 @@ namespace ProjectilesImproved.Effects.Weapon
             }
             else
             {
-                currentTime -= Tools.MillisecondPerFrame;
+                currentTime -= (Tools.MillisecondPerFrame * RampDownScaler);
                 if (currentTime < 0)
                 {
                     currentTime = 0;
