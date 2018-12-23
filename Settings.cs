@@ -12,7 +12,6 @@ using System.Xml.Serialization;
 using VRage.Game;
 using VRage.Utils;
 using VRageMath;
-using static Sandbox.Definitions.MyWeaponDefinition;
 
 namespace ProjectilesImproved
 {
@@ -226,13 +225,9 @@ namespace ProjectilesImproved
             MergeSBCInfo();
 
             Settings current = GetCurrentSettings();
+            current.HasBeenSetByServer = true;
             current.UseTurretLeadIndicators = s.UseTurretLeadIndicators;
             current.UseFixedGunLeadIndicators = s.UseFixedGunLeadIndicators;
-
-            if (NetworkAPI.Instance.NetworkType == NetworkTypes.Client)
-            {
-                current.HasBeenSetByServer = true;
-            }
 
             Instance = current;
         }
