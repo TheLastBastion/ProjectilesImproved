@@ -175,7 +175,7 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 Settings.Save();
-                Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+                Network.SendCommand(null, "Settings Saved", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
             }
             else
             {

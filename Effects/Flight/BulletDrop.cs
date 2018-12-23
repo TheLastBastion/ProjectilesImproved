@@ -14,7 +14,7 @@ namespace ProjectilesImproved.Effects.Flight
             bullet.Velocity += (forceData.Gravity * bullet.BulletDropGravityScaler) * Tools.Tick;
             bullet.PositionMatrix.Translation += bullet.Velocity * Tools.Tick;
 
-            //bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity - bullet.InitialGridVelocity);
+            bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity - bullet.InitialGridVelocity);
             bullet.DistanceTraveled += bullet.VelocityPerTick.LengthSquared();
 
             if (bullet.IsAtRange)
