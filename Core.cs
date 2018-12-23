@@ -73,6 +73,10 @@ namespace ProjectilesImproved
 
         public override void BeforeStart()
         {
+            if (Network.NetworkType == NetworkTypes.Client)
+            {
+                Network.SendCommand("update");
+            }
             Settings.Init();
             //Settings.Load();
         }
@@ -167,7 +171,7 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 Settings.Load();
-                Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+                Network.SendCommand(null, "New weapon settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
             }
             else
             {
@@ -180,7 +184,7 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 Settings.Save();
-                Network.SendCommand(null, "Settings Saved", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+                Network.SendCommand(null, "Settings Saved", /*MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()),*/ steamId: steamId);
             }
             else
             {
@@ -193,7 +197,7 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 //Settings.SetNewSettings(DefaultSettings);
-                Network.SendCommand(null, "Settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+                Network.SendCommand(null, "Default weapon settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
             }
             else
             {

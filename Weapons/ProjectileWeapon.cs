@@ -1,4 +1,5 @@
-﻿using ProjectilesImproved.Definitions;
+﻿using ModNetworkAPI;
+using ProjectilesImproved.Definitions;
 using ProjectilesImproved.Effects.Weapon;
 using ProjectilesImproved.Projectiles;
 using Sandbox.Common.ObjectBuilders;
@@ -55,6 +56,8 @@ namespace ProjectilesImproved.Weapons
         public WeaponDefinition Definition;
 
         private MyEntity3DSoundEmitter soundEmitter;
+
+        private int retry = 0;
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
@@ -297,6 +300,19 @@ namespace ProjectilesImproved.Weapons
 
         private void FireWeapon()
         {
+            // makes sure clients have gotten the update
+            if (!Settings.Instance.HasBeenSetByServer)
+            {
+                if (retry == 0)
+                {
+                    NetworkAPI.Instance.SendCommand("update");
+                    retry = 300;
+                }
+
+                retry--;
+                return;
+            }
+
             if (TimeTillNextShot >= 1)
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();

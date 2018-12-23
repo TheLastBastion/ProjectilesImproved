@@ -1,4 +1,5 @@
-﻿using ProjectilesImproved.Definitions;
+﻿using ModNetworkAPI;
+using ProjectilesImproved.Definitions;
 using ProjectilesImproved.Effects.Collision;
 using ProjectilesImproved.Effects.Weapon;
 using ProtoBuf;
@@ -7,6 +8,7 @@ using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml.Serialization;
 using VRage.Game;
 using VRage.Utils;
 using VRageMath;
@@ -27,6 +29,9 @@ namespace ProjectilesImproved
         public const string Filename = "WeaponsOverhaul.cfg";
 
         public static Settings Instance = new Settings();
+
+        [XmlIgnore]
+        public bool HasBeenSetByServer;
 
         [ProtoMember]
         public bool UseTurretLeadIndicators;
@@ -220,11 +225,14 @@ namespace ProjectilesImproved
 
             MergeSBCInfo();
 
-
-
             Settings current = GetCurrentSettings();
             current.UseTurretLeadIndicators = s.UseTurretLeadIndicators;
             current.UseFixedGunLeadIndicators = s.UseFixedGunLeadIndicators;
+
+            if (NetworkAPI.Instance.NetworkType == NetworkTypes.Client)
+            {
+                current.HasBeenSetByServer = true;
+            }
 
             Instance = current;
         }
