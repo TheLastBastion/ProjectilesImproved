@@ -110,13 +110,16 @@ namespace ProjectilesImproved
                     grid.Physics.LinearVelocity,
                     gridLoc);
 
-                interceptPoint = BulletDropAdjustment(
-                    CurrentData.Position,
-                    interceptPoint,
-                    grid.Physics.LinearVelocity,
-                    CurrentData.Ammo.BulletDropGravityScaler,
-                    projectileSpeed,
-                    CurrentData.Ammo.MaxTrajectory);
+                if (CurrentData.Ammo.HasBulletDrop)
+                {
+                    interceptPoint = BulletDropAdjustment(
+                        CurrentData.Position,
+                        interceptPoint,
+                        grid.Physics.LinearVelocity,
+                        CurrentData.Ammo.BulletDropGravityScaler,
+                        projectileSpeed,
+                        CurrentData.Ammo.MaxTrajectory);
+                }
 
                 AddGPS(grid.EntityId, interceptPoint);
             }
@@ -140,10 +143,8 @@ namespace ProjectilesImproved
 
             while (distance > (current - position).LengthSquared() && maxTick > currentTick)
             {
-                velocity = Vector3D.Normalize(velocity + gravity) * speed;
-
+                velocity += gravity * Tools.Tick;
                 current += velocity * Tools.Tick;
-
                 currentTick++;
             }
 

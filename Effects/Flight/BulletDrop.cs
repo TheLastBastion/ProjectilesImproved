@@ -11,10 +11,10 @@ namespace ProjectilesImproved.Effects.Flight
         {
             ExternalForceData forceData = WorldPlanets.GetExternalForces(bullet.PositionMatrix.Translation);
 
-            bullet.Velocity = bullet.Velocity + (forceData.Gravity * bullet.BulletDropGravityScaler);
-            bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity - bullet.InitialGridVelocity);
-
+            bullet.Velocity += (forceData.Gravity * bullet.BulletDropGravityScaler) * Tools.Tick;
             bullet.PositionMatrix.Translation += bullet.VelocityPerTick;
+
+            bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity - bullet.InitialGridVelocity);
             bullet.DistanceTraveled += bullet.VelocityPerTick.LengthSquared();
 
             if (bullet.IsAtRange)
