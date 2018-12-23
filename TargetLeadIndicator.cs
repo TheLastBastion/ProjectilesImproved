@@ -108,48 +108,13 @@ namespace ProjectilesImproved
                     CurrentData.Velocity,
                     CurrentData.Position,
                     grid.Physics.LinearVelocity,
-                    gridLoc);
-
-                if (CurrentData.Ammo.HasBulletDrop)
-                {
-                    interceptPoint = BulletDropAdjustment(
-                        CurrentData.Position,
-                        interceptPoint,
-                        grid.Physics.LinearVelocity,
-                        CurrentData.Ammo.BulletDropGravityScaler,
-                        projectileSpeed,
-                        CurrentData.Ammo.MaxTrajectory);
-                }
+                    gridLoc,
+                    CurrentData.Ammo.HasBulletDrop,
+                    CurrentData.Ammo.BulletDropGravityScaler,
+                    (int)(CurrentData.Ammo.MaxTrajectory / projectileSpeed));
 
                 AddGPS(grid.EntityId, interceptPoint);
             }
-        }
-
-        public static Vector3D BulletDropAdjustment(Vector3D position, Vector3D target, Vector3D gridVelocity, float gravityScaler, float bulletSpeed, float maxTrajectory)
-        {
-            Vector3D current = new Vector3D(position); // current bullet poistion 
-            Vector3D direction = Vector3D.Normalize(target - position); // direction the bullet is facing
-            Vector3D velocity = (direction * bulletSpeed) + gridVelocity; // starting bullet velocity
-
-            double speed = velocity.Length();
-
-            Vector3D grav1 = WorldPlanets.GetExternalForces(position).Gravity;
-            Vector3D grav2 = WorldPlanets.GetExternalForces(target).Gravity;
-            Vector3D gravity = (grav1 + grav2) * 0.5f * gravityScaler;
-
-            double distance = (target - position).LengthSquared();
-            int maxTick = (int)(maxTrajectory / bulletSpeed) + 5;
-            int currentTick = 0;
-
-            while (distance > (current - position).LengthSquared() && maxTick > currentTick)
-            {
-                velocity += gravity * Tools.Tick;
-                current += velocity * Tools.Tick;
-                currentTick++;
-            }
-
-            return target + ((current - target).Length() * -Vector3D.Normalize(gravity));
-
         }
 
         public static bool GridHasHostileOwners(IMyCubeGrid grid)
@@ -174,6 +139,9 @@ namespace ProjectilesImproved
             Vector3D shooterPosition,
             Vector3D targetVelocity,
             Vector3D targetPos,
+            bool hasBulletDrop,
+            float gravityScaler,
+            int maxPredictionSteps,
             double interceptPointMultiplier = 1)
         {
             var directHeading = targetPos - shooterPosition;
@@ -192,7 +160,31 @@ namespace ProjectilesImproved
 
             var timeToIntercept = interceptPointMultiplier * Math.Abs(Vector3D.Dot(directHeading, directHeadingNorm)) / Vector3D.Dot(projectileForwardVelocity, directHeadingNorm);
 
-            return shooterPosition + timeToIntercept * (projectileForwardVelocity + normalVelocity);
+            Vector3D target = shooterPosition + timeToIntercept * (projectileForwardVelocity + normalVelocity);
+
+            if (hasBulletDrop)
+            {
+                Vector3D current = shooterPosition;
+
+                double distance = (target - shooterPosition).LengthSquared();
+                int currentStep = 0;
+
+                Vector3D velocity = (directHeading * projectileSpeed) + shooterVelocity; // starting bullet velocity
+                Vector3D grav1 = WorldPlanets.GetExternalForces(shooterPosition).Gravity;
+                Vector3D grav2 = WorldPlanets.GetExternalForces(target).Gravity;
+                Vector3D gravity = (grav1 + grav2) * 0.5f * gravityScaler;
+
+                while (distance > (current - shooterPosition).LengthSquared() && maxPredictionSteps > currentStep)
+                {
+                    velocity += gravity * Tools.Tick;
+                    current += velocity * Tools.Tick;
+                    currentStep++;
+                }
+
+                return target + ((current - target).Length() * -Vector3D.Normalize(gravity));
+            }
+
+            return target;
         }
 
         private void AddGPS(long gridId, Vector3D target)
@@ -238,7 +230,6 @@ namespace ProjectilesImproved
         public ProjectileDefinition Ammo = null;
         public Vector3D Position = Vector3D.Zero;
         public Vector3D Velocity = Vector3D.Zero;
-        public MatrixD PositionMatrix = MatrixD.Zero;
 
         internal Vector3D offset = Vector3D.Zero;
         internal int toolbarIndex = -1;
@@ -266,7 +257,6 @@ namespace ProjectilesImproved
                         EntityId = turret.EntityId,
                         Position = turret.GetPosition(),
                         Velocity = turret.CubeGrid.Physics.LinearVelocity,
-                        PositionMatrix = gun.GunBase.GetMuzzleWorldMatrix(),
                         Ammo = def
                     };
                 }
@@ -323,7 +313,6 @@ namespace ProjectilesImproved
                     }
 
                     data.Position = data.Position - data.offset;
-                    data.PositionMatrix = MatrixD.CreateWorld(data.Position, cockpit.WorldMatrix.Forward, cockpit.WorldMatrix.Up);
                     return data;
                 }
             }
