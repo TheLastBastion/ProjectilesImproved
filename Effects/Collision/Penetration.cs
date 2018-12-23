@@ -14,8 +14,13 @@ namespace ProjectilesImproved.Effects.Collision
     [ProtoContract]
     public class Penetration : ICollision
     {
+        private float velocityDecreasePerHp;
         [ProtoMember]
-        public float VelocityDecreasePerHp { get; set; }
+        public float VelocityDecreasePerHp
+        {
+            get { return velocityDecreasePerHp; }
+            set { velocityDecreasePerHp = (value >= 0) ? value : 0;  }
+        }
 
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {

@@ -14,17 +14,94 @@ namespace ProjectilesImproved.Effects.Collision
     [ProtoContract]
     public class Ricochet : ICollision
     {
-        [ProtoMember(1)]
-        public float DeflectionAngle { get; set; }
+        private float deflectionAngle;
+        [ProtoMember]
+        public float DeflectionAngle
+        {
+            get { return deflectionAngle; }
+            set
+            {
+                if (value < 0)
+                {
+                    deflectionAngle = 0;
+                }
+                else if (value > 90)
+                {
+                    deflectionAngle = 90;
+                }
+                else
+                {
+                    deflectionAngle = value;
+                }
+            }
+        }
 
-        [ProtoMember(2)]
-        public float MaxVelocityTransfer { get; set; }
+        private float maxVelocityTransfer;
+        [ProtoMember]
+        public float MaxVelocityTransfer
+        {
+            get { return maxVelocityTransfer; }
+            set
+            {
+                if (value < 0)
+                {
+                    maxVelocityTransfer = 0;
+                }
+                else if (value > 1)
+                {
+                    maxVelocityTransfer = 1;
+                }
+                else
+                {
+                    maxVelocityTransfer = value;
+                }
+            }
+        }
 
-        [ProtoMember(3)]
-        public float MaxDamageTransfer { get; set; }
+        private float maxDamageTransfer;
+        [ProtoMember]
+        public float MaxDamageTransfer
+        {
+            get { return maxDamageTransfer; }
+            set
+            {
+                if (value < 0)
+                {
+                    maxDamageTransfer = 0;
+                }
+                else if (value > 1)
+                {
+                    maxDamageTransfer = 1;
+                }
+                else
+                {
+                    maxDamageTransfer = value;
+                }
+            }
+        }
 
-        [ProtoMember(4)]
-        public float RicochetChance { get; set; }
+        private float ricochetChance;
+        [ProtoMember]
+        public float RicochetChance
+        {
+            get { return ricochetChance; }
+            set
+            {
+                if (value < 0)
+                {
+                    ricochetChance = 0;
+                }
+                else if (value > 1)
+                {
+                    ricochetChance = 1;
+                }
+                else
+                {
+                    ricochetChance = value;
+                }
+            }
+        }
+
 
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {

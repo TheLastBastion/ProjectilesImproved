@@ -19,25 +19,34 @@ namespace ProjectilesImproved.Definitions
         public float DeviateShotAngle;
 
         [ProtoMember]
-        public float ReleaseTimeAfterFire;
-
-        [ProtoMember]
-        public int MuzzleFlashLifeSpan;
-
-        [ProtoMember]
-        public bool UseDefaultMuzzleFlash;
-
-        [ProtoMember]
         public int ReloadTime;
 
         [ProtoMember]
-        public float DamageMultiplier;
+        public int RateOfFire;
 
         [ProtoMember]
+        public int ShotsInBurst;
+
+        // mod effects
+
+        [ProtoMember]
+        public Ramping Ramping;
+
+        // Unused stuff
+        [XmlIgnore]
+        public float ReleaseTimeAfterFire;
+
+        [XmlIgnore]
         public MyStringHash PhysicalMaterial;
 
-        [ProtoMember]
-        public int RateOfFire;
+        [XmlIgnore]
+        public float DamageMultiplier;
+
+        [XmlIgnore]
+        public int MuzzleFlashLifeSpan;
+
+        [XmlIgnore]
+        public bool UseDefaultMuzzleFlash;
 
         [XmlIgnore]
         public MySoundPair ShootSound;
@@ -50,12 +59,6 @@ namespace ProjectilesImproved.Definitions
 
         [XmlIgnore]
         public MySoundPair SecondarySound;
-
-        [ProtoMember]
-        public int ShotsInBurst; 
-
-        [ProtoMember]
-        public Ramping Ramping;
 
 
         public WeaponDefinition Clone()

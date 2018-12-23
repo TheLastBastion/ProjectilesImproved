@@ -114,7 +114,9 @@ namespace ProjectilesImproved
         {
             { "PDCTurret", new WeaponDefinition()
                 {
-                    UseDefaultsFromSBC = true,
+                    UseDefaultsFromSBC = false,
+                    DeviateShotAngle = 0.03f,
+                    ReloadTime = 6000,
                     SubtypeId = "PDCTurret",
                     Ramping = new Ramping() { StartRPM = 1, MaxRPM = 2000, TimeToMax = 25000, RampDownScaler = 5f }
                 }

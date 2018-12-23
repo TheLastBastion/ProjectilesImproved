@@ -18,17 +18,11 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public float DesiredSpeed;
 
-        [XmlIgnore]
-        public float SpeedVar;
-
         [ProtoMember]
         public float MaxTrajectory;
 
         [ProtoMember]
         public float BackkickForce;
-
-        [XmlIgnore]
-        public string Material;
 
         [ProtoMember]
         public float ProjectileHitImpulse;
@@ -42,19 +36,27 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public float ProjectileTrailProbability;
 
-        [XmlIgnore]
-        public string ProjectileOnHitEffectName;
-
         [ProtoMember]
         public float ProjectileMassDamage;
 
         [ProtoMember]
         public float ProjectileHealthDamage;
 
-        [ProtoMember]
+        // unused stuff
+
+        [XmlIgnore]
+        public string ProjectileOnHitEffectName;
+
+        [XmlIgnore]
         public float ProjectileHeadShotDamage;
 
-        // Mod stuff
+        [XmlIgnore]
+        public string Material;
+
+        [XmlIgnore]
+        public float SpeedVar;
+
+        // Mod effects
 
         [ProtoMember]
         public bool HasBulletDrop;
@@ -87,7 +89,7 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public Ricochet Ricochet;
 
-        [ProtoMember]
+        [XmlIgnore]
         public Explosive Explosive;
 
 

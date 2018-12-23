@@ -14,31 +14,31 @@ namespace ProjectilesImproved.Effects.Collision
     [ProtoContract]
     public class DefaultCollisionEffect : ICollision
     {
-        [ProtoMember(1)]
+        [ProtoMember]
         public string AmmoId { get; set; }
 
-        [ProtoMember(2)]
+        [ProtoMember]
         public bool HasBulletDrop { get; set; }
 
-        [ProtoMember(3)]
+        [ProtoMember]
         public float BulletDropGravityScaler { get; set; }
 
-        [ProtoMember(4)]
+        [ProtoMember]
         public bool UseOverKillSpread { get; set; }
 
-        [ProtoMember(5)]
+        [ProtoMember]
         public float OverKillSpreadScaler { get; set; }
 
-        [ProtoMember(6)]
+        [ProtoMember]
         public bool IgnoreDamageReduction { get; set; }
 
-        [ProtoMember(7)]
+        [ProtoMember]
         public Penetration Penetration { get; set; }
 
-        [ProtoMember(8)]
+        [ProtoMember]
         public Ricochet Ricochet { get; set; }
 
-        [ProtoMember(9)]
+        [ProtoMember]
         public Explosive Explosive { get; set; }
 
 
