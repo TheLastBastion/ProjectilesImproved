@@ -116,7 +116,7 @@ namespace ProjectilesImproved
                 {
                     UseDefaultsFromSBC = true,
                     SubtypeId = "OKI23mmDG",
-                    Ramping = new Ramping() { StartRPM = 1, MaxRPM = 1500, TimeToMax = 15000, RampDownScaler = 1.3f }
+                    Ramping = new Ramping() { StartRPM = 1, MaxRPM = 2000, TimeToMax = 25000, RampDownScaler = 5f }
                 }
             }
         };

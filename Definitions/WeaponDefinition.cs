@@ -16,15 +16,6 @@ namespace ProjectilesImproved.Definitions
         public string SubtypeId;
 
         [ProtoMember]
-        public string NoAmmoSound;
-
-        [ProtoMember]
-        public string ReloadSound;
-
-        [ProtoMember]
-        public string SecondarySound;
-
-        [ProtoMember]
         public float DeviateShotAngle;
 
         [ProtoMember]
@@ -45,27 +36,23 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public MyStringHash PhysicalMaterial;
 
-        //public List<MyDefinitionId> AmmoMagazinesId = new List<MyDefinitionId>();
-
-        //public List<MyWeaponAmmoData> WeaponAmmoDatas = new List<MyWeaponAmmoData>();
-
-        //public List<MyWeaponEffect> WeaponEffects = new List<MyWeaponEffect>();
-
-        [XmlIgnore]
+        [ProtoMember]
         public int RateOfFire;
 
         [XmlIgnore]
         public MySoundPair ShootSound;
-        
+
         [XmlIgnore]
+        public MySoundPair NoAmmoSound;
+
+        [XmlIgnore]
+        public MySoundPair ReloadSound;
+
+        [XmlIgnore]
+        public MySoundPair SecondarySound;
+
+        [ProtoMember]
         public int ShotsInBurst; 
-
-
-        //public MyDefinitionId[] AmmoMagazinesId;
-
-        //public MyWeaponAmmoData[] WeaponAmmoDatas;
-
-        //public MyWeaponEffect[] WeaponEffects;
 
         [ProtoMember]
         public Ramping Ramping;

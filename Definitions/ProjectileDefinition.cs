@@ -1,7 +1,7 @@
 ﻿using ProjectilesImproved.Effects.Collision;
 using ProjectilesImproved.Projectiles;
 using ProtoBuf;
-using VRage.Game;
+using System.Xml.Serialization;
 using VRageMath;
 
 namespace ProjectilesImproved.Definitions
@@ -18,7 +18,7 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public float DesiredSpeed;
 
-        [ProtoMember]
+        [XmlIgnore]
         public float SpeedVar;
 
         [ProtoMember]
@@ -27,7 +27,7 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public float BackkickForce;
 
-        [ProtoMember]
+        [XmlIgnore]
         public string Material;
 
         [ProtoMember]
@@ -42,7 +42,7 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public float ProjectileTrailProbability;
 
-        [ProtoMember]
+        [XmlIgnore]
         public string ProjectileOnHitEffectName;
 
         [ProtoMember]
@@ -59,14 +59,24 @@ namespace ProjectilesImproved.Definitions
         [ProtoMember]
         public bool HasBulletDrop;
 
+        private float bulletDropGravityScaler;
         [ProtoMember]
-        public float BulletDropGravityScaler;
+        public float BulletDropGravityScaler
+        {
+            get { return bulletDropGravityScaler; }
+            set { bulletDropGravityScaler = (value >= 0) ? value : 0; }
+        }
 
         [ProtoMember]
         public bool UseOverKillSpread;
 
+        private float overKillSpreadScaler;
         [ProtoMember]
-        public float OverKillSpreadScaler;
+        public float OverKillSpreadScaler
+        {
+            get { return overKillSpreadScaler; }
+            set { overKillSpreadScaler = (value >= 0) ? value : 0;  }
+        }
 
         [ProtoMember]
         public bool IgnoreDamageReduction;

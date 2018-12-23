@@ -55,7 +55,6 @@ namespace ProjectilesImproved
 
                         Network.RegisterChatCommand("reset_default", (args) =>
                         {
-                            //Settings.SetNewSettings(DefaultSettings);
                             MyAPIGateway.Utilities.ShowMessage(ModName, "Reset default settings. This has not been saved yet.");
                         });
 
@@ -68,8 +67,14 @@ namespace ProjectilesImproved
                 }
             }
 
-            Settings.Init();
+            //Settings.Init();
             MyAPIGateway.Session.OnSessionReady += OnStartInit;
+        }
+
+        public override void BeforeStart()
+        {
+            Settings.Init();
+            //Settings.Load();
         }
 
         protected override void UnloadData()
@@ -80,7 +85,7 @@ namespace ProjectilesImproved
         private void OnStartInit()
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
-            Settings.Load();
+            //Settings.Load();
 
             OnLoadComplete?.Invoke();
             ExplosionShapeGenerator.Initialize();
