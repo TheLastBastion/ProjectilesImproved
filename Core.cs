@@ -7,6 +7,9 @@ using ModNetworkAPI;
 using ProjectilesImproved.Projectiles;
 using VRage.Game.ModAPI;
 using ProjectilesImproved.Effects.Collision;
+using ProjectilesImproved.Definitions;
+using VRage.Utils;
+using ProjectilesImproved.Weapons;
 
 namespace ProjectilesImproved
 {
@@ -33,6 +36,7 @@ namespace ProjectilesImproved
                 if (Network.NetworkType == NetworkTypes.Client)
                 {
                     Network.RegisterNetworkCommand(null, ClientCallback_Update);
+                    Network.RegisterNetworkCommand("shoot", ClientCallback_TerminalShoot);
                     Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
                     Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
                     Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
@@ -40,6 +44,7 @@ namespace ProjectilesImproved
                 }
                 else
                 {
+                    Network.RegisterNetworkCommand("shoot", ServerCallback_TerminalShoot);
                     Network.RegisterNetworkCommand("update", ServerCallback_Update);
                     Network.RegisterNetworkCommand("load", ServerCallback_Load);
                     Network.RegisterNetworkCommand("save", ServerCallback_Save);
@@ -67,7 +72,6 @@ namespace ProjectilesImproved
                 }
             }
 
-            //Settings.Init();
             MyAPIGateway.Session.OnSessionReady += OnStartInit;
         }
 
@@ -78,7 +82,6 @@ namespace ProjectilesImproved
                 Network.SendCommand("update");
             }
             Settings.Init();
-            //Settings.Load();
         }
 
         protected override void UnloadData()
@@ -89,7 +92,6 @@ namespace ProjectilesImproved
         private void OnStartInit()
         {
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
-            //Settings.Load();
 
             OnLoadComplete?.Invoke();
             ExplosionShapeGenerator.Initialize();
@@ -158,6 +160,38 @@ namespace ProjectilesImproved
             if (data != null)
             {
                 Settings.SetNewSettings(MyAPIGateway.Utilities.SerializeFromBinary<Settings>(data));
+            }
+        }
+
+        private void ClientCallback_TerminalShoot(ulong steamId, string CommandString, byte[] data)
+        {
+            TerminalShoot t = MyAPIGateway.Utilities.SerializeFromBinary<TerminalShoot>(data);
+
+            if (t != null)
+            {
+                MyAPIGateway.Utilities.ShowNotification($"shoot {t.BlockId} {t.State.ToString()}", 1000);
+                ProjectileWeapon.UpdateTerminalShooting(t);
+            }
+            else 
+            {
+                MyLog.Default.Warning("data did not unpack!");
+            }
+        }
+
+        private void ServerCallback_TerminalShoot(ulong steamId, string CommandString, byte[] data)
+        {
+            TerminalShoot t = MyAPIGateway.Utilities.SerializeFromBinary<TerminalShoot>(data);
+
+            if (t != null)
+            {
+                if (ProjectileWeapon.UpdateTerminalShooting(t))
+                {
+                    Network.SendCommand("shoot", data: data);
+                }
+            }
+            else
+            {
+                MyLog.Default.Warning("data did not unpack!");
             }
         }
 

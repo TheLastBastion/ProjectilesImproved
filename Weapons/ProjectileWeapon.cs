@@ -37,15 +37,16 @@ namespace ProjectilesImproved.Weapons
 
         public bool ControlsUpdated = false; // TODO: change this to static?
 
-        public bool IsShooting => gun.IsShooting || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
+        public bool IsShooting => gun.IsShooting || TerminalShootOnce || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
 
-        public  double TimeTillNextShot = 1d;
+        public double TimeTillNextShot = 1d;
         public int CurrentShotInBurst = 0;
         public float CooldownTime = 0;
         public int FirstTimeCooldown = 0;
 
         public bool IsFixedGun = false;
         public bool TerminalShooting = false;
+        public bool TerminalShootOnce = false;
 
         public IMyFunctionalBlock Block;
         public IMyCubeBlock Cube;
@@ -124,6 +125,36 @@ namespace ProjectilesImproved.Weapons
             Definition.ShootSound = moreDetails.ShootSound;
         }
 
+        public static bool UpdateTerminalShooting(TerminalShoot t)
+        {
+            //IMyCubeGrid grid = (IMyCubeGrid)MyAPIGateway.Entities.GetEntityById(terminal.GridId);
+            IMyTerminalBlock block = (IMyTerminalBlock)MyAPIGateway.Entities.GetEntityById(t.BlockId);
+
+            if (block == null)
+            {
+                MyLog.Default.Warning("Failed to find block in entities");
+                return false;
+            }
+
+            ProjectileWeapon weapon = (block.GameLogic as ProjectileWeapon);
+            if (weapon == null)
+            {
+                MyLog.Default.Warning($"Failed set weapon to {t.State.ToString()}. Block was of type {block.GameLogic.GetType()} not ProjectileWeapon.");
+                return false;
+            }
+
+            if (t.State == TerminalState.ShootOnce)
+            {
+                weapon.TerminalShootOnce = true;
+            }
+            else
+            {
+                weapon.TerminalShooting = t.State == TerminalState.Shoot_On;
+            }
+
+            return true;
+        }
+
         private void OverrideDefaultControls()
         {
             if (ControlsUpdated) return;
@@ -146,16 +177,13 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        try
+                        ProjectileWeapon weps = block.GameLogic as ProjectileWeapon;
+
+                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
                         {
-                            ProjectileWeapon weps = block.GameLogic as ProjectileWeapon;
-                            MyAPIGateway.Utilities.ShowNotification($"shoot action", 500);
-                            weps.TerminalShooting = !weps.TerminalShooting;
-                        }
-                        catch
-                        {
-                            MyLog.Default.Warning("Failed in the Shoot!");
-                        }
+                            BlockId = block.EntityId,
+                            State = ((weps.TerminalShooting) ? TerminalState.Shoot_Off : TerminalState.Shoot_On)
+                        }));
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -164,18 +192,11 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        try
+                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
                         {
-                            ProjectileWeapon weapon = (block.GameLogic as ProjectileWeapon);
-                            if (weapon.CooldownTime == 0 && weapon.TimeTillNextShot >= 1)
-                            {
-                                weapon.FireWeapon();
-                            }
-                        }
-                        catch
-                        {
-                            MyLog.Default.Warning("Failed in the Shoot Once!");
-                        }
+                            BlockId = block.EntityId,
+                            State = TerminalState.ShootOnce
+                        }));
                     };
 
                 }
@@ -183,14 +204,11 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        try
+                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
                         {
-                            (block.GameLogic as ProjectileWeapon).TerminalShooting = true;
-                        }
-                        catch
-                        {
-                            MyLog.Default.Warning("Failed in the Shoot_On!");
-                        }
+                            BlockId = block.EntityId,
+                            State = TerminalState.Shoot_On
+                        }));
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -199,15 +217,11 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        try
+                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
                         {
-                            MyAPIGateway.Utilities.ShowNotification($"Shoot off {block.GameLogic is ProjectileWeapon}", 500);
-                            (block.GameLogic as ProjectileWeapon).TerminalShooting = false;
-                        }
-                        catch
-                        {
-                            MyLog.Default.Warning("Failed in the Shoot_Off!");
-                        }
+                            BlockId = block.EntityId,
+                            State = TerminalState.Shoot_Off
+                        }));
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -232,14 +246,11 @@ namespace ProjectilesImproved.Weapons
 
                     onoff.Setter = (block, value) =>
                     {
-                        try
+                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
                         {
-                            (block.GameLogic as ProjectileWeapon).TerminalShooting = value;
-                        }
-                        catch
-                        {
-                            MyLog.Default.Warning("Failed in the terminal Shoot_On!");
-                        }
+                            BlockId = block.EntityId,
+                            State = (value) ? TerminalState.Shoot_On : TerminalState.Shoot_Off
+                        }));
                     };
 
                     onoff.Getter = (block) =>
@@ -250,7 +261,7 @@ namespace ProjectilesImproved.Weapons
                         }
                         catch
                         {
-                            MyLog.Default.Warning("Failed in the terminal Shoot_off!");
+                            MyLog.Default.Warning($"Failed in the terminal Shoot_off! {block.GameLogic is ProjectileWeapon} {block.GameLogic.GetType()}");
                             return false;
                         }
                     };
@@ -272,6 +283,11 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
+            //if (!MyAPIGateway.Utilities.IsDedicated)
+            //{
+            //    MyAPIGateway.Utilities.ShowNotification($"{(gun.IsShooting ? "Turret Mouse Click" : "")} - {(TerminalShootOnce ? "Shoot Once" : "")} - {(TerminalShooting ? "Terminal Shooting" : "")} - {((IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME) ? "Fixed Gun Mouse Click" : "")}",1);
+            //}
+
             if (Ammo != gun.GunBase.CurrentAmmoDefinition)
             {
                 Ammo = gun.GunBase.CurrentAmmoDefinition;
@@ -281,6 +297,7 @@ namespace ProjectilesImproved.Weapons
             if (FirstTimeCooldown > 0)
             {
                 FirstTimeCooldown--;
+                TerminalShootOnce = false;
                 return;
             }
 
@@ -295,7 +312,8 @@ namespace ProjectilesImproved.Weapons
             {
                 FireWeapon();
             }
-            
+
+            TerminalShootOnce = false;
         }
 
         private void FireWeapon()
@@ -352,6 +370,12 @@ namespace ProjectilesImproved.Weapons
 
                     var forceVector = -positionMatrix.Forward * bulletData.BackkickForce;
                     Block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, Block.WorldAABB.Center, null);
+
+                    if (TerminalShootOnce)
+                    {
+                        TerminalShootOnce = false;
+                        return;
+                    }
                 }
             }
         }

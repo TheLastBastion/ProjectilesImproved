@@ -81,6 +81,8 @@ namespace ProjectilesImproved
                 return;
             }
 
+            MyAPIGateway.Utilities.ShowNotification($"Target Lead Available - Ammo: {CurrentData.Ammo.SubtypeId}", 1);
+
             float projectileSpeed = CurrentData.Ammo.DesiredSpeed;
             float projectileRange = CurrentData.Ammo.MaxTrajectory + 100;
             float projectileRangeSquared = projectileRange * projectileRange;
@@ -111,6 +113,8 @@ namespace ProjectilesImproved
                     gridLoc,
                     CurrentData.Ammo.HasBulletDrop,
                     CurrentData.Ammo.BulletDropGravityScaler);
+
+                MyAPIGateway.Utilities.ShowNotification($"Targeting: {grid.EntityId}", 1);
 
                 AddGPS(grid.EntityId, interceptPoint);
             }
@@ -161,17 +165,16 @@ namespace ProjectilesImproved
 
             if (hasBulletDrop)
             {
-                Vector3D current = new Vector3D(shooterPosition);
+                Vector3D current = shooterPosition;
+                Vector3D newHeading = (target - current);
+                Vector3D velocity = (newHeading * projectileSpeed) + shooterVelocity; // starting bullet velocity
 
-                Vector3D velocity = (directHeadingNorm * projectileSpeed) + shooterVelocity; // starting bullet velocity
-                Vector3D grav1 = WorldPlanets.GetExternalForces(shooterPosition).Gravity;
-                Vector3D grav2 = WorldPlanets.GetExternalForces(targetPos).Gravity;
-                Vector3D gravity = ((grav1 + grav2) * 0.5f) * gravityScaler;
-
-                double currentDistance = directHeading.LengthSquared();
+                Vector3D gravity;
+                double currentDistance = newHeading.LengthSquared();
                 double lastDistance = currentDistance;
                 while (currentDistance <= lastDistance)
                 {
+                    gravity = WorldPlanets.GetExternalForces(current).Gravity * gravityScaler;
                     velocity += gravity * Tools.Tick;
                     current += velocity * Tools.Tick;
 
@@ -179,7 +182,7 @@ namespace ProjectilesImproved
                     currentDistance = (target - current).LengthSquared();
                 }
 
-                return target + ((target - current).Length() * -Vector3D.Normalize(gravity));
+                return target + ((target - current).Length() * -Vector3D.Normalize(WorldPlanets.GetExternalForces(target).Gravity));
             }
 
             return target;
