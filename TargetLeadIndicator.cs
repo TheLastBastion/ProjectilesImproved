@@ -62,7 +62,7 @@ namespace ProjectilesImproved
 
         public override void UpdateBeforeSimulation()
         {
-            if (MyAPIGateway.Utilities.IsDedicated || (!Settings.Instance.UseTurretLeadIndicators && !Settings.Instance.UseFixedGunLeadIndicators))
+            if (MyAPIGateway.Utilities.IsDedicated)
                 return;
 
             CurrentData = LeadingData.GetLeadingData(MyAPIGateway.Session?.Player?.Controller?.ControlledEntity?.Entity, CurrentData);
@@ -110,8 +110,7 @@ namespace ProjectilesImproved
                     grid.Physics.LinearVelocity,
                     gridLoc,
                     CurrentData.Ammo.HasBulletDrop,
-                    CurrentData.Ammo.BulletDropGravityScaler,
-                    (int)(CurrentData.Ammo.MaxTrajectory / projectileSpeed));
+                    CurrentData.Ammo.BulletDropGravityScaler);
 
                 AddGPS(grid.EntityId, interceptPoint);
             }
@@ -133,7 +132,7 @@ namespace ProjectilesImproved
 
         // Whip's CalculateProjectileInterceptPosition Method
         // Uses vector math as opposed to the quadratic equation
-        private static Vector3D CalculateProjectileInterceptPosition(
+        private Vector3D CalculateProjectileInterceptPosition(
             double projectileSpeed,
             Vector3D shooterVelocity,
             Vector3D shooterPosition,
@@ -141,7 +140,6 @@ namespace ProjectilesImproved
             Vector3D targetPos,
             bool hasBulletDrop,
             float gravityScaler,
-            int maxPredictionSteps,
             double interceptPointMultiplier = 1)
         {
             var directHeading = targetPos - shooterPosition;
@@ -157,30 +155,31 @@ namespace ProjectilesImproved
                 return normalVelocity;
 
             var projectileForwardVelocity = Math.Sqrt(diff) * directHeadingNorm;
-
             var timeToIntercept = interceptPointMultiplier * Math.Abs(Vector3D.Dot(directHeading, directHeadingNorm)) / Vector3D.Dot(projectileForwardVelocity, directHeadingNorm);
 
             Vector3D target = shooterPosition + timeToIntercept * (projectileForwardVelocity + normalVelocity);
 
             if (hasBulletDrop)
             {
-                Vector3D current = shooterPosition;
-                double distance = directHeading.LengthSquared();
+                Vector3D current = new Vector3D(shooterPosition);
 
                 Vector3D velocity = (directHeadingNorm * projectileSpeed) + shooterVelocity; // starting bullet velocity
                 Vector3D grav1 = WorldPlanets.GetExternalForces(shooterPosition).Gravity;
                 Vector3D grav2 = WorldPlanets.GetExternalForces(targetPos).Gravity;
-                Vector3D gravity = (grav1 + grav2) * 0.5f * gravityScaler;
+                Vector3D gravity = ((grav1 + grav2) * 0.5f) * gravityScaler;
 
-                int currentStep = 0;
-                while (distance > (current - shooterPosition).LengthSquared() && maxPredictionSteps > currentStep)
+                double currentDistance = directHeading.LengthSquared();
+                double lastDistance = currentDistance;
+                while (currentDistance <= lastDistance)
                 {
                     velocity += gravity * Tools.Tick;
                     current += velocity * Tools.Tick;
-                    currentStep++;
+
+                    lastDistance = currentDistance;
+                    currentDistance = (target - current).LengthSquared();
                 }
 
-                return target + ((current - target).Length() * -Vector3D.Normalize(gravity));
+                return target + ((target - current).Length() * -Vector3D.Normalize(gravity));
             }
 
             return target;
@@ -237,7 +236,7 @@ namespace ProjectilesImproved
         {
             try
             {
-                if (block is IMyLargeTurretBase && Settings.Instance.UseTurretLeadIndicators)
+                if (block is IMyLargeTurretBase /*&& Settings.Instance.UseTurretLeadIndicators*/)
                 {
                     IMyLargeTurretBase turret = block as IMyLargeTurretBase;
                     IMyGunObject<MyGunBase> gun = (turret as IMyGunObject<MyGunBase>);
@@ -254,12 +253,12 @@ namespace ProjectilesImproved
                     return new LeadingData()
                     {
                         EntityId = turret.EntityId,
-                        Position = turret.GetPosition(),
+                        Position = gun.GunBase.GetMuzzleWorldPosition(),
                         Velocity = turret.CubeGrid.Physics.LinearVelocity,
                         Ammo = def
                     };
                 }
-                else if (block is IMyShipController && Settings.Instance.UseFixedGunLeadIndicators)
+                else if (block is IMyShipController /*&& Settings.Instance.UseFixedGunLeadIndicators*/)
                 {
                     IMyShipController cockpit = block as IMyShipController;
 

@@ -9,9 +9,9 @@ namespace ProjectilesImproved.Effects.Flight
     {
         public void Update(Projectile bullet)
         {
-            ExternalForceData forceData = WorldPlanets.GetExternalForces(bullet.PositionMatrix.Translation);
+            Vector3D gravity = WorldPlanets.GetExternalForces(bullet.PositionMatrix.Translation).Gravity * bullet.BulletDropGravityScaler;
 
-            bullet.Velocity += (forceData.Gravity * bullet.BulletDropGravityScaler) * Tools.Tick;
+            bullet.Velocity += gravity * Tools.Tick;
             bullet.PositionMatrix.Translation += bullet.Velocity * Tools.Tick;
 
             bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity - bullet.InitialGridVelocity);

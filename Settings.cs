@@ -67,7 +67,6 @@ namespace ProjectilesImproved
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 1f,
                     UseOverKillSpread = false,
-                    //Explosive = new Explosive() { Offset = 1f, Angle = 20,  Radius = 7f, Resolution = 1.2f }
                 }
             },
             { "OKI50mmAmmoPars", new ProjectileDefinition()
@@ -76,8 +75,7 @@ namespace ProjectilesImproved
                     SubtypeId = "OKI50mmAmmoPars",
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 1f,
-                    UseOverKillSpread = true,
-                    OverKillSpreadScaler = 1,
+                    UseOverKillSpread = false,
                 }
             },
             { "OKI23mmAmmoPars", new ProjectileDefinition()
@@ -94,9 +92,9 @@ namespace ProjectilesImproved
                 {
                     UseDefaultsFromSBC = true,
                     SubtypeId = "LargeCaliber",
-                    HasBulletDrop = true,
-                    BulletDropGravityScaler = 0.3f,
-                    UseOverKillSpread = true,
+                    HasBulletDrop = false,
+                    BulletDropGravityScaler = 1f,
+                    UseOverKillSpread = false,
                     OverKillSpreadScaler = 1,
                     Ricochet = new Ricochet { DeflectionAngle = 30, MaxDamageTransfer = 0.5f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.5f },
                 }
@@ -107,9 +105,19 @@ namespace ProjectilesImproved
                     UseDefaultsFromSBC = true,
                     SubtypeId = "SmallCaliber",
                     HasBulletDrop = true,
-                    BulletDropGravityScaler = 0.3f,
+                    BulletDropGravityScaler = 1f,
                     UseOverKillSpread = false,
                     Ricochet = new Ricochet { DeflectionAngle = 90, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.25f, RicochetChance = 0.25f },
+                }
+            },
+            {
+                "DeU_25x184mm", new ProjectileDefinition()
+                {
+                    UseDefaultsFromSBC = true,
+                    SubtypeId = "DeU_25x184mm",
+                    HasBulletDrop = false,
+                    UseOverKillSpread = false,
+                    Ricochet = new Ricochet { DeflectionAngle = 45, MaxDamageTransfer = 0.25f, MaxVelocityTransfer = 0.50f, RicochetChance = 0.5f },
                 }
             }
         };
@@ -118,9 +126,7 @@ namespace ProjectilesImproved
         {
             { "PDCTurret", new WeaponDefinition()
                 {
-                    UseDefaultsFromSBC = false,
-                    DeviateShotAngle = 0.03f,
-                    ReloadTime = 6000,
+                    UseDefaultsFromSBC = true,
                     SubtypeId = "PDCTurret",
                     Ramping = new Ramping() { StartRPM = 1, MaxRPM = 2000, TimeToMax = 25000, RampDownScaler = 5f }
                 }
