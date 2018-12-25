@@ -177,12 +177,17 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        ProjectileWeapon weps = block.GameLogic as ProjectileWeapon;
+                        ProjectileWeapon weapons = block.GameLogic as ProjectileWeapon;
+
+                        if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                        {
+                            weapons.TerminalShooting = !weapons.TerminalShooting;
+                        }
 
                         NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
                         {
                             BlockId = block.EntityId,
-                            State = ((weps.TerminalShooting) ? TerminalState.Shoot_Off : TerminalState.Shoot_On)
+                            State = ((weapons.TerminalShooting) ? TerminalState.Shoot_Off : TerminalState.Shoot_On)
                         }));
                     };
 
@@ -192,11 +197,21 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                        ProjectileWeapon weapons = block.GameLogic as ProjectileWeapon;
+
+                        if (weapons != null && !weapons.TerminalShootOnce)
                         {
-                            BlockId = block.EntityId,
-                            State = TerminalState.ShootOnce
-                        }));
+                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            {
+                                weapons.TerminalShootOnce = true;
+                            }
+
+                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            {
+                                BlockId = block.EntityId,
+                                State = TerminalState.ShootOnce
+                            }));
+                        }
                     };
 
                 }
@@ -204,11 +219,21 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                        ProjectileWeapon weapons = block.GameLogic as ProjectileWeapon;
+
+                        if (weapons != null && !weapons.TerminalShooting)
                         {
-                            BlockId = block.EntityId,
-                            State = TerminalState.Shoot_On
-                        }));
+                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            {
+                                weapons.TerminalShooting = true;
+                            }
+
+                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            {
+                                BlockId = block.EntityId,
+                                State = TerminalState.Shoot_On
+                            }));
+                        }
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -217,11 +242,21 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                        ProjectileWeapon weapons = block.GameLogic as ProjectileWeapon;
+
+                        if (weapons != null && weapons.TerminalShooting)
                         {
-                            BlockId = block.EntityId,
-                            State = TerminalState.Shoot_Off
-                        }));
+                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            {
+                                weapons.TerminalShooting = false;
+                            }
+
+                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            {
+                                BlockId = block.EntityId,
+                                State = TerminalState.Shoot_Off
+                            }));
+                        }
                     };
 
                     a.Writer = WeaponsFiringWriter;
@@ -246,11 +281,21 @@ namespace ProjectilesImproved.Weapons
 
                     onoff.Setter = (block, value) =>
                     {
-                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                        ProjectileWeapon weapons = block.GameLogic as ProjectileWeapon;
+
+                        if (weapons != null && weapons.TerminalShooting != value)
                         {
-                            BlockId = block.EntityId,
-                            State = (value) ? TerminalState.Shoot_On : TerminalState.Shoot_Off
-                        }));
+                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            {
+                                weapons.TerminalShooting = value;
+                            }
+
+                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            {
+                                BlockId = block.EntityId,
+                                State = (value) ? TerminalState.Shoot_On : TerminalState.Shoot_Off
+                            }));
+                        }
                     };
 
                     onoff.Getter = (block) =>

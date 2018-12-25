@@ -114,7 +114,7 @@ namespace ProjectilesImproved
                     CurrentData.Ammo.HasBulletDrop,
                     CurrentData.Ammo.BulletDropGravityScaler);
 
-                MyAPIGateway.Utilities.ShowNotification($"Targeting: {grid.EntityId}", 1);
+                //MyAPIGateway.Utilities.ShowNotification($"Targeting: {grid.EntityId}", 1);
 
                 AddGPS(grid.EntityId, interceptPoint);
             }
@@ -166,21 +166,29 @@ namespace ProjectilesImproved
             if (hasBulletDrop)
             {
                 Vector3D current = shooterPosition;
-                Vector3D newHeading = (target - current);
-                Vector3D velocity = (newHeading * projectileSpeed) + shooterVelocity; // starting bullet velocity
+                Vector3D newHeading = target - current;
 
-                Vector3D gravity;
+                Vector3D velocity = (Vector3D.Normalize(newHeading) * projectileSpeed) + shooterVelocity; // starting bullet velocity
+                Vector3D initialVelocity = velocity;
+
                 double currentDistance = newHeading.LengthSquared();
                 double lastDistance = currentDistance;
-                while (currentDistance <= lastDistance)
+
+                Vector3D difference = Vector3D.Zero;
+                Vector3D gravity;
+                do
                 {
-                    gravity = WorldPlanets.GetExternalForces(current).Gravity * gravityScaler;
+                    gravity = WorldPlanets.GetExternalForces((current - (difference * 2 * Tools.Tick))).Gravity * gravityScaler;
+
                     velocity += gravity * Tools.Tick;
                     current += velocity * Tools.Tick;
+
+                    difference += (velocity - initialVelocity);
 
                     lastDistance = currentDistance;
                     currentDistance = (target - current).LengthSquared();
                 }
+                while (currentDistance < lastDistance);
 
                 return target + ((target - current).Length() * -Vector3D.Normalize(WorldPlanets.GetExternalForces(target).Gravity));
             }
