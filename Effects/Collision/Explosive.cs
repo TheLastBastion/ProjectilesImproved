@@ -47,24 +47,24 @@ namespace ProjectilesImproved.Effects.Collision
         [ProtoMember(5)]
         public bool AffectVoxels { get; set; }
 
-        private RayE[][] ExplosionRays;
-        private List<EntityDesc> entities;
-        private IOrderedEnumerable<EntityDesc> orderedEntities;
+        //private RayE[][] ExplosionRays;
+        //private List<EntityDesc> entities;
+        //private IOrderedEnumerable<EntityDesc> orderedEntities;
 
-        private Vector3D epicenter;
-        private MatrixD transformationMatrix;
+        //private Vector3D epicenter;
+        //private MatrixD transformationMatrix;
 
-        private float radiusSquared;
+        //private float radiusSquared;
 
-        private MySoundPair sound = new MySoundPair("WepSmallMissileExpl", false);
-        private MyEntity3DSoundEmitter myEntity3DSoundEmitter;
+        //private MySoundPair sound = new MySoundPair("WepSmallMissileExpl", false);
+        //private MyEntity3DSoundEmitter myEntity3DSoundEmitter;
 
         //private Stopwatch watch = new Stopwatch();
 
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {
-            epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
             bullet.HasExpired = true;
+            //epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
 
             //if (!MyAPIGateway.Utilities.IsDedicated)
             //{
@@ -89,245 +89,245 @@ namespace ProjectilesImproved.Effects.Collision
             //    //effect.SetRandomDuration();
             //}
 
-            if (MyAPIGateway.Session.IsServer)
-            {
-                ExplosionRays = null;
-                entities = new List<EntityDesc>();
+            //if (MyAPIGateway.Session.IsServer)
+            //{
+            //    ExplosionRays = null;
+            //    entities = new List<EntityDesc>();
 
-                //watch.Start("Explode");
-                radiusSquared = Radius * Radius;
+            //    //watch.Start("Explode");
+            //    radiusSquared = Radius * Radius;
 
-                if (Settings.DebugMode_ShowSphereOctants)
-                {
-                    MyVisualScriptLogicProvider.AddGPS("", "", epicenter, Color.Black);
-                }
+            //    if (Settings.DebugMode_ShowSphereOctants)
+            //    {
+            //        MyVisualScriptLogicProvider.AddGPS("", "", epicenter, Color.Black);
+            //    }
 
-                transformationMatrix = new MatrixD(bullet.PositionMatrix);
-                transformationMatrix.Translation = epicenter;
+            //    transformationMatrix = new MatrixD(bullet.PositionMatrix);
+            //    transformationMatrix.Translation = epicenter;
 
-                //watch.Start("Pull Rays");
-                ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.SubtypeId, transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
-                //watch.Stop("Pull Rays");
+            //    //watch.Start("Pull Rays");
+            //    ExplosionRays = ExplosionShapeGenerator.GetExplosionRays(bullet.SubtypeId, transformationMatrix, epicenter, Radius, bullet.ProjectileMassDamage);
+            //    //watch.Stop("Pull Rays");
 
-                //watch.Start("Get World Entities");
-                List<IMyEntity> effectedEntities;
-                BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
-                effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-                //watch.Stop("Get World Entities");
+            //    //watch.Start("Get World Entities");
+            //    List<IMyEntity> effectedEntities;
+            //    BoundingSphereD sphere = new BoundingSphereD(hit.Position, Radius);
+            //    effectedEntities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+            //    //watch.Stop("Get World Entities");
 
-                //watch.Start("Ray Tracing");
-                foreach (IMyEntity ent in effectedEntities)
-                {
-                    if (ent is IMyCubeGrid)
-                    {
-                        //watch.Start("Get Blocks");
-                        List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
-                        //watch.Stop("Get Blocks");
+            //    //watch.Start("Ray Tracing");
+            //    foreach (IMyEntity ent in effectedEntities)
+            //    {
+            //        if (ent is IMyCubeGrid)
+            //        {
+            //            //watch.Start("Get Blocks");
+            //            List<IMySlimBlock> slims = GetBlocks(ent as IMyCubeGrid);
+            //            //watch.Stop("Get Blocks");
 
-                        foreach (IMySlimBlock slim in slims)
-                        {
-                            if (slim != null)
-                            {
-                                //watch.Start("Get Block Bounds");
-                                BoundingBoxD bounds;
-                                slim.GetWorldBoundingBox(out bounds);
-                                //watch.Stop("Get Block Bounds");
+            //            foreach (IMySlimBlock slim in slims)
+            //            {
+            //                if (slim != null)
+            //                {
+            //                    //watch.Start("Get Block Bounds");
+            //                    BoundingBoxD bounds;
+            //                    slim.GetWorldBoundingBox(out bounds);
+            //                    //watch.Stop("Get Block Bounds");
 
-                                //watch.Start("Block Eat");
-                                BlockEater(slim, bounds);
-                                //watch.Stop("Block Eat");
-                            }
-                        }
-                    }
-                    else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
-                    {
-                        BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
-                    }
-                }
-                //watch.Stop("Ray Tracing");
+            //                    //watch.Start("Block Eat");
+            //                    BlockEater(slim, bounds);
+            //                    //watch.Stop("Block Eat");
+            //                }
+            //            }
+            //        }
+            //        else if (ent is IMyDestroyableObject && !ent.MarkedForClose)
+            //        {
+            //            BlockEater(ent as IMyDestroyableObject, ent.WorldAABB);
+            //        }
+            //    }
+            //    //watch.Stop("Ray Tracing");
 
-                //watch.Start("Sort Hit Objects");
-                orderedEntities = entities.OrderBy(e => e.DistanceSquared);
-                //watch.Stop("Sort Hit Objects");
+            //    //watch.Start("Sort Hit Objects");
+            //    orderedEntities = entities.OrderBy(e => e.DistanceSquared);
+            //    //watch.Stop("Sort Hit Objects");
 
-                //watch.Start("Damage Time");
-                DamageBlocks(MyStringHash.GetOrCompute(bullet.SubtypeId), bullet.BlockId);
-                //watch.Stop("Damage Time");
-                //watch.Stop("Explode");
+            //    //watch.Start("Damage Time");
+            //    DamageBlocks(MyStringHash.GetOrCompute(bullet.SubtypeId), bullet.ParentBlockId);
+            //    //watch.Stop("Damage Time");
+            //    //watch.Stop("Explode");
 
-                //watch.Write("Explode");
-                //watch.Write("Pull Rays");
-                //watch.Write("Get World Entities");
-                //watch.Write("Ray Tracing");
-                //watch.Write("Get Blocks");
-                //watch.Write("Get Block Bounds");
-                //watch.Write("Block Eat");
-                //watch.Write("Sort Hit Objects");
-                //watch.Write("Damage Time");
-                //watch.ResetAll();
-            }
+            //    //watch.Write("Explode");
+            //    //watch.Write("Pull Rays");
+            //    //watch.Write("Get World Entities");
+            //    //watch.Write("Ray Tracing");
+            //    //watch.Write("Get Blocks");
+            //    //watch.Write("Get Block Bounds");
+            //    //watch.Write("Block Eat");
+            //    //watch.Write("Sort Hit Objects");
+            //    //watch.Write("Damage Time");
+            //    //watch.ResetAll();
+            //}
         }
 
-        private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
-        {
-            Vector3I center = grid.WorldToGridInteger(epicenter);
-            int iRadius = (int)Math.Ceiling(Radius / grid.GridSize);
+        //private List<IMySlimBlock> GetBlocks(IMyCubeGrid grid)
+        //{
+        //    Vector3I center = grid.WorldToGridInteger(epicenter);
+        //    int iRadius = (int)Math.Ceiling(Radius / grid.GridSize);
 
-            Vector3I Min = new Vector3I(center.X - iRadius, center.Y - iRadius, center.Z - iRadius);
-            Vector3I Max = new Vector3I(center.X + iRadius, center.Y + iRadius, center.Z + iRadius);
+        //    Vector3I Min = new Vector3I(center.X - iRadius, center.Y - iRadius, center.Z - iRadius);
+        //    Vector3I Max = new Vector3I(center.X + iRadius, center.Y + iRadius, center.Z + iRadius);
 
-            if (Min.X < grid.Min.X) Min.X = grid.Min.X;
-            if (Min.Y < grid.Min.Y) Min.Y = grid.Min.Y;
-            if (Min.Z < grid.Min.Z) Min.Z = grid.Min.Z;
-            if (Max.X > grid.Max.X) Max.X = grid.Max.X + 1;
-            if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y + 1;
-            if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z + 1;
+        //    if (Min.X < grid.Min.X) Min.X = grid.Min.X;
+        //    if (Min.Y < grid.Min.Y) Min.Y = grid.Min.Y;
+        //    if (Min.Z < grid.Min.Z) Min.Z = grid.Min.Z;
+        //    if (Max.X > grid.Max.X) Max.X = grid.Max.X + 1;
+        //    if (Max.Y > grid.Max.Y) Max.Y = grid.Max.Y + 1;
+        //    if (Max.Z > grid.Max.Z) Max.Z = grid.Max.Z + 1;
 
-            List<IMySlimBlock> slims = new List<IMySlimBlock>();
+        //    List<IMySlimBlock> slims = new List<IMySlimBlock>();
 
-            Vector3I loc = Vector3I.Zero;
-            slims.Add(grid.GetCubeBlock(center));
+        //    Vector3I loc = Vector3I.Zero;
+        //    slims.Add(grid.GetCubeBlock(center));
 
-            for (loc.X = Min.X; loc.X < Max.X; loc.X++)
-            {
-                for (loc.Y = Min.Y; loc.Y < Max.Y; loc.Y++)
-                {
-                    for (loc.Z = Min.Z; loc.Z < Max.Z; loc.Z++)
-                    {
-                        slims.Add(grid.GetCubeBlock(loc));
-                    }
-                }
-            }
+        //    for (loc.X = Min.X; loc.X < Max.X; loc.X++)
+        //    {
+        //        for (loc.Y = Min.Y; loc.Y < Max.Y; loc.Y++)
+        //        {
+        //            for (loc.Z = Min.Z; loc.Z < Max.Z; loc.Z++)
+        //            {
+        //                slims.Add(grid.GetCubeBlock(loc));
+        //            }
+        //        }
+        //    }
 
-            return slims;
-        }
+        //    return slims;
+        //}
 
-        private void BlockEater(IMyDestroyableObject obj, BoundingBoxD bounds)
-        {
-            double distance = (bounds.Center - epicenter).LengthSquared();
-            if (distance > radiusSquared)
-            {
-                return;
-            }
+        //private void BlockEater(IMyDestroyableObject obj, BoundingBoxD bounds)
+        //{
+        //    double distance = (bounds.Center - epicenter).LengthSquared();
+        //    if (distance > radiusSquared)
+        //    {
+        //        return;
+        //    }
 
-            bool[] octants = bounds.GetOctants(epicenter);
-            EntityDesc entity = new EntityDesc(obj, distance);
+        //    bool[] octants = bounds.GetOctants(epicenter);
+        //    EntityDesc entity = new EntityDesc(obj, distance);
 
-            RayD ray = new RayD();
-            for (int i = 0; i < 8; i++)
-            {
-                if (!octants[i]) continue;
+        //    RayD ray = new RayD();
+        //    for (int i = 0; i < 8; i++)
+        //    {
+        //        if (!octants[i]) continue;
 
-                for (int j = 0; j < ExplosionRays[i].Length; j++)
-                {
-                    RayE data = ExplosionRays[i][j];
-                    ray.Position = data.Position;
-                    ray.Direction = data.Direction;
+        //        for (int j = 0; j < ExplosionRays[i].Length; j++)
+        //        {
+        //            RayE data = ExplosionRays[i][j];
+        //            ray.Position = data.Position;
+        //            ray.Direction = data.Direction;
 
-                    if (bounds.GaugeIntersects(ray))
-                    {
-                        entity.Rays.Add(new RayLookup(i, j));
-                    }
-                }
-            }
+        //            if (bounds.GaugeIntersects(ray))
+        //            {
+        //                entity.Rays.Add(new RayLookup(i, j));
+        //            }
+        //        }
+        //    }
 
-            if (Settings.DebugMode_ShowBlockOctants)
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    if (octants[i])
-                    {
-                        MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Settings.DebugOctantColors[i]);
-                    }
-                }
-            }
+        //    if (Settings.DebugMode_ShowBlockOctants)
+        //    {
+        //        for (int i = 0; i < 8; i++)
+        //        {
+        //            if (octants[i])
+        //            {
+        //                MyVisualScriptLogicProvider.AddGPS("", "", bounds.Center, Settings.DebugOctantColors[i]);
+        //            }
+        //        }
+        //    }
 
-            if (entity.Rays.Count > 0)
-            {
-                entities.Add(entity);
+        //    if (entity.Rays.Count > 0)
+        //    {
+        //        entities.Add(entity);
 
-                if (Settings.DebugMode_ShowBlockRayIntersects)
-                {
-                    float value = 255f * (entity.Rays.Count / 5f);
-                    MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
-                }
+        //        if (Settings.DebugMode_ShowBlockRayIntersects)
+        //        {
+        //            float value = 255f * (entity.Rays.Count / 5f);
+        //            MyVisualScriptLogicProvider.AddGPS(entity.Rays.Count.ToString(), "", bounds.Center, Color.FromNonPremultiplied(new Vector4(value, 0, 0, 255)), 5);
+        //        }
 
-            }
-        }
+        //    }
+        //}
 
-        private void DamageBlocks(MyStringHash ammoId, long shooter)
-        {
-            foreach (EntityDesc entity in orderedEntities)
-            {
-                if (entity.Object.Integrity < 0)
-                {
-                    continue;
-                }
+        //private void DamageBlocks(MyStringHash ammoId, long shooter)
+        //{
+        //    foreach (EntityDesc entity in orderedEntities)
+        //    {
+        //        if (entity.Object.Integrity < 0)
+        //        {
+        //            continue;
+        //        }
 
-                float mult = 1;
-                float trueIntegrity;
-                if (entity.Object is IMySlimBlock)
-                {
-                    mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)((IMySlimBlock)entity.Object).BlockDefinition).GeneralDamageMultiplier);
-                }
+        //        float mult = 1;
+        //        float trueIntegrity;
+        //        if (entity.Object is IMySlimBlock)
+        //        {
+        //            mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)((IMySlimBlock)entity.Object).BlockDefinition).GeneralDamageMultiplier);
+        //        }
 
-                trueIntegrity = entity.Object.Integrity * mult;
+        //        trueIntegrity = entity.Object.Integrity * mult;
 
-                foreach (RayLookup ray in entity.Rays)
-                {
-                    entity.AccumulatedDamage += ExplosionRays[ray.Octant][ray.Index].Damage;
-                }
+        //        foreach (RayLookup ray in entity.Rays)
+        //        {
+        //            entity.AccumulatedDamage += ExplosionRays[ray.Octant][ray.Index].Damage;
+        //        }
 
-                float damageToBeDone;
-                if (entity.AccumulatedDamage < trueIntegrity)
-                {
-                    damageToBeDone = entity.AccumulatedDamage;
-                    for (int i = 0; i < entity.Rays.Count; i++)
-                    {
-                        RayLookup ray = entity.Rays[i];
-                        ExplosionRays[ray.Octant][ray.Index].Damage = 0;
-                    }
-                }
-                else
-                {
-                    damageToBeDone = trueIntegrity;
+        //        float damageToBeDone;
+        //        if (entity.AccumulatedDamage < trueIntegrity)
+        //        {
+        //            damageToBeDone = entity.AccumulatedDamage;
+        //            for (int i = 0; i < entity.Rays.Count; i++)
+        //            {
+        //                RayLookup ray = entity.Rays[i];
+        //                ExplosionRays[ray.Octant][ray.Index].Damage = 0;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            damageToBeDone = trueIntegrity;
 
-                    float average = entity.AccumulatedDamage / entity.Rays.Count;
-                    for (int i = 0; i < entity.Rays.Count; i++)
-                    {
-                        RayLookup loc = entity.Rays[i];
-                        RayE ray = ExplosionRays[loc.Octant][loc.Index];
+        //            float average = entity.AccumulatedDamage / entity.Rays.Count;
+        //            for (int i = 0; i < entity.Rays.Count; i++)
+        //            {
+        //                RayLookup loc = entity.Rays[i];
+        //                RayE ray = ExplosionRays[loc.Octant][loc.Index];
 
-                        if (ray.Damage > average)
-                        {
-                            ray.Damage -= average;
-                        }
-                        else
-                        {
+        //                if (ray.Damage > average)
+        //                {
+        //                    ray.Damage -= average;
+        //                }
+        //                else
+        //                {
 
-                            average = average + ((average - ray.Damage) / (entity.Rays.Count - (i + 1)));
-                            ray.Damage = 0;
-                        }
-                    }
-                }
+        //                    average = average + ((average - ray.Damage) / (entity.Rays.Count - (i + 1)));
+        //                    ray.Damage = 0;
+        //                }
+        //            }
+        //        }
 
-                if (damageToBeDone == 0) continue;
+        //        if (damageToBeDone == 0) continue;
 
-                if (Settings.DebugMode)
-                {
-                    MyLog.Default.Info($"Block HP: {entity.Object.Integrity} Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
-                }
+        //        if (Settings.DebugMode)
+        //        {
+        //            MyLog.Default.Info($"Block HP: {entity.Object.Integrity} Accum: {entity.AccumulatedDamage}, ToDo: {damageToBeDone}, Rays: {entity.Rays.Count} Dist: {entity.DistanceSquared}");
+        //        }
 
-                try
-                {
-                    entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
-                }
-                catch (Exception e)
-                {
-                    MyLog.Default.Info(e.ToString());
-                }
-            }
-        }
+        //        try
+        //        {
+        //            entity.Object.DoDamage(damageToBeDone, ammoId, true, null, shooter);
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            MyLog.Default.Info(e.ToString());
+        //        }
+        //    }
+        //}
 
         public Explosive Clone()
         {

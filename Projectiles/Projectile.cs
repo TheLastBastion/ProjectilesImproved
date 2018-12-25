@@ -1,9 +1,11 @@
 ﻿using ProjectilesImproved.Definitions;
 using ProjectilesImproved.Effects.Flight;
+using ProtoBuf;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
@@ -13,46 +15,52 @@ using VRageMath;
 
 namespace ProjectilesImproved.Projectiles
 {
+    [ProtoContract]
     public class Projectile : ProjectileDefinition
     {
-        public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ?
-            MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
-
+        [XmlIgnore]
         public static MyStringId DefaultProjectileTrail = MyStringId.GetOrCompute("ProjectileTrailLine");
-
-        public const float Tick = 1f / 60f;
-        public Vector3D VelocityPerTick => Velocity * Tick;
+        [XmlIgnore]
+        public Vector3D VelocityPerTick => Velocity * Tools.Tick;
+        [XmlIgnore]
         public bool IsAtRange => DistanceTraveled * LifeTimeTicks > MaxTrajectory * MaxTrajectory;
-        public bool UseLongRaycast => DesiredSpeed * Tick * CollisionCheckFrames > 50;
+        [XmlIgnore]
+        public bool UseLongRaycast => DesiredSpeed * Tools.Tick * CollisionCheckFrames > 50;
+        [XmlIgnore]
+        public IMySlimBlock PartentSlim;
 
-        public long BlockId;
-
-        public IMySlimBlock Slim;
-
-        public MatrixD PositionMatrix;
-
-        public double DistanceTraveled;
-
-        public Vector3D InitialGridVelocity;
-
+        [ProtoMember]
+        public long ParentBlockId;
+        [ProtoMember]
+        public Vector3D Position;
+        [ProtoMember]
         public Vector3D Velocity;
-
-        public IFlight FlightEffect { get; set; }
-
+        [XmlIgnore]
+        public Vector3D Direction;
+        [ProtoMember]
+        public Vector3D InitialGridVelocity;
+        [XmlIgnore]
+        public double DistanceTraveled;
+        [XmlIgnore]
+        public IFlight FlightEffect;
+        [XmlIgnore]
         public int LifeTimeTicks;
-
+        [XmlIgnore]
         public bool IsInitialized = false;
-
+        [XmlIgnore]
         public bool HasExpired = false;
-
-        public Vector3D PreviousPosition;
-        public Vector3D Start;
-        public Vector3D End;
-
+        [XmlIgnore]
         public float LastPositionFraction = 0;
 
-        public int CollisionCheckFrames { get; private set; } = -1;
+        private Vector3D PreviousPosition;
+        private Vector3D Start;
+        private Vector3D End;
+
+        [XmlIgnore]
+        public int CollisionCheckFrames = -1;
+        [XmlIgnore]
         public int CollisionCheckCounter = 0;
+        [XmlIgnore]
         public bool DoShortRaycast = false;
 
         /// <summary>
@@ -60,6 +68,8 @@ namespace ProjectilesImproved.Projectiles
         /// </summary>
         public void Init()
         {
+            Direction = Vector3D.Normalize(Velocity);
+
             if (HasBulletDrop)
             {
                 FlightEffect = new BulletDrop();
@@ -77,7 +87,7 @@ namespace ProjectilesImproved.Projectiles
         /// </summary>
         public void PreUpdate()
         {
-            PreviousPosition = PositionMatrix.Translation;
+            PreviousPosition = Position;
             LifeTimeTicks++;
         }
 
@@ -99,8 +109,8 @@ namespace ProjectilesImproved.Projectiles
             MyTransparentGeometry.AddLineBillboard(
                     string.IsNullOrWhiteSpace(Material) ? DefaultProjectileTrail : MyStringId.GetOrCompute(Material),
                     new Vector4(ProjectileTrailColor * 10f, 1f),
-                    PositionMatrix.Translation + (PositionMatrix.Forward * length),
-                    -PositionMatrix.Forward,
+                    Position + (Direction * length),
+                    -Direction,
                     length,
                     thickness);
         }
@@ -110,15 +120,15 @@ namespace ProjectilesImproved.Projectiles
         /// </summary>
         public void PreCollitionDetection()
         {
-            Start = PositionMatrix.Translation;
+            Start = Position;
             if (DoShortRaycast)
             {
-                End = PositionMatrix.Translation + VelocityPerTick;
+                End = Position + VelocityPerTick;
                 DoShortRaycast = false;
             }
             else
             {
-                End = PositionMatrix.Translation + (VelocityPerTick * CollisionCheckFrames);
+                End = Position + (VelocityPerTick * CollisionCheckFrames);
             }
         }
 
@@ -163,14 +173,15 @@ namespace ProjectilesImproved.Projectiles
                     }
                     else
                     {
+                        HasExpired = true;
                         if (!MyAPIGateway.Session.IsServer) return;
 
                         if (hit.HitEntity is IMyDestroyableObject)
                         {
                             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                            (hit.HitEntity as IMyDestroyableObject).DoDamage(ProjectileHealthDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), BlockId);
+                            (hit.HitEntity as IMyDestroyableObject).DoDamage(ProjectileHealthDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), ParentBlockId);
 
-                            hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, PositionMatrix.Forward * ProjectileHitImpulse, hit.Position, null);
+                            hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, Direction * ProjectileHitImpulse, hit.Position, null);
 
                             LastPositionFraction = hit.Fraction;
                         }
@@ -178,7 +189,7 @@ namespace ProjectilesImproved.Projectiles
                         {
                             IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
 
-                            Vector3D direction = PositionMatrix.Forward;
+                            Vector3D direction = Direction;
                             Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
                             if (hitPos.HasValue)
                             {
@@ -187,20 +198,18 @@ namespace ProjectilesImproved.Projectiles
                                 {
                                     float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                                    block.DoDamage(ProjectileMassDamage * mult, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), BlockId);
+                                    block.DoDamage(ProjectileMassDamage * mult, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), ParentBlockId);
                                 }
                                 else
                                 {
-                                    block.DoDamage(ProjectileMassDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), BlockId);
+                                    block.DoDamage(ProjectileMassDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), ParentBlockId);
                                 }
 
-                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, PositionMatrix.Forward * ProjectileHitImpulse, hit.Position, null);
+                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, Direction * ProjectileHitImpulse, hit.Position, null);
 
                                 LastPositionFraction = hit.Fraction;
                             }
                         }
-
-                        HasExpired = true;
                     }
                 }
                 else
@@ -234,13 +243,13 @@ namespace ProjectilesImproved.Projectiles
         {
             if (CollisionCheckFrames == -1)
             {
-                if (MaxSpeedLimit == 0)
+                if (Tools.MaxSpeedLimit == 0)
                 {
                     CollisionCheckFrames = 1;
                 }
                 else
                 {
-                    CollisionCheckFrames = 1 + (int)Math.Ceiling((DesiredSpeed / MaxSpeedLimit) * 0.5f);
+                    CollisionCheckFrames = 1 + (int)Math.Ceiling((DesiredSpeed / Tools.MaxSpeedLimit) * 0.5f);
                 }
             }
 

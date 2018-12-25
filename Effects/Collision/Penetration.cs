@@ -39,9 +39,9 @@ namespace ProjectilesImproved.Effects.Collision
                     if (hit.HitEntity is IMyDestroyableObject)
                     {
                         IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                        (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                        (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
 
-                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
+                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Direction * bullet.ProjectileHitImpulse, hit.Position, null);
 
                         bullet.LastPositionFraction = hit.Fraction;
                     }
@@ -90,9 +90,9 @@ namespace ProjectilesImproved.Effects.Collision
                                     }
                                 }
 
-                                block.DoDamage(damage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                                block.DoDamage(damage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
 
-                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
+                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Direction * bullet.ProjectileHitImpulse, hit.Position, null);
 
                                 bullet.LastPositionFraction = hit.Fraction;
                             }

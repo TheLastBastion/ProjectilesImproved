@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using ProjectilesImproved.Effects;
-using ProjectilesImproved.Projectiles;
-using VRage.Game.ModAPI;
+﻿using ProjectilesImproved.Projectiles;
 
 namespace ProjectilesImproved.Effects.Flight
 {
@@ -9,7 +6,7 @@ namespace ProjectilesImproved.Effects.Flight
     {
         public void Update(Projectile bullet)
         {
-            bullet.PositionMatrix.Translation += bullet.VelocityPerTick;
+            bullet.Position += bullet.VelocityPerTick;
             bullet.DistanceTraveled += bullet.VelocityPerTick.LengthSquared();
 
             if (bullet.IsAtRange)

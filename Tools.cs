@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Sandbox.Definitions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using VRage.Utils;
@@ -12,6 +13,9 @@ namespace ProjectilesImproved
         public const float Tick = 1f / 60f;
         public const float MillisecondPerFrame = 1000f / 60f;
         public const double FireRateMultiplayer = 1d / 60d / 60d;
+
+        public static float MaxSpeedLimit => (MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed > MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed) ?
+    MyDefinitionManager.Static.EnvironmentDefinition.LargeShipMaxSpeed : MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
 
         /// <summary>
         /// Gets the octant this vector occupies 

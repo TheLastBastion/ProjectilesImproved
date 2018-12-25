@@ -63,9 +63,9 @@ namespace ProjectilesImproved.Effects.Collision
                 if (hit.HitEntity is IMyDestroyableObject)
                 {
                     IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-                    (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                    (hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
 
-                    hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
+                    hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Direction * bullet.ProjectileHitImpulse, hit.Position, null);
 
                     bullet.LastPositionFraction = hit.Fraction;
                 }
@@ -73,7 +73,7 @@ namespace ProjectilesImproved.Effects.Collision
                 {
                     IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
 
-                    Vector3D direction = bullet.PositionMatrix.Forward;
+                    Vector3D direction = bullet.Direction;
                     Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
                     if (hitPos.HasValue)
                     {
@@ -82,14 +82,14 @@ namespace ProjectilesImproved.Effects.Collision
                         {
                             float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                            block.DoDamage(bullet.ProjectileMassDamage * mult, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                            block.DoDamage(bullet.ProjectileMassDamage * mult, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
                         }
                         else
                         {
-                            block.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.BlockId);
+                            block.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
                         }
 
-                        block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.PositionMatrix.Forward * bullet.ProjectileHitImpulse, hit.Position, null);
+                        block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Direction * bullet.ProjectileHitImpulse, hit.Position, null);
 
                         bullet.LastPositionFraction = hit.Fraction;
                     }

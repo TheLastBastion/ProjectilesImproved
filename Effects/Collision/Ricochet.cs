@@ -109,7 +109,7 @@ namespace ProjectilesImproved.Effects.Collision
             if (hit.HitEntity is IMyCubeGrid)
             {
                 IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3D direction = bullet.PositionMatrix.Forward;
+                Vector3D direction = bullet.Direction;
                 Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
                 if (hitPos.HasValue)
                 {
@@ -156,19 +156,15 @@ namespace ProjectilesImproved.Effects.Collision
 
                 // calculate new direction
                 bullet.ResetCollisionCheck();
-                bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity);
-                bullet.PositionMatrix.Translation = hit.Position;
+                bullet.Direction = Vector3D.Normalize(bullet.Velocity);
+                bullet.Position = hit.Position + (bullet.Direction * 0.5f);
 
-                bullet.Start = bullet.PositionMatrix.Translation + (bullet.PositionMatrix.Forward * 0.5f); // ensure it does not hit itself
-                bullet.End = bullet.PositionMatrix.Translation + bullet.VelocityPerTick;
-
+                bullet.PreCollitionDetection();
                 bullet.CollisionDetection();
                 bullet.Draw();
 
                 if (!MyAPIGateway.Utilities.IsDedicated)
                 {
-
-
                     MatrixD world = MatrixD.CreateFromDir(hit.Normal);
                     world.Translation = hit.Position;
 
@@ -205,10 +201,6 @@ namespace ProjectilesImproved.Effects.Collision
                 MaxVelocityTransfer = MaxVelocityTransfer,
                 RicochetChance = RicochetChance
             };
-        }
-
-        public void Update(Projectile bullet)
-        {
         }
     }
 }

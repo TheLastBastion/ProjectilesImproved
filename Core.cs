@@ -40,7 +40,7 @@ namespace ProjectilesImproved
                     Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
                     Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
                     Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
-                    Network.RegisterChatCommand("reset_default", (args) => { Network.SendCommand("reset_default"); });
+                    //Network.RegisterChatCommand("reset_default", (args) => { Network.SendCommand("reset_default"); });
                 }
                 else
                 {
@@ -48,7 +48,7 @@ namespace ProjectilesImproved
                     Network.RegisterNetworkCommand("update", ServerCallback_Update);
                     Network.RegisterNetworkCommand("load", ServerCallback_Load);
                     Network.RegisterNetworkCommand("save", ServerCallback_Save);
-                    Network.RegisterNetworkCommand("reset_default", ServerCallback_Default);
+                    //Network.RegisterNetworkCommand("reset_default", ServerCallback_Default);
 
                     if (Network.NetworkType != NetworkTypes.Dedicated)
                     {
@@ -58,10 +58,10 @@ namespace ProjectilesImproved
                             MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
                         });
 
-                        Network.RegisterChatCommand("reset_default", (args) =>
-                        {
-                            MyAPIGateway.Utilities.ShowMessage(ModName, "Reset default settings. This has not been saved yet.");
-                        });
+                        //Network.RegisterChatCommand("reset_default", (args) =>
+                        //{
+                        //    MyAPIGateway.Utilities.ShowMessage(ModName, "Reset default settings. This has not been saved yet.");
+                        //});
 
                         Network.RegisterChatCommand("save", (args) =>
                         {
@@ -155,21 +155,13 @@ namespace ProjectilesImproved
             }
         }
 
-        private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)
-        {
-            if (data != null)
-            {
-                Settings.SetNewSettings(MyAPIGateway.Utilities.SerializeFromBinary<Settings>(data));
-            }
-        }
-
         private void ClientCallback_TerminalShoot(ulong steamId, string CommandString, byte[] data)
         {
             TerminalShoot t = MyAPIGateway.Utilities.SerializeFromBinary<TerminalShoot>(data);
 
             if (t != null)
             {
-                MyAPIGateway.Utilities.ShowNotification($"shoot {t.BlockId} {t.State.ToString()}", 1000);
+                MyAPIGateway.Utilities.ShowNotification($"shoot {t.BlockId} {t.State.ToString()}", 1);
                 ProjectileWeapon.UpdateTerminalShooting(t);
             }
             else 
@@ -192,6 +184,14 @@ namespace ProjectilesImproved
             else
             {
                 MyLog.Default.Warning("data did not unpack!");
+            }
+        }
+
+        private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)
+        {
+            if (data != null)
+            {
+                Settings.SetNewSettings(MyAPIGateway.Utilities.SerializeFromBinary<Settings>(data));
             }
         }
 
@@ -218,7 +218,7 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 Settings.Save();
-                Network.SendCommand(null, "Settings Saved", /*MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()),*/ steamId: steamId);
+                Network.SendCommand(null, "Settings Saved", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()), steamId: steamId);
             }
             else
             {
@@ -226,18 +226,18 @@ namespace ProjectilesImproved
             }
         }
 
-        private void ServerCallback_Default(ulong steamId, string commandString, byte[] data)
-        {
-            if (IsAllowedSpecialOperations(steamId))
-            {
-                //Settings.SetNewSettings(DefaultSettings);
-                Network.SendCommand(null, "Default weapon settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
-            }
-            else
-            {
-                Network.SendCommand(null, "Load command requires Admin status.", steamId: steamId);
-            }
-        }
+        //private void ServerCallback_Default(ulong steamId, string commandString, byte[] data)
+        //{
+        //    if (IsAllowedSpecialOperations(steamId))
+        //    {
+        //        //Settings.SetNewSettings(DefaultSettings);
+        //        Network.SendCommand(null, "Default weapon settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
+        //    }
+        //    else
+        //    {
+        //        Network.SendCommand(null, "Load command requires Admin status.", steamId: steamId);
+        //    }
+        //}
 
         public static bool IsAllowedSpecialOperations(ulong steamId)
         {

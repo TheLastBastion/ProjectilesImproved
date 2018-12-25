@@ -9,12 +9,12 @@ namespace ProjectilesImproved.Effects.Flight
     {
         public void Update(Projectile bullet)
         {
-            Vector3D gravity = WorldPlanets.GetExternalForces(bullet.PositionMatrix.Translation).Gravity * bullet.BulletDropGravityScaler;
+            Vector3D gravity = WorldPlanets.GetExternalForces(bullet.Position).Gravity * bullet.BulletDropGravityScaler;
 
             bullet.Velocity += gravity * Tools.Tick;
-            bullet.PositionMatrix.Translation += bullet.Velocity * Tools.Tick;
+            bullet.Position += bullet.Velocity * Tools.Tick;
 
-            bullet.PositionMatrix.Forward = Vector3D.Normalize(bullet.Velocity - bullet.InitialGridVelocity);
+            bullet.Direction = Vector3D.Normalize(bullet.Velocity);
             bullet.DistanceTraveled += bullet.VelocityPerTick.LengthSquared();
 
             if (bullet.IsAtRange)

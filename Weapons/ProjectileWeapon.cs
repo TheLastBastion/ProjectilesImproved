@@ -127,7 +127,6 @@ namespace ProjectilesImproved.Weapons
 
         public static bool UpdateTerminalShooting(TerminalShoot t)
         {
-            //IMyCubeGrid grid = (IMyCubeGrid)MyAPIGateway.Entities.GetEntityById(terminal.GridId);
             IMyTerminalBlock block = (IMyTerminalBlock)MyAPIGateway.Entities.GetEntityById(t.BlockId);
 
             if (block == null)
@@ -333,6 +332,19 @@ namespace ProjectilesImproved.Weapons
             //    MyAPIGateway.Utilities.ShowNotification($"{(gun.IsShooting ? "Turret Mouse Click" : "")} - {(TerminalShootOnce ? "Shoot Once" : "")} - {(TerminalShooting ? "Terminal Shooting" : "")} - {((IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME) ? "Fixed Gun Mouse Click" : "")}",1);
             //}
 
+            // makes sure clients have gotten the update
+            if (!Settings.Instance.HasBeenSetByServer)
+            {
+                if (retry == 0)
+                {
+                    NetworkAPI.Instance.SendCommand("update");
+                    retry = 300;
+                }
+
+                retry--;
+                return;
+            }
+
             if (Ammo != gun.GunBase.CurrentAmmoDefinition)
             {
                 Ammo = gun.GunBase.CurrentAmmoDefinition;
@@ -363,19 +375,6 @@ namespace ProjectilesImproved.Weapons
 
         private void FireWeapon()
         {
-            // makes sure clients have gotten the update
-            if (!Settings.Instance.HasBeenSetByServer)
-            {
-                if (retry == 0)
-                {
-                    NetworkAPI.Instance.SendCommand("update");
-                    retry = 300;
-                }
-
-                retry--;
-                return;
-            }
-
             if (TimeTillNextShot >= 1)
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
@@ -396,7 +395,7 @@ namespace ProjectilesImproved.Weapons
                     Projectile bullet = bulletData.CreateProjectile();
                     bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
                     bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * bulletData.DesiredSpeed);
-                    bullet.PositionMatrix = positionMatrix;
+                    bullet.Position = positionMatrix.Translation;
 
                     Core.SpawnProjectile(bullet);
                     gun.GunBase.ConsumeAmmo();
