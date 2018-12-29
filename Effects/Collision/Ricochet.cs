@@ -161,7 +161,7 @@ namespace ProjectilesImproved.Effects.Collision
 
                 bullet.PreCollitionDetection();
                 bullet.CollisionDetection();
-                bullet.Draw();
+                //bullet.Draw();
 
                 if (!MyAPIGateway.Utilities.IsDedicated)
                 {

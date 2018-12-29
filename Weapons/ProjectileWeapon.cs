@@ -38,6 +38,7 @@ namespace ProjectilesImproved.Weapons
         public bool ControlsUpdated = false; // TODO: change this to static?
 
         public bool IsShooting => gun.IsShooting || TerminalShootOnce || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
+        public int AmmoType => (Ammo == null) ? 0 : (int)Ammo.AmmoType;
 
         public double TimeTillNextShot = 1d;
         public int CurrentShotInBurst = 0;
@@ -99,9 +100,7 @@ namespace ProjectilesImproved.Weapons
             if (gun != null)
             {
                 Weapon = MyDefinitionManager.Static.GetWeaponDefinition((Block.SlimBlock.BlockDefinition as MyWeaponBlockDefinition).WeaponDefinitionId);
-
                 Definition = Settings.GetWeaponDefinition(Weapon.Id.SubtypeId.String);
-                GetMoreWeaponDef();
 
                 // Thanks for the help Digi
                 for (int i = 0; i < Weapon.WeaponAmmoDatas.Length; i++)
@@ -114,15 +113,6 @@ namespace ProjectilesImproved.Weapons
                     ammoData.ShootIntervalInMiliseconds = int.MaxValue;
                 }
             }
-        }
-
-        private void GetMoreWeaponDef()
-        {
-            MyWeaponDefinition.MyWeaponAmmoData moreDetails = Weapon.WeaponAmmoDatas[GetAmmoLookup()];
-
-            Definition.RateOfFire = moreDetails.RateOfFire;
-            Definition.ShotsInBurst = moreDetails.ShotsInBurst;
-            Definition.ShootSound = moreDetails.ShootSound;
         }
 
         public static bool UpdateTerminalShooting(TerminalShoot t)
@@ -329,7 +319,7 @@ namespace ProjectilesImproved.Weapons
         {
             //if (!MyAPIGateway.Utilities.IsDedicated)
             //{
-            //    MyAPIGateway.Utilities.ShowNotification($"{(gun.IsShooting ? "Turret Mouse Click" : "")} - {(TerminalShootOnce ? "Shoot Once" : "")} - {(TerminalShooting ? "Terminal Shooting" : "")} - {((IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME) ? "Fixed Gun Mouse Click" : "")}",1);
+            //    MyAPIGateway.Utilities.ShowNotification($"{(gun.IsShooting ? "Turret Mouse Click" : "")} - {(TerminalShootOnce ? "Shoot Once" : "")} - {(TerminalShooting ? "Terminal Shooting" : "")} - {((IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME) ? "Fixed Gun Mouse Click" : "")}", 1);
             //}
 
             // makes sure clients have gotten the update
@@ -348,7 +338,6 @@ namespace ProjectilesImproved.Weapons
             if (Ammo != gun.GunBase.CurrentAmmoDefinition)
             {
                 Ammo = gun.GunBase.CurrentAmmoDefinition;
-                GetMoreWeaponDef();
             }
 
             if (FirstTimeCooldown > 0)
@@ -401,10 +390,10 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.ConsumeAmmo();
                     TimeTillNextShot--;
 
-                    soundEmitter.PlaySound(gun.GunBase.ShootSound, false, false, false, false, false, null);
+                    soundEmitter.PlaySound(gun.GunBase.ShootSound, true, false, false, false, false, null);
 
                     CurrentShotInBurst++;
-                    if (CurrentShotInBurst == Definition.ShotsInBurst)
+                    if (CurrentShotInBurst == Definition.AmmoDatas[AmmoType].ShotsInBurst)
                     {
                         TimeTillNextShot = 0;
                         CurrentShotInBurst = 0;
@@ -422,16 +411,6 @@ namespace ProjectilesImproved.Weapons
                     }
                 }
             }
-        }
-
-        private int GetAmmoLookup()
-        {
-            if (gun.GunBase.CurrentAmmoDefinition != null)
-            {
-                return (int)gun.GunBase.CurrentAmmoDefinition.AmmoType;
-            }
-
-            return 0;
         }
 
         public override void Close()

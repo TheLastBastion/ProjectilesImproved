@@ -86,7 +86,7 @@ namespace ProjectilesImproved.Effects.Weapon
                 // this makes sure the gun will fire instantly when fire condisions are met
                 if (weapon.TimeTillNextShot < 1)
                 {
-                    weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
+                    weapon.TimeTillNextShot += weapon.Definition.AmmoDatas[weapon.AmmoType].RateOfFire * Tools.FireRateMultiplayer;
                 }
 
                 if (weapon.TimeTillNextShot > 1)
@@ -99,8 +99,8 @@ namespace ProjectilesImproved.Effects.Weapon
 
             if (willShoot)
             {
-                weapon.Definition.RateOfFire = CurrentRPM();
-                weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
+                weapon.Definition.AmmoDatas[weapon.AmmoType].RateOfFire = CurrentRPM();
+                weapon.TimeTillNextShot += weapon.Definition.AmmoDatas[weapon.AmmoType].RateOfFire * Tools.FireRateMultiplayer;
 
                 currentTime += Tools.MillisecondPerFrame;
                 if (currentTime > TimeToMax)

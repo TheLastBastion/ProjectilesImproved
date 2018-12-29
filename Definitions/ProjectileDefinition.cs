@@ -156,5 +156,10 @@ namespace ProjectilesImproved.Definitions
                 Explosive = (Explosive == null) ? null : Explosive.Clone()
             };
         }
+
+        public override string ToString()
+        {
+            return $"Spd: {DesiredSpeed}, Dist: {MaxTrajectory}, HitImp: {ProjectileHitImpulse}, Damage: {ProjectileMassDamage}|{ProjectileHealthDamage}";
+        }
     }
 }

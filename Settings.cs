@@ -30,7 +30,7 @@ namespace ProjectilesImproved
         public static Settings Instance = new Settings();
 
         [XmlIgnore]
-        public bool HasBeenSetByServer;
+        public bool HasBeenSetByServer = false;
 
         [ProtoMember]
         public bool UseTurretLeadIndicators;
@@ -253,29 +253,42 @@ namespace ProjectilesImproved
                     if (def is MyWeaponBlockDefinition)
                     {
                         MyWeaponBlockDefinition block = def as MyWeaponBlockDefinition;
-
                         MyWeaponDefinition w = MyDefinitionManager.Static.GetWeaponDefinition(block.WeaponDefinitionId);
 
-                        MyAmmoMagazineDefinition mag = MyDefinitionManager.Static.GetAmmoMagazineDefinition(w.AmmoMagazinesId[0]);
+                        List<WeaponAmmoDefinition> WeaponAmmosDefs = new List<WeaponAmmoDefinition>();
+                        for (int i = 0; i < 6; i++) // there are six types in MyAmmoType
+                        {
+                            WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
+                        }
 
-                        MyAmmoDefinition ammo = MyDefinitionManager.Static.GetAmmoDefinition(mag.AmmoDefinitionId);
+                        foreach (MyDefinitionId id in w.AmmoMagazinesId)
+                        {
+                            MyAmmoMagazineDefinition mag = MyDefinitionManager.Static.GetAmmoMagazineDefinition(id);
+                            MyAmmoDefinition ammo = MyDefinitionManager.Static.GetAmmoDefinition(mag.AmmoDefinitionId);
+                            int index = (int)ammo.AmmoType;
+
+                            WeaponAmmosDefs[index].RateOfFire = w.WeaponAmmoDatas[index].RateOfFire;
+                            WeaponAmmosDefs[index].ShotsInBurst = w.WeaponAmmoDatas[index].ShotsInBurst;
+                            WeaponAmmosDefs[index].ShootSound = w.WeaponAmmoDatas[index].ShootSound;
+                        }
 
                         WeaponDefinition SBCWeapon = new WeaponDefinition()
                         {
                             UseDefaultsFromSBC = true,
                             SubtypeId = w.Id.SubtypeId.String,
-                            //NoAmmoSound = w.NoAmmoSound,
-                            //ReloadSound = w.ReloadSound,
-                            //SecondarySound = w.SecondarySound,
                             DeviateShotAngle = w.DeviateShotAngle,
+                            ReloadTime = w.ReloadTime,
+                            AmmoDatas = WeaponAmmosDefs,
+
                             ReleaseTimeAfterFire = w.ReleaseTimeAfterFire,
+                            PhysicalMaterial = w.PhysicalMaterial,
+                            DamageMultiplier = w.DamageMultiplier,
                             MuzzleFlashLifeSpan = w.MuzzleFlashLifeSpan,
                             UseDefaultMuzzleFlash = w.UseDefaultMuzzleFlash,
-                            ReloadTime = w.ReloadTime,
-                            DamageMultiplier = w.DamageMultiplier,
-                            RateOfFire = w.WeaponAmmoDatas[(int)ammo.AmmoType].RateOfFire,
-                            ShootSound = w.WeaponAmmoDatas[(int)ammo.AmmoType].ShootSound,
-                            ShotsInBurst = w.WeaponAmmoDatas[(int)ammo.AmmoType].ShotsInBurst,
+
+                            NoAmmoSound = w.NoAmmoSound,
+                            ReloadSound = w.ReloadSound,
+                            SecondarySound = w.SecondarySound,
                         };
 
                         if (WeaponDefinitionLookup.ContainsKey(w.Id.SubtypeId.String))

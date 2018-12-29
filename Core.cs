@@ -6,7 +6,6 @@ using VRage.Game.Components;
 using ModNetworkAPI;
 using ProjectilesImproved.Projectiles;
 using VRage.Game.ModAPI;
-using ProjectilesImproved.Effects.Collision;
 using ProjectilesImproved.Definitions;
 using VRage.Utils;
 using ProjectilesImproved.Weapons;
@@ -16,14 +15,18 @@ namespace ProjectilesImproved
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation | MyUpdateOrder.BeforeSimulation)]
     public class Core : MySessionComponentBase
     {
-        public static bool IsInitialized = false;
-        public bool SentInitialRequest = false;
-        private int waitInterval = 0;
-        public static event Action OnLoadComplete;
-        public static List<Projectile> ActiveProjectiles = new List<Projectile>();
+        private static HashSet<Projectile> PendingProjectiles = new HashSet<Projectile>();
+        private static HashSet<Projectile> ActiveProjectiles = new HashSet<Projectile>();
+        private static HashSet<Projectile> ExpiredProjectiles = new HashSet<Projectile>();
 
         public const string ModName = "Weapons Overhaul";
         public const ushort ModID = 4112;
+
+        public static event Action OnLoadComplete;
+
+        public static bool IsInitialized = false;
+        public bool SentInitialRequest = false;
+        private int waitInterval = 0;
 
         private NetworkAPI Network => NetworkAPI.Instance;
 
@@ -37,10 +40,10 @@ namespace ProjectilesImproved
                 {
                     Network.RegisterNetworkCommand(null, ClientCallback_Update);
                     Network.RegisterNetworkCommand("shoot", ClientCallback_TerminalShoot);
+                    Network.RegisterNetworkCommand("spawn", ClientCallback_Spawn);
                     Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
                     Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
                     Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
-                    //Network.RegisterChatCommand("reset_default", (args) => { Network.SendCommand("reset_default"); });
                 }
                 else
                 {
@@ -48,7 +51,6 @@ namespace ProjectilesImproved
                     Network.RegisterNetworkCommand("update", ServerCallback_Update);
                     Network.RegisterNetworkCommand("load", ServerCallback_Load);
                     Network.RegisterNetworkCommand("save", ServerCallback_Save);
-                    //Network.RegisterNetworkCommand("reset_default", ServerCallback_Default);
 
                     if (Network.NetworkType != NetworkTypes.Dedicated)
                     {
@@ -57,11 +59,6 @@ namespace ProjectilesImproved
                             Settings.Load();
                             MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
                         });
-
-                        //Network.RegisterChatCommand("reset_default", (args) =>
-                        //{
-                        //    MyAPIGateway.Utilities.ShowMessage(ModName, "Reset default settings. This has not been saved yet.");
-                        //});
 
                         Network.RegisterChatCommand("save", (args) =>
                         {
@@ -81,12 +78,10 @@ namespace ProjectilesImproved
             {
                 Network.SendCommand("update");
             }
-            Settings.Init();
-        }
-
-        protected override void UnloadData()
-        {
-            Network.Close();
+            else
+            {
+                Settings.Init();
+            }
         }
 
         private void OnStartInit()
@@ -94,13 +89,21 @@ namespace ProjectilesImproved
             MyAPIGateway.Session.OnSessionReady -= OnStartInit;
 
             OnLoadComplete?.Invoke();
-            ExplosionShapeGenerator.Initialize();
             IsInitialized = true;
+        }
+
+        protected override void UnloadData()
+        {
+            Network.Close();
         }
 
         public static void SpawnProjectile(Projectile data)
         {
-            ActiveProjectiles.Add(data);
+            lock (PendingProjectiles)
+            {
+                PendingProjectiles.Add(data);
+            }
+
         }
 
         public override void UpdateBeforeSimulation()
@@ -124,34 +127,79 @@ namespace ProjectilesImproved
 
         public override void UpdateAfterSimulation()
         {
-            MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}", 1);
-
-            for (int i = 0; i < ActiveProjectiles.Count; i++)
+            try
             {
-                if (ActiveProjectiles[i].HasExpired)
+                MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}, Pending: {PendingProjectiles.Count}, Expired: {ExpiredProjectiles.Count}", 1);
+
+
+                ActiveProjectiles.ExceptWith(ExpiredProjectiles);
+                ExpiredProjectiles.Clear();
+
+                ActiveProjectiles.UnionWith(PendingProjectiles);
+                PendingProjectiles.Clear();
+
+                MyAPIGateway.Parallel.ForEach(ActiveProjectiles, (Projectile p) =>
                 {
-                    ActiveProjectiles.RemoveAt(i);
-                    i--;
-                    continue;
-                }
+                    if (!p.IsInitialized)
+                    {
+                        p.Init();
+                    }
 
-                Projectile bullet = ActiveProjectiles[i];
+                    p.PreUpdate();
 
-                if (!bullet.IsInitialized)
+                    if (p.DoCollisionCheck())
+                    {
+                        p.PreCollitionDetection();
+                        p.CollisionDetection();
+                    }
+
+                    p.Update();
+
+                    if (p.HasExpired)
+                    {
+                        lock (ExpiredProjectiles)
+                        {
+                            ExpiredProjectiles.Add(p);
+                        }
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                MyLog.Default.Error(e.ToString());
+            }
+
+            // VVV for testing performance VVV
+
+            //foreach (Projectile p in ActiveProjectiles)
+            //{
+
+            //    if (!p.IsInitialized)
+            //    {
+            //        p.Init();
+            //    }
+
+            //    p.PreUpdate();
+
+            //    if (p.DoCollisionCheck())
+            //    {
+            //        p.PreCollitionDetection();
+            //        p.CollisionDetection();
+            //    }
+
+            //    p.Draw();
+            //    p.Update();
+            //}
+        }
+
+        public override void Draw()
+        {
+            foreach (Projectile p in ActiveProjectiles)
+            {
+                if (!p.HasExpired)
                 {
-                    bullet.Init();
+                    p.Draw();
                 }
-
-                bullet.PreUpdate();
-
-                if (bullet.DoCollisionCheck())
-                {
-                    bullet.PreCollitionDetection();
-                    bullet.CollisionDetection();
-                }
-
-                bullet.Draw();
-                bullet.Update();
             }
         }
 
@@ -164,7 +212,7 @@ namespace ProjectilesImproved
                 MyAPIGateway.Utilities.ShowNotification($"shoot {t.BlockId} {t.State.ToString()}", 1);
                 ProjectileWeapon.UpdateTerminalShooting(t);
             }
-            else 
+            else
             {
                 MyLog.Default.Warning("data did not unpack!");
             }
@@ -185,6 +233,11 @@ namespace ProjectilesImproved
             {
                 MyLog.Default.Warning("data did not unpack!");
             }
+        }
+
+        private void ClientCallback_Spawn(ulong steamId, string CommandString, byte[] data)
+        {
+
         }
 
         private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)
@@ -225,19 +278,6 @@ namespace ProjectilesImproved
                 Network.SendCommand(null, "Load command requires Admin status.", steamId: steamId);
             }
         }
-
-        //private void ServerCallback_Default(ulong steamId, string commandString, byte[] data)
-        //{
-        //    if (IsAllowedSpecialOperations(steamId))
-        //    {
-        //        //Settings.SetNewSettings(DefaultSettings);
-        //        Network.SendCommand(null, "Default weapon settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
-        //    }
-        //    else
-        //    {
-        //        Network.SendCommand(null, "Load command requires Admin status.", steamId: steamId);
-        //    }
-        //}
 
         public static bool IsAllowedSpecialOperations(ulong steamId)
         {

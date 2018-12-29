@@ -1,5 +1,4 @@
-﻿using ProjectilesImproved.Definitions;
-using ProjectilesImproved.Weapons;
+﻿using ProjectilesImproved.Weapons;
 using ProtoBuf;
 
 namespace ProjectilesImproved.Effects.Weapon
@@ -42,7 +41,7 @@ namespace ProjectilesImproved.Effects.Weapon
                 // this makes sure the gun will fire instantly when fire condisions are met
                 if (weapon.TimeTillNextShot < 1)
                 {
-                    weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
+                    weapon.TimeTillNextShot += weapon.Definition.AmmoDatas[weapon.AmmoType].RateOfFire * Tools.FireRateMultiplayer;
                 }
 
                 if (weapon.TimeTillNextShot > 1)
@@ -55,7 +54,7 @@ namespace ProjectilesImproved.Effects.Weapon
 
             if (willShoot)
             {
-                weapon.TimeTillNextShot += weapon.Definition.RateOfFire * Tools.FireRateMultiplayer;
+                weapon.TimeTillNextShot += weapon.Definition.AmmoDatas[weapon.AmmoType].RateOfFire * Tools.FireRateMultiplayer;
             }
 
             return willShoot;

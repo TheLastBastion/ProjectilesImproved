@@ -65,6 +65,9 @@ namespace ProjectilesImproved
             if (MyAPIGateway.Utilities.IsDedicated)
                 return;
 
+            if (!Settings.Instance.UseTurretLeadIndicators && !Settings.Instance.UseFixedGunLeadIndicators)
+                return;
+
             CurrentData = LeadingData.GetLeadingData(MyAPIGateway.Session?.Player?.Controller?.ControlledEntity?.Entity, CurrentData);
 
             if (CurrentData == null)

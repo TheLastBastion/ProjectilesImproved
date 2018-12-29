@@ -1,6 +1,7 @@
 ﻿using ProjectilesImproved.Effects.Weapon;
 using ProtoBuf;
 using Sandbox.Game.Entities;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 using VRage.Utils;
 
@@ -22,13 +23,9 @@ namespace ProjectilesImproved.Definitions
         public int ReloadTime;
 
         [ProtoMember]
-        public int RateOfFire;
-
-        [ProtoMember]
-        public int ShotsInBurst;
+        public List<WeaponAmmoDefinition> AmmoDatas = new List<WeaponAmmoDefinition>();
 
         // mod effects
-
         [ProtoMember]
         public Ramping Ramping;
 
@@ -49,9 +46,6 @@ namespace ProjectilesImproved.Definitions
         public bool UseDefaultMuzzleFlash;
 
         [XmlIgnore]
-        public MySoundPair ShootSound;
-
-        [XmlIgnore]
         public MySoundPair NoAmmoSound;
 
         [XmlIgnore]
@@ -65,18 +59,23 @@ namespace ProjectilesImproved.Definitions
         {
             return new WeaponDefinition
             {
+                UseDefaultsFromSBC = UseDefaultsFromSBC,
                 SubtypeId = SubtypeId,
+                DeviateShotAngle = DeviateShotAngle,
+                ReloadTime = ReloadTime,
+                AmmoDatas = new List<WeaponAmmoDefinition>(AmmoDatas),
+
+                Ramping = (Ramping == null) ? null : Ramping.Clone(),
+
+                ReleaseTimeAfterFire = ReleaseTimeAfterFire,
+                PhysicalMaterial = PhysicalMaterial,
+                DamageMultiplier = DamageMultiplier,
+                MuzzleFlashLifeSpan = MuzzleFlashLifeSpan,
+                UseDefaultMuzzleFlash = UseDefaultMuzzleFlash,
+
                 NoAmmoSound = NoAmmoSound,
                 ReloadSound = ReloadSound,
                 SecondarySound = SecondarySound,
-                DeviateShotAngle = DeviateShotAngle,
-                ReleaseTimeAfterFire = ReleaseTimeAfterFire,
-                MuzzleFlashLifeSpan = MuzzleFlashLifeSpan,
-                UseDefaultMuzzleFlash = UseDefaultMuzzleFlash,
-                ReloadTime = ReloadTime,
-                DamageMultiplier = DamageMultiplier,
-
-                Ramping = (Ramping == null) ? null : Ramping.Clone()
             };
         }
     }
