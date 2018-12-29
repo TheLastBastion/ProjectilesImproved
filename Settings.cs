@@ -256,7 +256,7 @@ namespace ProjectilesImproved
                         MyWeaponDefinition w = MyDefinitionManager.Static.GetWeaponDefinition(block.WeaponDefinitionId);
 
                         List<WeaponAmmoDefinition> WeaponAmmosDefs = new List<WeaponAmmoDefinition>();
-                        for (int i = 0; i < 6; i++) // there are six types in MyAmmoType
+                        for (int i = 0; i < 5; i++) // there are five types in MyAmmoType
                         {
                             WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
                         }
