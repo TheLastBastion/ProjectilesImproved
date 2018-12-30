@@ -57,13 +57,20 @@ namespace ProjectilesImproved.Definitions
 
         public WeaponDefinition Clone()
         {
-            return new WeaponDefinition
+            WeaponDefinition def = new WeaponDefinition
             {
                 UseDefaultsFromSBC = UseDefaultsFromSBC,
                 SubtypeId = SubtypeId,
                 DeviateShotAngle = DeviateShotAngle,
                 ReloadTime = ReloadTime,
-                AmmoDatas = new List<WeaponAmmoDefinition>(AmmoDatas),
+                AmmoDatas = new List<WeaponAmmoDefinition>
+                    {
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition()
+                    },
 
                 Ramping = (Ramping == null) ? null : Ramping.Clone(),
 
@@ -77,6 +84,15 @@ namespace ProjectilesImproved.Definitions
                 ReloadSound = ReloadSound,
                 SecondarySound = SecondarySound,
             };
+
+            for (int i = 0; i < AmmoDatas.Count; i++)
+            {
+                def.AmmoDatas[i].RateOfFire = AmmoDatas[i].RateOfFire;
+                def.AmmoDatas[i].ShotsInBurst = AmmoDatas[i].ShotsInBurst;
+                def.AmmoDatas[i].ShootSound = AmmoDatas[i].ShootSound;
+            }
+
+            return def;
         }
     }
 }

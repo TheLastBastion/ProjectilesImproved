@@ -25,7 +25,7 @@ namespace ProjectilesImproved
         public static event Action OnLoadComplete;
 
         public static bool IsInitialized = false;
-        public bool SentInitialRequest = false;
+        public bool SettingsInitialized = false;
         private int waitInterval = 0;
 
         private NetworkAPI Network => NetworkAPI.Instance;
@@ -112,62 +112,51 @@ namespace ProjectilesImproved
             * this is a dumb hack to fix crashing when clients connect.
             * the session ready event sometimes does not have everything loaded when i trigger the send command
             */
-            if (IsInitialized && !SentInitialRequest && Network.NetworkType != NetworkTypes.Client)
+            if (IsInitialized && !SettingsInitialized && Network.NetworkType != NetworkTypes.Client)
             {
                 if (waitInterval == 600) // 5 second timer before sending update request
                 {
                     Network.SendCommand("update");
-                    SentInitialRequest = true;
-
                 }
 
                 waitInterval++;
             }
-        }
 
-        public override void UpdateAfterSimulation()
-        {
-            try
+
+            MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}, Pending: {PendingProjectiles.Count}, Expired: {ExpiredProjectiles.Count}", 1);
+
+
+            ActiveProjectiles.ExceptWith(ExpiredProjectiles);
+            ExpiredProjectiles.Clear();
+
+            ActiveProjectiles.UnionWith(PendingProjectiles);
+            PendingProjectiles.Clear();
+
+            MyAPIGateway.Parallel.ForEach(ActiveProjectiles, (Projectile p) =>
             {
-                MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}, Pending: {PendingProjectiles.Count}, Expired: {ExpiredProjectiles.Count}", 1);
-
-
-                ActiveProjectiles.ExceptWith(ExpiredProjectiles);
-                ExpiredProjectiles.Clear();
-
-                ActiveProjectiles.UnionWith(PendingProjectiles);
-                PendingProjectiles.Clear();
-
-                MyAPIGateway.Parallel.ForEach(ActiveProjectiles, (Projectile p) =>
+                if (!p.IsInitialized)
                 {
-                    if (!p.IsInitialized)
+                    p.Init();
+                }
+
+                p.PreUpdate();
+
+                if (p.DoCollisionCheck())
+                {
+                    p.PreCollitionDetection();
+                    p.CollisionDetection();
+                }
+
+                p.Update();
+
+                if (p.HasExpired)
+                {
+                    lock (ExpiredProjectiles)
                     {
-                        p.Init();
+                        ExpiredProjectiles.Add(p);
                     }
-
-                    p.PreUpdate();
-
-                    if (p.DoCollisionCheck())
-                    {
-                        p.PreCollitionDetection();
-                        p.CollisionDetection();
-                    }
-
-                    p.Update();
-
-                    if (p.HasExpired)
-                    {
-                        lock (ExpiredProjectiles)
-                        {
-                            ExpiredProjectiles.Add(p);
-                        }
-                    }
-                });
-            }
-            catch (Exception e)
-            {
-                MyLog.Default.Error(e.ToString());
-            }
+                }
+            });
 
             // VVV for testing performance VVV
 
@@ -190,6 +179,11 @@ namespace ProjectilesImproved
             //    p.Draw();
             //    p.Update();
             //}
+        }
+
+        public override void UpdateAfterSimulation()
+        {
+
         }
 
         public override void Draw()
@@ -244,7 +238,11 @@ namespace ProjectilesImproved
         {
             if (data != null)
             {
-                Settings.SetNewSettings(MyAPIGateway.Utilities.SerializeFromBinary<Settings>(data));
+                Settings s = MyAPIGateway.Utilities.SerializeFromBinary<Settings>(data);
+
+                MyLog.Default.Info(s.WeaponDefinitions[0].AmmoDatas.Count.ToString());
+                Settings.SetNewSettings(s);
+                SettingsInitialized = true;
             }
         }
 
@@ -271,7 +269,7 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 Settings.Save();
-                Network.SendCommand(null, "Settings Saved", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()), steamId: steamId);
+                Network.SendCommand(null, "Settings Saved", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
             }
             else
             {

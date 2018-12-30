@@ -10,6 +10,7 @@ using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using System.Collections.Generic;
 using System.Text;
+using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
@@ -30,6 +31,11 @@ namespace ProjectilesImproved.Weapons
     {
     }
 
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_InteriorTurret), false)]
+    public class InteriorTurret : ProjectileWeapon
+    {
+    }
+
     public class ProjectileWeapon : MyGameLogicComponent
     {
 
@@ -38,26 +44,28 @@ namespace ProjectilesImproved.Weapons
         public bool ControlsUpdated = false; // TODO: change this to static?
 
         public bool IsShooting => gun.IsShooting || TerminalShootOnce || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
-        public int AmmoType => (Ammo == null) ? 0 : (int)Ammo.AmmoType;
+        public int AmmoType => (Ammo != null && Ammo.AmmoType != MyAmmoType.Unknown) ? (int)Ammo.AmmoType : 0;
 
         public double TimeTillNextShot = 1d;
         public int CurrentShotInBurst = 0;
         public float CooldownTime = 0;
         public int FirstTimeCooldown = 0;
+        public int LastNoAmmoSound = 0;
 
         public bool IsFixedGun = false;
         public bool TerminalShooting = false;
         public bool TerminalShootOnce = false;
 
-        public IMyFunctionalBlock Block;
-        public IMyCubeBlock Cube;
-        public IMyGunObject<MyGunBase> gun;
+        public IMyFunctionalBlock Block = null;
+        public IMyCubeBlock Cube = null;
+        public IMyGunObject<MyGunBase> gun = null;
 
-        private MyWeaponDefinition Weapon;
-        private MyAmmoDefinition Ammo;
-        public WeaponDefinition Definition;
+        private MyWeaponDefinition Weapon = null;
+        private MyAmmoDefinition Ammo = null;
+        public WeaponDefinition Definition = null;
 
-        private MyEntity3DSoundEmitter soundEmitter;
+        private MyEntity3DSoundEmitter soundEmitter = null;
+        private MyEntity3DSoundEmitter secondarySoundEmitter = null;
 
         private int retry = 0;
 
@@ -72,6 +80,7 @@ namespace ProjectilesImproved.Weapons
             Ammo = gun.GunBase.CurrentAmmoDefinition;
 
             soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
+            secondarySoundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
 
             if (!Core.IsInitialized)
             {
@@ -317,11 +326,6 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
-            //if (!MyAPIGateway.Utilities.IsDedicated)
-            //{
-            //    MyAPIGateway.Utilities.ShowNotification($"{(gun.IsShooting ? "Turret Mouse Click" : "")} - {(TerminalShootOnce ? "Shoot Once" : "")} - {(TerminalShooting ? "Terminal Shooting" : "")} - {((IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME) ? "Fixed Gun Mouse Click" : "")}", 1);
-            //}
-
             // makes sure clients have gotten the update
             if (!Settings.Instance.HasBeenSetByServer)
             {
@@ -359,6 +363,20 @@ namespace ProjectilesImproved.Weapons
                 FireWeapon();
             }
 
+            if (IsShooting)
+            {
+                if (!gun.GunBase.HasEnoughAmmunition() && LastNoAmmoSound == 0)
+                {
+                    MakeNoAmmoSound();
+                    LastNoAmmoSound = 60;
+                }
+                LastNoAmmoSound--;
+            }
+            else
+            {
+                StopShootingSound();
+            }
+
             TerminalShootOnce = false;
         }
 
@@ -389,8 +407,9 @@ namespace ProjectilesImproved.Weapons
                     Core.SpawnProjectile(bullet);
                     gun.GunBase.ConsumeAmmo();
                     TimeTillNextShot--;
+                    MakeShootSound();
+                    MakeSecondaryShotSound();
 
-                    soundEmitter.PlaySound(gun.GunBase.ShootSound, true, false, false, false, false, null);
 
                     CurrentShotInBurst++;
                     if (CurrentShotInBurst == Definition.AmmoDatas[AmmoType].ShotsInBurst)
@@ -409,7 +428,71 @@ namespace ProjectilesImproved.Weapons
                         TerminalShootOnce = false;
                         return;
                     }
+
+                    if (gun.GunBase.HasEnoughAmmunition())
+                    {
+                        LastNoAmmoSound = 0;
+                        break;
+                    }
                 }
+            }
+        }
+
+        private void MakeShootSound()
+        {
+            if (gun.GunBase.ShootSound != null)
+            {
+                if (soundEmitter.IsPlaying)
+                {
+                    if (!soundEmitter.Loop)
+                    {
+                        soundEmitter.PlaySound(gun.GunBase.ShootSound, false, false, false, false, false, null);
+                    }
+                }
+                else
+                {
+                    soundEmitter.PlaySound(gun.GunBase.ShootSound, true, false, false, false, false, null);
+                }
+            }
+        }
+
+        private void MakeSecondaryShotSound()
+        {
+            if (gun.GunBase.SecondarySound != null)
+            {
+                if (soundEmitter.IsPlaying)
+                {
+                    if (!soundEmitter.Loop)
+                    {
+                        secondarySoundEmitter.PlaySound(gun.GunBase.SecondarySound, false, false, false, false, false, null);
+                    }
+                }
+                else
+                {
+                    secondarySoundEmitter.PlaySound(gun.GunBase.SecondarySound, true, false, false, false, false, null);
+                }
+            }
+        }
+
+        public void StopShootingSound()
+        {
+            if (soundEmitter.Loop)
+            {
+                soundEmitter.StopSound(false, true);
+            }
+
+            if (secondarySoundEmitter.Loop)
+            {
+                secondarySoundEmitter.StopSound(false, true);
+            }
+        }
+
+        private void MakeNoAmmoSound()
+        {
+            if (gun.GunBase.NoAmmoSound != null)
+            {
+                soundEmitter.StopSound(true, true);
+                soundEmitter.PlaySingleSound(gun.GunBase.NoAmmoSound, true, false, false, null);
             }
         }
 

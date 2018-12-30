@@ -1,5 +1,4 @@
-﻿using ModNetworkAPI;
-using ProjectilesImproved.Definitions;
+﻿using ProjectilesImproved.Definitions;
 using ProjectilesImproved.Effects.Collision;
 using ProjectilesImproved.Effects.Weapon;
 using ProtoBuf;
@@ -11,26 +10,18 @@ using System.IO;
 using System.Xml.Serialization;
 using VRage.Game;
 using VRage.Utils;
-using VRageMath;
 
 namespace ProjectilesImproved
 {
     [ProtoContract]
     public class Settings
     {
-        public const bool DebugMode = false;
-        public const bool DebugMode_ShowBlockOctants = false;
-        public const bool DebugMode_ShowSphereOctants = false;
-        public const bool DebugMode_ShowBlockRayIntersects = false;
-
-        public static readonly Color[] DebugOctantColors = new Color[] { Color.Green, Color.Blue, Color.Orange, Color.Black, Color.HotPink, Color.Red, Color.LightGreen, Color.White };
-
         public const string Filename = "WeaponsOverhaul.cfg";
 
         public static Settings Instance = new Settings();
 
         [XmlIgnore]
-        public bool HasBeenSetByServer = false;
+        public bool HasBeenSetByServer;
 
         [ProtoMember]
         public bool UseTurretLeadIndicators;
@@ -145,6 +136,7 @@ namespace ProjectilesImproved
                     reader.Close();
 
                     Settings s = MyAPIGateway.Utilities.SerializeFromXML<Settings>(text);
+
                     SetNewSettings(s);
                     Save();
                 }
@@ -256,10 +248,12 @@ namespace ProjectilesImproved
                         MyWeaponDefinition w = MyDefinitionManager.Static.GetWeaponDefinition(block.WeaponDefinitionId);
 
                         List<WeaponAmmoDefinition> WeaponAmmosDefs = new List<WeaponAmmoDefinition>();
-                        for (int i = 0; i < 5; i++) // there are five types in MyAmmoType
-                        {
-                            WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
-                        }
+                        // there are five types in MyAmmoType
+                        WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
+                        WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
+                        WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
+                        WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
+                        WeaponAmmosDefs.Add(new WeaponAmmoDefinition());
 
                         foreach (MyDefinitionId id in w.AmmoMagazinesId)
                         {
@@ -332,9 +326,9 @@ namespace ProjectilesImproved
                             ProjectileHealthDamage = p.ProjectileHealthDamage,
                             ProjectileHeadShotDamage = p.ProjectileHeadShotDamage,
                             HasBulletDrop = false,
-                            BulletDropGravityScaler = 0.3f,
+                            BulletDropGravityScaler = 1f,
                             UseOverKillSpread = false,
-                            OverKillSpreadScaler = 1,
+                            OverKillSpreadScaler = 1f,
                             IgnoreDamageReduction = false
                         };
 
@@ -377,7 +371,7 @@ namespace ProjectilesImproved
                 return ProjectileDefinitionLookup[id].Clone();
             }
 
-            return new ProjectileDefinition();
+            return new ProjectileDefinition().Clone();
         }
 
         public static WeaponDefinition GetWeaponDefinition(string id)
@@ -387,7 +381,7 @@ namespace ProjectilesImproved
                 return WeaponDefinitionLookup[id].Clone();
             }
 
-            return new WeaponDefinition();
+            return new WeaponDefinition().Clone();
 
         }
 

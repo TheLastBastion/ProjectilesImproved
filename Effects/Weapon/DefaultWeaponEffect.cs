@@ -1,5 +1,7 @@
 ﻿using ProjectilesImproved.Weapons;
 using ProtoBuf;
+using Sandbox.ModAPI;
+using VRage.Utils;
 
 namespace ProjectilesImproved.Effects.Weapon
 {
