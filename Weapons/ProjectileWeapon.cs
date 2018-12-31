@@ -42,6 +42,7 @@ namespace ProjectilesImproved.Weapons
         public static DefaultWeaponEffect DefaultEffect = new DefaultWeaponEffect();
 
         public bool ControlsUpdated = false; // TODO: change this to static?
+        private bool initialize = false;
 
         public bool IsShooting => gun.IsShooting || TerminalShootOnce || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
         public int AmmoType => (Ammo != null && Ammo.AmmoType != MyAmmoType.Unknown) ? (int)Ammo.AmmoType : 0;
@@ -52,6 +53,7 @@ namespace ProjectilesImproved.Weapons
         public int FirstTimeCooldown = 0;
         public int LastNoAmmoSound = 0;
         private float currentReleaseTime = 0;
+        private int retry = 0;
 
         public bool IsFixedGun = false;
         public bool TerminalShooting = false;
@@ -71,8 +73,6 @@ namespace ProjectilesImproved.Weapons
         private Vector3 originalBarrelPostion = Vector3.Zero;
         private MyEntitySubpart barrelSubpart = null;
 
-        private int retry = 0;
-
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
             Block = Entity as IMyFunctionalBlock;
@@ -91,8 +91,6 @@ namespace ProjectilesImproved.Weapons
             {
                 InitAfterLoad();
             }
-
-
         }
 
         private void InitAfterLoad()
@@ -100,7 +98,6 @@ namespace ProjectilesImproved.Weapons
             Core.OnLoadComplete -= InitAfterLoad;
             OverrideDefaultControls();
             GetWeaponDef();
-
             currentReleaseTime = Definition.ReleaseTimeAfterFire;
 
             NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
@@ -328,6 +325,12 @@ namespace ProjectilesImproved.Weapons
 
         public override void UpdateBeforeSimulation()
         {
+
+            //if (!MyAPIGateway.Utilities.IsDedicated)
+            //{
+            //    MyAPIGateway.Utilities.ShowNotification($"Settings Loaded: {Settings.Instance.HasBeenSetByServer}, IsShooting: {IsShooting}, RoF: {Definition.AmmoDatas[0].RateOfFire}, Shots: {Definition.AmmoDatas[0].ShotsInBurst}, release: {currentReleaseTime}, barrel: {barrelSubpart != null} x: {originalBarrelPostion.X} y: {originalBarrelPostion.Y}, z: {originalBarrelPostion.Z}",1);
+            //}
+
             // makes sure clients have gotten the update
             if (!Settings.Instance.HasBeenSetByServer)
             {
@@ -340,6 +343,15 @@ namespace ProjectilesImproved.Weapons
                 retry--;
                 return;
             }
+
+            if (!initialize && Settings.Instance.HasBeenSetByServer)
+            {
+                GetWeaponDef();
+                currentReleaseTime = Definition.ReleaseTimeAfterFire;
+                initialize = true;
+                return;
+            }
+
 
             if (Ammo != gun.GunBase.CurrentAmmoDefinition)
             {
@@ -479,7 +491,7 @@ namespace ProjectilesImproved.Weapons
 
         private void RotateBarrel()
         {
-            if (barrelSubpart == null)
+            if (barrelSubpart == null && Settings.Instance.HasBeenSetByServer)
             {
                 InitializeBarrel();
             }
