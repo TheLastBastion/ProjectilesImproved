@@ -108,9 +108,10 @@ namespace ProjectilesImproved.Effects.Weapon
                     currentTime = TimeToMax;
                 }
             }
-            else
+            else if (currentTime != 0)
             {
                 currentTime -= (Tools.MillisecondPerFrame * RampDownScaler);
+                weapon.Definition.AmmoDatas[weapon.AmmoType].RateOfFire = CurrentRPM();
                 if (currentTime < 0)
                 {
                     currentTime = 0;

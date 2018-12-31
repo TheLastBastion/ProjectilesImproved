@@ -51,6 +51,7 @@ namespace ProjectilesImproved.Weapons
         public float CooldownTime = 0;
         public int FirstTimeCooldown = 0;
         public int LastNoAmmoSound = 0;
+        private float currentReleaseTime = 0;
 
         public bool IsFixedGun = false;
         public bool TerminalShooting = false;
@@ -67,6 +68,9 @@ namespace ProjectilesImproved.Weapons
         private MyEntity3DSoundEmitter soundEmitter = null;
         private MyEntity3DSoundEmitter secondarySoundEmitter = null;
 
+        private Vector3 originalBarrelPostion = Vector3.Zero;
+        private MyEntitySubpart barrelSubpart = null;
+
         private int retry = 0;
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
@@ -82,24 +86,22 @@ namespace ProjectilesImproved.Weapons
             soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
             secondarySoundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
 
-            if (!Core.IsInitialized)
+            Core.OnLoadComplete += InitAfterLoad;
+            if (Core.IsInitialized)
             {
-                Core.OnLoadComplete += LoadComplete;
+                InitAfterLoad();
             }
-            else
-            {
-                OverrideDefaultControls();
-                GetWeaponDef();
 
-                NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
-            }
+
         }
 
-        private void LoadComplete()
+        private void InitAfterLoad()
         {
-            Core.OnLoadComplete -= LoadComplete;
+            Core.OnLoadComplete -= InitAfterLoad;
             OverrideDefaultControls();
             GetWeaponDef();
+
+            currentReleaseTime = Definition.ReleaseTimeAfterFire;
 
             NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
         }
@@ -377,6 +379,8 @@ namespace ProjectilesImproved.Weapons
                 StopShootingSound();
             }
 
+            RotateBarrel();
+
             TerminalShootOnce = false;
         }
 
@@ -435,6 +439,79 @@ namespace ProjectilesImproved.Weapons
                         break;
                     }
                 }
+            }
+        }
+
+        private void InitializeBarrel()
+        {
+            MyEntity ent = (MyEntity)Entity;
+
+            if (ent.Subparts.ContainsKey("GatlingTurretBase1"))
+            {
+                if (ent.Subparts["GatlingTurretBase1"].Subparts.ContainsKey("GatlingTurretBase2"))
+                {
+                    if (ent.Subparts["GatlingTurretBase1"].Subparts["GatlingTurretBase2"].Subparts.ContainsKey("GatlingBarrel"))
+                    {
+                        barrelSubpart = ent.Subparts["GatlingTurretBase1"].Subparts["GatlingTurretBase2"].Subparts["GatlingBarrel"];
+                    }
+                }
+            }
+            else if (ent.Subparts.ContainsKey("InteriorTurretBase1"))
+            {
+                if (ent.Subparts["InteriorTurretBase1"].Subparts.ContainsKey("InteriorTurretBase2"))
+                {
+                    if (ent.Subparts["InteriorTurretBase1"].Subparts["InteriorTurretBase2"].Subparts.ContainsKey("Barrel"))
+                    {
+                        barrelSubpart = ent.Subparts["InteriorTurretBase1"].Subparts["InteriorTurretBase2"].Subparts["Barrel"];
+                    }
+                }
+            }
+            else if (ent.Subparts.ContainsKey("Barrel"))
+            {
+                barrelSubpart = ent.Subparts["Barrel"];
+            }
+
+            if (barrelSubpart != null)
+            {
+                originalBarrelPostion = barrelSubpart.PositionComp.LocalMatrix.Translation;
+            }
+        }
+
+        private void RotateBarrel()
+        {
+            if (barrelSubpart == null)
+            {
+                InitializeBarrel();
+            }
+
+            if (barrelSubpart != null)
+            {
+                double rotationAmount = 0.0002f * Definition.AmmoDatas[0].RateOfFire;
+                if (IsShooting)
+                {
+                    currentReleaseTime = 0;
+                }
+                else if (currentReleaseTime <= Definition.ReleaseTimeAfterFire)
+                {
+                    rotationAmount *= (1 - currentReleaseTime / Definition.ReleaseTimeAfterFire);
+
+                    currentReleaseTime += Tools.MillisecondPerFrame;
+
+                    if (currentReleaseTime >= Definition.ReleaseTimeAfterFire)
+                    {
+                        currentReleaseTime = Definition.ReleaseTimeAfterFire;
+                    }
+                }
+
+                if (rotationAmount == 0) return;
+
+                MatrixD rotation = MatrixD.CreateRotationZ(rotationAmount);
+
+                Matrix matrix = barrelSubpart.PositionComp.LocalMatrix;
+
+                matrix.Translation = new Vector3(originalBarrelPostion.X, originalBarrelPostion.Y, matrix.Translation.Z);
+
+                barrelSubpart.PositionComp.LocalMatrix = matrix * rotation;
             }
         }
 
