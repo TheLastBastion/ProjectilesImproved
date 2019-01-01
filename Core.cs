@@ -22,74 +22,77 @@ namespace ProjectilesImproved
         public const string ModName = "Weapons Overhaul";
         public const ushort ModID = 4112;
 
-        public static event Action OnLoadComplete;
+        public static event Action OnSettingsUpdate;
 
-        public static bool IsInitialized = false;
-        public bool SettingsInitialized = false;
-        private int waitInterval = 0;
+        private static bool ServerInitalized = false;
+        private static bool ClientInitialized = false;
+
+        public static bool IsInitialized()
+        {
+            if (MyAPIGateway.Session == null)
+            {
+                return false;
+            }
+
+            if (MyAPIGateway.Session.IsServer)
+            {
+                return ServerInitalized;
+            }
+
+            return ClientInitialized;
+        }
 
         private NetworkAPI Network => NetworkAPI.Instance;
+        private int waitInterval = 0;
 
         public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
         {
-            if (!NetworkAPI.IsInitialized)
+            if (NetworkAPI.IsInitialized) return;
+            NetworkAPI.Init(ModID, ModName, "/weapons");
+
+            if (Network.NetworkType == NetworkTypes.Client)
             {
-                NetworkAPI.Init(ModID, ModName, "/weapons");
+                Network.RegisterNetworkCommand(null, ClientCallback_Update);
+                Network.RegisterNetworkCommand("shoot", ClientCallback_TerminalShoot);
+                Network.RegisterNetworkCommand("spawn", ClientCallback_Spawn);
 
-                if (Network.NetworkType == NetworkTypes.Client)
-                {
-                    Network.RegisterNetworkCommand(null, ClientCallback_Update);
-                    Network.RegisterNetworkCommand("shoot", ClientCallback_TerminalShoot);
-                    Network.RegisterNetworkCommand("spawn", ClientCallback_Spawn);
-                    Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
-                    Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
-                    Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
-                }
-                else
-                {
-                    Network.RegisterNetworkCommand("shoot", ServerCallback_TerminalShoot);
-                    Network.RegisterNetworkCommand("update", ServerCallback_Update);
-                    Network.RegisterNetworkCommand("load", ServerCallback_Load);
-                    Network.RegisterNetworkCommand("save", ServerCallback_Save);
+                Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
+                Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
+                Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
+            }
+            else
+            {
+                Network.RegisterNetworkCommand("shoot", ServerCallback_TerminalShoot);
+                Network.RegisterNetworkCommand("update", ServerCallback_Update);
+                Network.RegisterNetworkCommand("load", ServerCallback_Load);
+                Network.RegisterNetworkCommand("save", ServerCallback_Save);
 
-                    if (Network.NetworkType != NetworkTypes.Dedicated)
+                if (Network.NetworkType != NetworkTypes.Dedicated)
+                {
+                    Network.RegisterChatCommand("load", (args) =>
                     {
-                        Network.RegisterChatCommand("load", (args) =>
-                        {
-                            Settings.Load();
-                            MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
-                        });
+                        Settings.Load();
+                        OnSettingsUpdate?.Invoke();
+                        MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
+                    });
 
-                        Network.RegisterChatCommand("save", (args) =>
-                        {
-                            Settings.Save();
-                            MyAPIGateway.Utilities.ShowMessage(ModName, "Settings saved");
-                        });
-                    }
+                    Network.RegisterChatCommand("save", (args) =>
+                    {
+                        Settings.Save();
+                        MyAPIGateway.Utilities.ShowMessage(ModName, "Settings saved");
+                    });
                 }
             }
-
-            MyAPIGateway.Session.OnSessionReady += OnStartInit;
         }
 
         public override void BeforeStart()
         {
-            if (Network.NetworkType == NetworkTypes.Client)
-            {
-                Network.SendCommand("update");
-            }
-            else
+            if (MyAPIGateway.Session.IsServer)
             {
                 Settings.Init();
+                OnSettingsUpdate?.Invoke();
+                ServerInitalized = true;
             }
-        }
-
-        private void OnStartInit()
-        {
-            MyAPIGateway.Session.OnSessionReady -= OnStartInit;
-
-            OnLoadComplete?.Invoke();
-            IsInitialized = true;
         }
 
         protected override void UnloadData()
@@ -112,7 +115,7 @@ namespace ProjectilesImproved
             * this is a dumb hack to fix crashing when clients connect.
             * the session ready event sometimes does not have everything loaded when i trigger the send command
             */
-            if (IsInitialized && !SettingsInitialized && Network.NetworkType != NetworkTypes.Client)
+            if (!IsInitialized() && !MyAPIGateway.Session.IsServer)
             {
                 if (waitInterval == 600) // 5 second timer before sending update request
                 {
@@ -181,11 +184,6 @@ namespace ProjectilesImproved
             //}
         }
 
-        public override void UpdateAfterSimulation()
-        {
-
-        }
-
         public override void Draw()
         {
             foreach (Projectile p in ActiveProjectiles)
@@ -239,10 +237,9 @@ namespace ProjectilesImproved
             if (data != null)
             {
                 Settings s = MyAPIGateway.Utilities.SerializeFromBinary<Settings>(data);
-
-                MyLog.Default.Info(s.WeaponDefinitions[0].AmmoDatas.Count.ToString());
                 Settings.SetNewSettings(s);
-                SettingsInitialized = true;
+                OnSettingsUpdate?.Invoke();
+                ClientInitialized = true;
             }
         }
 
@@ -256,6 +253,7 @@ namespace ProjectilesImproved
             if (IsAllowedSpecialOperations(steamId))
             {
                 Settings.Load();
+                OnSettingsUpdate?.Invoke();
                 Network.SendCommand(null, "New weapon settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
             }
             else

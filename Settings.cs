@@ -236,6 +236,27 @@ namespace ProjectilesImproved
             Load();
         }
 
+        public static ProjectileDefinition GetAmmoDefinition(string id)
+        {
+            if (ProjectileDefinitionLookup.ContainsKey(id))
+            {
+                return ProjectileDefinitionLookup[id].Clone();
+            }
+
+            return new ProjectileDefinition().Clone();
+        }
+
+        public static WeaponDefinition GetWeaponDefinition(string id)
+        {
+            if (WeaponDefinitionLookup.ContainsKey(id))
+            {
+                return WeaponDefinitionLookup[id].Clone();
+            }
+
+            return new WeaponDefinition().Clone();
+
+        }
+
         private static void MergeSBCInfo()
         {
             foreach (MyDefinitionBase def in MyDefinitionManager.Static.GetAllDefinitions())
@@ -363,27 +384,5 @@ namespace ProjectilesImproved
                 }
             }
         }
-
-        public static ProjectileDefinition GetAmmoDefinition(string id)
-        {
-            if (ProjectileDefinitionLookup.ContainsKey(id))
-            {
-                return ProjectileDefinitionLookup[id].Clone();
-            }
-
-            return new ProjectileDefinition().Clone();
-        }
-
-        public static WeaponDefinition GetWeaponDefinition(string id)
-        {
-            if (WeaponDefinitionLookup.ContainsKey(id))
-            {
-                return WeaponDefinitionLookup[id].Clone();
-            }
-
-            return new WeaponDefinition().Clone();
-
-        }
-
     }
 }

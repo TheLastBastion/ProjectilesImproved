@@ -41,9 +41,6 @@ namespace ProjectilesImproved.Weapons
 
         public static DefaultWeaponEffect DefaultEffect = new DefaultWeaponEffect();
 
-        public bool ControlsUpdated = false; // TODO: change this to static?
-        private bool initialize = false;
-
         public bool IsShooting => gun.IsShooting || TerminalShootOnce || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
         public int AmmoType => (Ammo != null && Ammo.AmmoType != MyAmmoType.Unknown) ? (int)Ammo.AmmoType : 0;
 
@@ -63,65 +60,18 @@ namespace ProjectilesImproved.Weapons
         public IMyCubeBlock Cube = null;
         public IMyGunObject<MyGunBase> gun = null;
 
+        public WeaponDefinition Definition = null;
+
+        private bool ControlsUpdated = false; // TODO: change this to static?
+
         private MyWeaponDefinition Weapon = null;
         private MyAmmoDefinition Ammo = null;
-        public WeaponDefinition Definition = null;
 
         private MyEntity3DSoundEmitter soundEmitter = null;
         private MyEntity3DSoundEmitter secondarySoundEmitter = null;
 
         private Vector3 originalBarrelPostion = Vector3.Zero;
         private MyEntitySubpart barrelSubpart = null;
-
-        public override void Init(MyObjectBuilder_EntityBase objectBuilder)
-        {
-            Block = Entity as IMyFunctionalBlock;
-            Cube = Entity as IMyCubeBlock;
-            gun = Entity as IMyGunObject<MyGunBase>;
-            IsFixedGun = Entity is IMySmallGatlingGun;
-            FirstTimeCooldown = 10;
-
-            Ammo = gun.GunBase.CurrentAmmoDefinition;
-
-            soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
-            secondarySoundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
-
-            Core.OnLoadComplete += InitAfterLoad;
-            if (Core.IsInitialized)
-            {
-                InitAfterLoad();
-            }
-        }
-
-        private void InitAfterLoad()
-        {
-            Core.OnLoadComplete -= InitAfterLoad;
-            OverrideDefaultControls();
-            GetWeaponDef();
-            currentReleaseTime = Definition.ReleaseTimeAfterFire;
-
-            NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
-        }
-
-        private void GetWeaponDef()
-        {
-            if (gun != null)
-            {
-                Weapon = MyDefinitionManager.Static.GetWeaponDefinition((Block.SlimBlock.BlockDefinition as MyWeaponBlockDefinition).WeaponDefinitionId);
-                Definition = Settings.GetWeaponDefinition(Weapon.Id.SubtypeId.String);
-
-                // Thanks for the help Digi
-                for (int i = 0; i < Weapon.WeaponAmmoDatas.Length; i++)
-                {
-                    var ammoData = Weapon.WeaponAmmoDatas[i];
-
-                    if (ammoData == null)
-                        continue;
-
-                    ammoData.ShootIntervalInMiliseconds = int.MaxValue;
-                }
-            }
-        }
 
         public static bool UpdateTerminalShooting(TerminalShoot t)
         {
@@ -150,6 +100,179 @@ namespace ProjectilesImproved.Weapons
             }
 
             return true;
+        }
+
+        public override void Init(MyObjectBuilder_EntityBase objectBuilder)
+        {
+            Block = Entity as IMyFunctionalBlock;
+            Cube = Entity as IMyCubeBlock;
+            gun = Entity as IMyGunObject<MyGunBase>;
+            IsFixedGun = Entity is IMySmallGatlingGun;
+            FirstTimeCooldown = 10;
+
+            Ammo = gun.GunBase.CurrentAmmoDefinition;
+
+            soundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
+            secondarySoundEmitter = new MyEntity3DSoundEmitter((MyEntity)Entity, true, 1f);
+
+            Core.OnSettingsUpdate += OnSettingsUpdate;
+        }
+
+        public override void OnAddedToContainer()
+        {
+            OverrideDefaultControls();
+
+            if (Entity.InScene)
+            {
+                OnAddedToScene();
+            }
+        }
+
+        public override void OnAddedToScene()
+        {
+            GetWeaponDef();
+            InitializeBarrel();
+            NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
+        }
+
+        public override void Close()
+        {
+            soundEmitter?.StopSound(true, true);
+        }
+
+        public void OnSettingsUpdate()
+        {
+            GetWeaponDef();
+            currentReleaseTime = Definition.ReleaseTimeAfterFire;
+        }
+
+        public override void UpdateBeforeSimulation()
+        {
+
+            if (!MyAPIGateway.Utilities.IsDedicated)
+            {
+                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {Definition.AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{Definition.AmmoDatas[0].ShotsInBurst}, {(CooldownTime > 0 ? $"Cooldown {Definition.ReloadTime-CooldownTime}/{Definition.ReloadTime}, " : "")}release: {currentReleaseTime}/{Definition.ReleaseTimeAfterFire}", 1);
+            }
+
+            if (Ammo != gun.GunBase.CurrentAmmoDefinition)
+            {
+                Ammo = gun.GunBase.CurrentAmmoDefinition;
+            }
+
+            if (FirstTimeCooldown > 0)
+            {
+                FirstTimeCooldown--;
+                TerminalShootOnce = false;
+                return;
+            }
+
+            if (Definition.Ramping != null)
+            {
+                if (Definition.Ramping.Update(this))
+                {
+                    FireWeapon();
+                }
+            }
+            else if (DefaultEffect.Update(this))
+            {
+                FireWeapon();
+            }
+
+            if (IsShooting)
+            {
+                if (!gun.GunBase.HasEnoughAmmunition() && LastNoAmmoSound == 0)
+                {
+                    MakeNoAmmoSound();
+                    LastNoAmmoSound = 60;
+                }
+                LastNoAmmoSound--;
+            }
+            else
+            {
+                StopShootingSound();
+            }
+
+            RotateBarrel();
+
+            TerminalShootOnce = false;
+        }
+
+        private void FireWeapon()
+        {
+            if (TimeTillNextShot >= 1)
+            {
+                MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
+                Vector3D bonus = (Block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
+
+                bonus.Rotate(muzzleMatrix);
+                muzzleMatrix.Translation += bonus;
+
+                ProjectileDefinition bulletData = Settings.GetAmmoDefinition(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId.String);
+
+                while (TimeTillNextShot >= 1)
+                {
+                    MatrixD positionMatrix = Matrix.CreateWorld(
+                        muzzleMatrix.Translation,
+                        gun.GunBase.GetDeviatedVector(Definition.DeviateShotAngle, muzzleMatrix.Forward),
+                        muzzleMatrix.Up);
+
+                    Projectile bullet = bulletData.CreateProjectile();
+                    bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
+                    bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * bulletData.DesiredSpeed);
+                    bullet.Position = positionMatrix.Translation;
+
+                    Core.SpawnProjectile(bullet);
+                    gun.GunBase.ConsumeAmmo();
+                    TimeTillNextShot--;
+                    MakeShootSound();
+                    MakeSecondaryShotSound();
+
+
+                    CurrentShotInBurst++;
+                    if (CurrentShotInBurst == Definition.AmmoDatas[AmmoType].ShotsInBurst)
+                    {
+                        TimeTillNextShot = 0;
+                        CurrentShotInBurst = 0;
+                        CooldownTime = Definition.ReloadTime;
+                        break;
+                    }
+
+                    var forceVector = -positionMatrix.Forward * bulletData.BackkickForce;
+                    Block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, Block.WorldAABB.Center, null);
+
+                    if (TerminalShootOnce)
+                    {
+                        TerminalShootOnce = false;
+                        return;
+                    }
+
+                    if (gun.GunBase.HasEnoughAmmunition())
+                    {
+                        LastNoAmmoSound = 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void GetWeaponDef()
+        {
+            if (gun != null)
+            {
+                Weapon = MyDefinitionManager.Static.GetWeaponDefinition((Block.SlimBlock.BlockDefinition as MyWeaponBlockDefinition).WeaponDefinitionId);
+                Definition = Settings.GetWeaponDefinition(Weapon.Id.SubtypeId.String);
+
+                // Thanks for the help Digi
+                for (int i = 0; i < Weapon.WeaponAmmoDatas.Length; i++)
+                {
+                    var ammoData = Weapon.WeaponAmmoDatas[i];
+
+                    if (ammoData == null)
+                        continue;
+
+                    ammoData.ShootIntervalInMiliseconds = int.MaxValue;
+                }
+            }
         }
 
         private void OverrideDefaultControls()
@@ -323,137 +446,6 @@ namespace ProjectilesImproved.Weapons
             }
         }
 
-        public override void UpdateBeforeSimulation()
-        {
-
-            //if (!MyAPIGateway.Utilities.IsDedicated)
-            //{
-            //    MyAPIGateway.Utilities.ShowNotification($"Settings Loaded: {Settings.Instance.HasBeenSetByServer}, IsShooting: {IsShooting}, RoF: {Definition.AmmoDatas[0].RateOfFire}, Shots: {Definition.AmmoDatas[0].ShotsInBurst}, release: {currentReleaseTime}, barrel: {barrelSubpart != null} x: {originalBarrelPostion.X} y: {originalBarrelPostion.Y}, z: {originalBarrelPostion.Z}",1);
-            //}
-
-            // makes sure clients have gotten the update
-            if (!Settings.Instance.HasBeenSetByServer)
-            {
-                if (retry == 0)
-                {
-                    NetworkAPI.Instance.SendCommand("update");
-                    retry = 300;
-                }
-
-                retry--;
-                return;
-            }
-
-            if (!initialize && Settings.Instance.HasBeenSetByServer)
-            {
-                GetWeaponDef();
-                currentReleaseTime = Definition.ReleaseTimeAfterFire;
-                initialize = true;
-                return;
-            }
-
-
-            if (Ammo != gun.GunBase.CurrentAmmoDefinition)
-            {
-                Ammo = gun.GunBase.CurrentAmmoDefinition;
-            }
-
-            if (FirstTimeCooldown > 0)
-            {
-                FirstTimeCooldown--;
-                TerminalShootOnce = false;
-                return;
-            }
-
-            if (Definition.Ramping != null)
-            {
-                if (Definition.Ramping.Update(this))
-                {
-                    FireWeapon();
-                }
-            }
-            else if (DefaultEffect.Update(this))
-            {
-                FireWeapon();
-            }
-
-            if (IsShooting)
-            {
-                if (!gun.GunBase.HasEnoughAmmunition() && LastNoAmmoSound == 0)
-                {
-                    MakeNoAmmoSound();
-                    LastNoAmmoSound = 60;
-                }
-                LastNoAmmoSound--;
-            }
-            else
-            {
-                StopShootingSound();
-            }
-
-            RotateBarrel();
-
-            TerminalShootOnce = false;
-        }
-
-        private void FireWeapon()
-        {
-            if (TimeTillNextShot >= 1)
-            {
-                MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
-                Vector3D bonus = (Block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
-
-                bonus.Rotate(muzzleMatrix);
-                muzzleMatrix.Translation += bonus;
-
-                ProjectileDefinition bulletData = Settings.GetAmmoDefinition(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId.String);
-
-                while (TimeTillNextShot >= 1)
-                {
-                    MatrixD positionMatrix = Matrix.CreateWorld(
-                        muzzleMatrix.Translation,
-                        gun.GunBase.GetDeviatedVector(Definition.DeviateShotAngle, muzzleMatrix.Forward),
-                        muzzleMatrix.Up);
-
-                    Projectile bullet = bulletData.CreateProjectile();
-                    bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
-                    bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * bulletData.DesiredSpeed);
-                    bullet.Position = positionMatrix.Translation;
-
-                    Core.SpawnProjectile(bullet);
-                    gun.GunBase.ConsumeAmmo();
-                    TimeTillNextShot--;
-                    MakeShootSound();
-                    MakeSecondaryShotSound();
-
-
-                    CurrentShotInBurst++;
-                    if (CurrentShotInBurst == Definition.AmmoDatas[AmmoType].ShotsInBurst)
-                    {
-                        TimeTillNextShot = 0;
-                        CurrentShotInBurst = 0;
-                        CooldownTime = Definition.ReloadTime;
-                        break;
-                    }
-
-                    var forceVector = -positionMatrix.Forward * bulletData.BackkickForce;
-                    Block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, forceVector, Block.WorldAABB.Center, null);
-
-                    if (TerminalShootOnce)
-                    {
-                        TerminalShootOnce = false;
-                        return;
-                    }
-
-                    if (gun.GunBase.HasEnoughAmmunition())
-                    {
-                        LastNoAmmoSound = 0;
-                        break;
-                    }
-                }
-            }
-        }
-
         private void InitializeBarrel()
         {
             MyEntity ent = (MyEntity)Entity;
@@ -563,7 +555,7 @@ namespace ProjectilesImproved.Weapons
             }
         }
 
-        public void StopShootingSound()
+        private void StopShootingSound()
         {
             if (soundEmitter.Loop)
             {
@@ -582,14 +574,6 @@ namespace ProjectilesImproved.Weapons
             {
                 soundEmitter.StopSound(true, true);
                 soundEmitter.PlaySingleSound(gun.GunBase.NoAmmoSound, true, false, false, null);
-            }
-        }
-
-        public override void Close()
-        {
-            if (soundEmitter != null)
-            {
-                soundEmitter.StopSound(true, true);
             }
         }
     }
