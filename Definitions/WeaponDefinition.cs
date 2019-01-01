@@ -7,6 +7,8 @@ using VRage.Utils;
 
 namespace ProjectilesImproved.Definitions
 {
+    public enum WeaponType { Basic, Ramping }
+
     [ProtoContract]
     public class WeaponDefinition
     {
@@ -54,45 +56,89 @@ namespace ProjectilesImproved.Definitions
         [XmlIgnore]
         public MySoundPair SecondarySound;
 
+        public WeaponType Type()
+        {
+            if (Ramping != null)
+            {
+                return WeaponType.Ramping;
+            }
+
+            return WeaponType.Basic;
+        }
 
         public WeaponDefinition Clone()
         {
-            WeaponDefinition def = new WeaponDefinition
-            {
-                UseDefaultsFromSBC = UseDefaultsFromSBC,
-                SubtypeId = SubtypeId,
-                DeviateShotAngle = DeviateShotAngle,
-                ReloadTime = ReloadTime,
-                AmmoDatas = new List<WeaponAmmoDefinition>
+            WeaponDefinition def = new WeaponDefinition();
+            Clone(def);
+            return def;
+        }
+
+        public void Clone(WeaponDefinition d)
+        {
+            d.UseDefaultsFromSBC = UseDefaultsFromSBC;
+            d.SubtypeId = SubtypeId;
+            d.DeviateShotAngle = DeviateShotAngle;
+            d.ReloadTime = ReloadTime;
+            d.AmmoDatas = new List<WeaponAmmoDefinition>
                     {
                         new WeaponAmmoDefinition(),
                         new WeaponAmmoDefinition(),
                         new WeaponAmmoDefinition(),
                         new WeaponAmmoDefinition(),
                         new WeaponAmmoDefinition()
-                    },
+                    };
+            d.Ramping = (Ramping == null) ? null : Ramping.Clone();
 
-                Ramping = (Ramping == null) ? null : Ramping.Clone(),
+            d.ReleaseTimeAfterFire = ReleaseTimeAfterFire;
+            d.PhysicalMaterial = PhysicalMaterial;
+            d.DamageMultiplier = DamageMultiplier;
+            d.MuzzleFlashLifeSpan = MuzzleFlashLifeSpan;
+            d.UseDefaultMuzzleFlash = UseDefaultMuzzleFlash;
 
-                ReleaseTimeAfterFire = ReleaseTimeAfterFire,
-                PhysicalMaterial = PhysicalMaterial,
-                DamageMultiplier = DamageMultiplier,
-                MuzzleFlashLifeSpan = MuzzleFlashLifeSpan,
-                UseDefaultMuzzleFlash = UseDefaultMuzzleFlash,
-
-                NoAmmoSound = NoAmmoSound,
-                ReloadSound = ReloadSound,
-                SecondarySound = SecondarySound,
-            };
+            d.NoAmmoSound = NoAmmoSound;
+            d.ReloadSound = ReloadSound;
+            d.SecondarySound = SecondarySound;
 
             for (int i = 0; i < AmmoDatas.Count; i++)
             {
-                def.AmmoDatas[i].RateOfFire = AmmoDatas[i].RateOfFire;
-                def.AmmoDatas[i].ShotsInBurst = AmmoDatas[i].ShotsInBurst;
-                def.AmmoDatas[i].ShootSound = AmmoDatas[i].ShootSound;
+                d.AmmoDatas[i].RateOfFire = AmmoDatas[i].RateOfFire;
+                d.AmmoDatas[i].ShotsInBurst = AmmoDatas[i].ShotsInBurst;
+                d.AmmoDatas[i].ShootSound = AmmoDatas[i].ShootSound;
             }
+        }
 
-            return def;
+        public void Set(WeaponDefinition def)
+        {
+            UseDefaultsFromSBC = def.UseDefaultsFromSBC;
+            SubtypeId = def.SubtypeId;
+            DeviateShotAngle = def.DeviateShotAngle;
+            ReloadTime = def.ReloadTime;
+            AmmoDatas = new List<WeaponAmmoDefinition>
+                    {
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition(),
+                        new WeaponAmmoDefinition()
+                    };
+            Ramping = (def.Ramping == null) ? null : def.Ramping.Clone();
+
+            ReleaseTimeAfterFire = def.ReleaseTimeAfterFire;
+            PhysicalMaterial = def.PhysicalMaterial;
+            DamageMultiplier = def.DamageMultiplier;
+            MuzzleFlashLifeSpan = def.MuzzleFlashLifeSpan;
+            UseDefaultMuzzleFlash = def.UseDefaultMuzzleFlash;
+
+            NoAmmoSound = def.NoAmmoSound;
+            ReloadSound = def.ReloadSound;
+            SecondarySound = def.SecondarySound;
+
+            for (int i = 0; i < def.AmmoDatas.Count; i++)
+            {
+                AmmoDatas[i].RateOfFire = def.AmmoDatas[i].RateOfFire;
+                AmmoDatas[i].ShotsInBurst = def.AmmoDatas[i].ShotsInBurst;
+                AmmoDatas[i].ShootSound = def.AmmoDatas[i].ShootSound;
+            }
         }
     }
 }

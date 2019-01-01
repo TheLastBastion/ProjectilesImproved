@@ -55,7 +55,6 @@ namespace ProjectilesImproved
                 Network.RegisterNetworkCommand(null, ClientCallback_Update);
                 Network.RegisterNetworkCommand("shoot", ClientCallback_TerminalShoot);
                 Network.RegisterNetworkCommand("spawn", ClientCallback_Spawn);
-
                 Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
                 Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
                 Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
@@ -115,10 +114,11 @@ namespace ProjectilesImproved
             * this is a dumb hack to fix crashing when clients connect.
             * the session ready event sometimes does not have everything loaded when i trigger the send command
             */
-            if (!IsInitialized() && !MyAPIGateway.Session.IsServer)
+            if (!MyAPIGateway.Session.IsServer && !IsInitialized())
             {
                 if (waitInterval == 600) // 5 second timer before sending update request
                 {
+                    MyAPIGateway.Utilities.ShowNotification("Sending update Request", 1000);
                     Network.SendCommand("update");
                 }
 
@@ -202,7 +202,7 @@ namespace ProjectilesImproved
             if (t != null)
             {
                 MyAPIGateway.Utilities.ShowNotification($"shoot {t.BlockId} {t.State.ToString()}", 1);
-                ProjectileWeapon.UpdateTerminalShooting(t);
+                WeaponBasic.UpdateTerminalShooting(t);
             }
             else
             {
@@ -216,7 +216,7 @@ namespace ProjectilesImproved
 
             if (t != null)
             {
-                if (ProjectileWeapon.UpdateTerminalShooting(t))
+                if (WeaponBasic.UpdateTerminalShooting(t))
                 {
                     Network.SendCommand("shoot", data: data);
                 }
