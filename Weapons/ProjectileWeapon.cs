@@ -44,13 +44,14 @@ namespace ProjectilesImproved.Weapons
         public bool IsShooting => gun.IsShooting || TerminalShootOnce || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
         public int AmmoType => (Ammo != null && Ammo.AmmoType != MyAmmoType.Unknown) ? (int)Ammo.AmmoType : 0;
 
-        public double TimeTillNextShot = 1d;
         public int CurrentShotInBurst = 0;
-        public float CooldownTime = 0;
         public int FirstTimeCooldown = 0;
         public int LastNoAmmoSound = 0;
+        public double TimeTillNextShot = 1;
+        public float CurrentReloadTime = 0;
+        private float currentIdleReloadTime = 0;
         private float currentReleaseTime = 0;
-        private int retry = 0;
+
 
         public bool IsFixedGun = false;
         public bool TerminalShooting = false;
@@ -151,7 +152,7 @@ namespace ProjectilesImproved.Weapons
 
             if (!MyAPIGateway.Utilities.IsDedicated)
             {
-                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {Definition.AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{Definition.AmmoDatas[0].ShotsInBurst}, {(CooldownTime > 0 ? $"Cooldown {Definition.ReloadTime-CooldownTime}/{Definition.ReloadTime}, " : "")}release: {currentReleaseTime}/{Definition.ReleaseTimeAfterFire}", 1);
+                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {Definition.AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{Definition.AmmoDatas[0].ShotsInBurst}, {(CurrentReloadTime > 0 ? $"Cooldown {Definition.ReloadTime-CurrentReloadTime}/{Definition.ReloadTime}, " : "")}release: {currentReleaseTime}/{Definition.ReleaseTimeAfterFire}", 1);
             }
 
             if (Ammo != gun.GunBase.CurrentAmmoDefinition)
@@ -193,8 +194,26 @@ namespace ProjectilesImproved.Weapons
             }
 
             RotateBarrel();
-
+            IdleReload();
             TerminalShootOnce = false;
+        }
+
+        private void IdleReload()
+        {
+            if (!IsShooting && CurrentShotInBurst > 0)
+            {
+                if (currentIdleReloadTime >= Definition.ReloadTime)
+                {
+                    currentIdleReloadTime = 0;
+                    CurrentShotInBurst = 0;
+                }
+
+                currentIdleReloadTime += Tools.MillisecondPerFrame;
+            }
+            else
+            {
+                currentIdleReloadTime = 0;
+            }
         }
 
         private void FireWeapon()
@@ -233,7 +252,7 @@ namespace ProjectilesImproved.Weapons
                     {
                         TimeTillNextShot = 0;
                         CurrentShotInBurst = 0;
-                        CooldownTime = Definition.ReloadTime;
+                        CurrentReloadTime = Definition.ReloadTime;
                         break;
                     }
 

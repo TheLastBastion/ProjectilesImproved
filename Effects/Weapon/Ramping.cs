@@ -58,9 +58,9 @@ namespace ProjectilesImproved.Effects.Weapon
 
             // If cooldown is greater than 0 the gun is on cooldown and should not fire
             // reduce cooldown and dont fire projectiles
-            if (weapon.CooldownTime > 0)
+            if (weapon.CurrentReloadTime > 0)
             {
-                weapon.CooldownTime -= Tools.MillisecondPerFrame;
+                weapon.CurrentReloadTime -= Tools.MillisecondPerFrame;
                 willShoot = false;
             }
 
@@ -123,7 +123,8 @@ namespace ProjectilesImproved.Effects.Weapon
 
         public int CurrentRPM()
         {
-            return (int)(StartRPM + (MaxRPM - StartRPM) * ((currentTime <= TimeToMax) ? (currentTime / TimeToMax) : 1));
+            int rof = (int)(StartRPM + (MaxRPM - StartRPM) * ((currentTime <= TimeToMax) ? (currentTime / TimeToMax) : 1));
+            return rof < 0 ? 0 : rof;
         }
     }
 }
