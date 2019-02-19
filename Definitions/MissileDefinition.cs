@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ProjectilesImproved.Definitions
 {
-    class MissileDefinition
+    public class MissileDefinition
     {
     }
 }

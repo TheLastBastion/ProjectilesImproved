@@ -53,15 +53,14 @@ namespace ProjectilesImproved
             if (Network.NetworkType == NetworkTypes.Client)
             {
                 Network.RegisterNetworkCommand(null, ClientCallback_Update);
-                Network.RegisterNetworkCommand("shoot", ClientCallback_TerminalShoot);
-                Network.RegisterNetworkCommand("spawn", ClientCallback_Spawn);
+                Network.RegisterNetworkCommand("sync", ClientCallback_WeaponSync);
                 Network.RegisterChatCommand("update", (args) => { Network.SendCommand("update"); });
                 Network.RegisterChatCommand("load", (args) => { Network.SendCommand("load"); });
                 Network.RegisterChatCommand("save", (args) => { Network.SendCommand("save"); });
             }
             else
             {
-                Network.RegisterNetworkCommand("shoot", ServerCallback_TerminalShoot);
+                Network.RegisterNetworkCommand("sync", ServerCallback_WeaponSync);
                 Network.RegisterNetworkCommand("update", ServerCallback_Update);
                 Network.RegisterNetworkCommand("load", ServerCallback_Load);
                 Network.RegisterNetworkCommand("save", ServerCallback_Save);
@@ -72,6 +71,7 @@ namespace ProjectilesImproved
                     {
                         Settings.Load();
                         OnSettingsUpdate?.Invoke();
+                        Network.SendCommand(null, "New weapon settings loaded", MyAPIGateway.Utilities.SerializeToBinary(Settings.GetCurrentSettings()));
                         MyAPIGateway.Utilities.ShowMessage(ModName, "Loading from file");
                     });
 
@@ -105,7 +105,6 @@ namespace ProjectilesImproved
             {
                 PendingProjectiles.Add(data);
             }
-
         }
 
         public override void UpdateBeforeSimulation()
@@ -195,14 +194,13 @@ namespace ProjectilesImproved
             }
         }
 
-        private void ClientCallback_TerminalShoot(ulong steamId, string CommandString, byte[] data)
+        private void ClientCallback_WeaponSync(ulong steamId, string CommandString, byte[] data)
         {
-            TerminalShoot t = MyAPIGateway.Utilities.SerializeFromBinary<TerminalShoot>(data);
+            WeaponSync sync = MyAPIGateway.Utilities.SerializeFromBinary<WeaponSync>(data);
 
-            if (t != null)
+            if (sync != null)
             {
-                MyAPIGateway.Utilities.ShowNotification($"shoot {t.BlockId} {t.State.ToString()}", 1);
-                WeaponBasic.UpdateTerminalShooting(t);
+                WeaponBasic.SyncWeapon(sync);
             }
             else
             {
@@ -210,26 +208,18 @@ namespace ProjectilesImproved
             }
         }
 
-        private void ServerCallback_TerminalShoot(ulong steamId, string CommandString, byte[] data)
+        private void ServerCallback_WeaponSync(ulong steamId, string CommandString, byte[] data)
         {
-            TerminalShoot t = MyAPIGateway.Utilities.SerializeFromBinary<TerminalShoot>(data);
+            WeaponSync sync = MyAPIGateway.Utilities.SerializeFromBinary<WeaponSync>(data);
 
-            if (t != null)
+            if (sync != null)
             {
-                if (WeaponBasic.UpdateTerminalShooting(t))
-                {
-                    Network.SendCommand("shoot", data: data);
-                }
+                WeaponBasic.SyncWeapon(sync);
             }
             else
             {
                 MyLog.Default.Warning("data did not unpack!");
             }
-        }
-
-        private void ClientCallback_Spawn(ulong steamId, string CommandString, byte[] data)
-        {
-
         }
 
         private void ClientCallback_Update(ulong steamId, string CommandString, byte[] data)

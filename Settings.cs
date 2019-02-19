@@ -1,6 +1,6 @@
 ﻿using ProjectilesImproved.Definitions;
 using ProjectilesImproved.Effects.Collision;
-using ProjectilesImproved.Effects.Weapon;
+using ProjectilesImproved.Weapons.Types;
 using ProtoBuf;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
@@ -164,6 +164,17 @@ namespace ProjectilesImproved
                     MergeSBCInfo();
                     Settings s = GetCurrentSettings();
 
+                    for (int i = 0; i < s.ProjectileDefinitions.Count; i++)
+                    {
+                        ProjectileDefinition def = s.ProjectileDefinitions[i];
+                        if (def.DesiredSpeed == 0 && def.MaxTrajectory == 0 && def.ProjectileMassDamage == 0 && def.ProjectileHealthDamage == 0)
+                        {
+                            s.ProjectileDefinitions.RemoveAt(i);
+                            i--;
+                            continue;
+                        }
+                    }
+
                     TextWriter writer = MyAPIGateway.Utilities.WriteFileInLocalStorage(Filename, typeof(Settings));
                     writer.Write(MyAPIGateway.Utilities.SerializeToXML(s));
                     writer.Close();
@@ -315,6 +326,19 @@ namespace ProjectilesImproved
                                 SBCWeapon.Ramping = (configWeapon.Ramping == null) ? null : configWeapon.Ramping.Clone();
 
                                 WeaponDefinitionLookup[w.Id.SubtypeId.String] = SBCWeapon;
+                            }
+                            else
+                            {
+                                // these are hidden properties users cant edit
+                                configWeapon.ReleaseTimeAfterFire = SBCWeapon.ReleaseTimeAfterFire;
+                                configWeapon.PhysicalMaterial = SBCWeapon.PhysicalMaterial;
+                                configWeapon.DamageMultiplier = SBCWeapon.DamageMultiplier;
+                                configWeapon.MuzzleFlashLifeSpan = SBCWeapon.MuzzleFlashLifeSpan;
+                                configWeapon.UseDefaultMuzzleFlash = SBCWeapon.UseDefaultMuzzleFlash;
+
+                                configWeapon.NoAmmoSound = SBCWeapon.NoAmmoSound;
+                                configWeapon.ReloadSound = SBCWeapon.ReloadSound;
+                                configWeapon.SecondarySound = SBCWeapon.SecondarySound;
                             }
                         }
                         else

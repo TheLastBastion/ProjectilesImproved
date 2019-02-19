@@ -1,7 +1,7 @@
 ﻿using ProjectilesImproved.Weapons;
 using ProtoBuf;
 
-namespace ProjectilesImproved.Effects.Weapon
+namespace ProjectilesImproved.Weapons.Types
 {
     [ProtoContract]
     public class Ramping

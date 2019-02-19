@@ -1,4 +1,4 @@
-﻿using ProjectilesImproved.Effects.Weapon;
+﻿using ProjectilesImproved.Weapons.Types;
 using ProtoBuf;
 using Sandbox.Game.Entities;
 using System.Collections.Generic;
@@ -30,6 +30,10 @@ namespace ProjectilesImproved.Definitions
         // mod effects
         [ProtoMember]
         public Ramping Ramping;
+
+        // Is not part of the config
+        [XmlIgnore]
+        public Randomizer Randomizer = new Randomizer();
 
         // Unused stuff
         [XmlIgnore]

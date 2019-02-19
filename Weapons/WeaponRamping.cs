@@ -9,13 +9,13 @@ namespace ProjectilesImproved.Weapons
     public class WeaponRamping : WeaponBasic, IWeapon
     {
 
-        private float CurrentRampingTime = 0; // in miliseconds
+        public float CurrentRampingTime = 0; // in miliseconds
 
         public override void Update()
         {
             if (!MyAPIGateway.Utilities.IsDedicated)
             {
-                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{AmmoDatas[0].ShotsInBurst}, {(CurrentReloadTime > 0 ? $"Cooldown {(ReloadTime - CurrentReloadTime).ToString("n0")}/{ReloadTime}, " : "")}release: {currentReleaseTime.ToString("n0")}/{ReleaseTimeAfterFire}, Time: {TimeTillNextShot.ToString("n2")}", 1);
+                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{AmmoDatas[0].ShotsInBurst}, {(CurrentReloadTime > 0 ? $"Cooldown {(ReloadTime - CurrentReloadTime).ToString("n0")}/{ReloadTime}, " : "")}release: {CurrentReleaseTime.ToString("n0")}/{ReleaseTimeAfterFire}, Time: {TimeTillNextShot.ToString("n2")}", 1);
             }
 
             WillFireThisFrame = true;

@@ -21,6 +21,8 @@ namespace ProjectilesImproved.Weapons
 
     public class WeaponBasic : WeaponDefinition, IWeapon
     {
+        public enum TerminalState { None, Shoot_On, Shoot_Off, ShootOnce }
+
         public bool IsFixedGun { get; private set; }
         public bool IsShooting => gun.IsShooting || TerminalShootOnce || TerminalShooting || (IsFixedGun && (Entity.NeedsUpdate & MyEntityUpdateEnum.EACH_FRAME) == MyEntityUpdateEnum.EACH_FRAME);
         public bool IsInitialized { get; private set; }
@@ -37,7 +39,7 @@ namespace ProjectilesImproved.Weapons
         protected int FirstTimeCooldown = 0;
         protected int LastNoAmmoSound = 0;
         protected float CurrentReloadTime = 0;
-        protected float currentReleaseTime = 0;
+        protected float CurrentReleaseTime = 0;
         protected double TimeTillNextShot = 1d;
         protected float CurrentIdleReloadTime = 0;
 
@@ -52,9 +54,9 @@ namespace ProjectilesImproved.Weapons
         private Vector3 originalBarrelPostion = Vector3.Zero;
         private MyEntitySubpart barrelSubpart = null;
 
-        public static bool UpdateTerminalShooting(TerminalShoot t)
+        public static bool SyncWeapon(WeaponSync data)
         {
-            IMyTerminalBlock block = (IMyTerminalBlock)MyAPIGateway.Entities.GetEntityById(t.BlockId);
+            IMyTerminalBlock block = (IMyTerminalBlock)MyAPIGateway.Entities.GetEntityById(data.BlockId);
 
             if (block == null)
             {
@@ -62,21 +64,60 @@ namespace ProjectilesImproved.Weapons
                 return false;
             }
 
-            WeaponControlLayer weapon = (block.GameLogic as WeaponControlLayer);
-            if (weapon == null)
+            WeaponControlLayer controlLayer = (block.GameLogic as WeaponControlLayer);
+            if (controlLayer == null)
             {
-                MyLog.Default.Warning($"Failed set weapon to {t.State.ToString()}. Block was of type {block.GameLogic.GetType()} not ProjectileWeapon.");
+                MyLog.Default.Warning($"Failed set weapon to {data.State.ToString()}. Block was of type {block.GameLogic.GetType()} not ProjectileWeapon.");
                 return false;
             }
 
-            if (t.State == TerminalState.ShootOnce)
+            WeaponBasic weapon = controlLayer.Weapon as WeaponBasic;
+
+            if (data.State == TerminalState.None)
             {
-                (weapon.Weapon as WeaponBasic).TerminalShootOnce = true;
+                // do nothing
+            }
+            else if (data.State == TerminalState.ShootOnce)
+            {
+                weapon.TerminalShootOnce = true;
             }
             else
             {
-                (weapon.Weapon as WeaponBasic).TerminalShooting = t.State == TerminalState.Shoot_On;
+                weapon.TerminalShooting = data.State == TerminalState.Shoot_On;
             }
+
+            if (MyAPIGateway.Session.IsServer)
+            {
+                data.DeviationIndex = weapon.Randomizer.Index;
+                data.CurrentReloadTime = weapon.CurrentReloadTime;
+                data.CurrentIdleReloadTime = weapon.CurrentIdleReloadTime;
+                data.CurrentReleaseTime = weapon.CurrentReleaseTime;
+                data.CurrentShotInBurst = weapon.CurrentShotInBurst;
+                data.TimeTillNextShot = weapon.TimeTillNextShot;
+
+                if (weapon is WeaponRamping)
+                {
+                    data.CurrentRampingTime = (weapon as WeaponRamping).CurrentRampingTime;
+                }
+
+                NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(data));
+            }
+            else
+            {
+                weapon.Randomizer.Index = data.DeviationIndex;
+                weapon.CurrentReloadTime = data.CurrentReloadTime;
+                weapon.CurrentIdleReloadTime = data.CurrentIdleReloadTime;
+                weapon.CurrentReleaseTime = data.CurrentReleaseTime;
+                weapon.CurrentShotInBurst = data.CurrentShotInBurst;
+                weapon.TimeTillNextShot = data.TimeTillNextShot;
+
+                if (weapon is WeaponRamping)
+                {
+                    (weapon as WeaponRamping).CurrentRampingTime = data.CurrentRampingTime;
+                }
+            }
+
+            MyLog.Default.Info(MyAPIGateway.Utilities.SerializeToXML(data));
 
             return true;
         }
@@ -99,6 +140,8 @@ namespace ProjectilesImproved.Weapons
         public virtual void OnAddedToContainer()
         {
             OverrideDefaultControls();
+            WeaponSync sync = new WeaponSync() { BlockId = Entity.EntityId };
+            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(sync));
         }
 
         public virtual void OnAddedToScene()
@@ -116,7 +159,7 @@ namespace ProjectilesImproved.Weapons
         {
             if (!MyAPIGateway.Utilities.IsDedicated)
             {
-                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{AmmoDatas[0].ShotsInBurst}, {(CurrentReloadTime > 0 ? $"Cooldown {(ReloadTime - CurrentReloadTime).ToString("n0")}/{ReloadTime}, " : "")}release: {currentReleaseTime.ToString("n0")}/{ReleaseTimeAfterFire}, Time: {TimeTillNextShot.ToString("n2")}", 1);
+                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{AmmoDatas[0].ShotsInBurst}, {(CurrentReloadTime > 0 ? $"Cooldown {(ReloadTime - CurrentReloadTime).ToString("n0")}/{ReloadTime}, " : "")}release: {CurrentReleaseTime.ToString("n0")}/{ReleaseTimeAfterFire}, Time: {TimeTillNextShot.ToString("n2")}", 1);
             }
 
             WillFireThisFrame = true;
@@ -216,7 +259,8 @@ namespace ProjectilesImproved.Weapons
                 {
                     MatrixD positionMatrix = Matrix.CreateWorld(
                         muzzleMatrix.Translation,
-                        gun.GunBase.GetDeviatedVector(DeviateShotAngle, muzzleMatrix.Forward),
+                        Randomizer.ApplyDeviation(muzzleMatrix.Forward, DeviateShotAngle),
+                        //gun.GunBase.GetDeviatedVector(DeviateShotAngle, muzzleMatrix.Forward),
                         muzzleMatrix.Up);
 
                     Projectile bullet = bulletData.CreateProjectile();
@@ -265,17 +309,17 @@ namespace ProjectilesImproved.Weapons
             double rotationAmount = 0.0002f * AmmoDatas[0].RateOfFire;
             if (IsShooting)
             {
-                currentReleaseTime = 0;
+                CurrentReleaseTime = 0;
             }
-            else if (currentReleaseTime <= ReleaseTimeAfterFire)
+            else if (CurrentReleaseTime <= ReleaseTimeAfterFire)
             {
-                rotationAmount *= (1 - currentReleaseTime / ReleaseTimeAfterFire);
+                rotationAmount *= (1 - CurrentReleaseTime / ReleaseTimeAfterFire);
 
-                currentReleaseTime += Tools.MillisecondPerFrame;
+                CurrentReleaseTime += Tools.MillisecondPerFrame;
 
-                if (currentReleaseTime >= ReleaseTimeAfterFire)
+                if (CurrentReleaseTime >= ReleaseTimeAfterFire)
                 {
-                    currentReleaseTime = ReleaseTimeAfterFire;
+                    CurrentReleaseTime = ReleaseTimeAfterFire;
                 }
             }
 
@@ -337,10 +381,10 @@ namespace ProjectilesImproved.Weapons
                             basic.TerminalShooting = !basic.TerminalShooting;
                         }
 
-                        NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                        NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
                         {
                             BlockId = block.EntityId,
-                            State = ((basic.TerminalShooting) ? TerminalState.Shoot_Off : TerminalState.Shoot_On)
+                            State = ((basic.TerminalShooting) ? TerminalState.Shoot_On : TerminalState.Shoot_Off)
                         }));
                     };
 
@@ -359,7 +403,7 @@ namespace ProjectilesImproved.Weapons
                                 basic.TerminalShootOnce = true;
                             }
 
-                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
                             {
                                 BlockId = block.EntityId,
                                 State = TerminalState.ShootOnce
@@ -381,7 +425,7 @@ namespace ProjectilesImproved.Weapons
                                 basic.TerminalShooting = true;
                             }
 
-                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
                             {
                                 BlockId = block.EntityId,
                                 State = TerminalState.Shoot_On
@@ -404,7 +448,7 @@ namespace ProjectilesImproved.Weapons
                                 basic.TerminalShooting = false;
                             }
 
-                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
                             {
                                 BlockId = block.EntityId,
                                 State = TerminalState.Shoot_Off
@@ -443,7 +487,7 @@ namespace ProjectilesImproved.Weapons
                                 basic.TerminalShooting = value;
                             }
 
-                            NetworkAPI.Instance.SendCommand("shoot", data: MyAPIGateway.Utilities.SerializeToBinary(new TerminalShoot
+                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
                             {
                                 BlockId = block.EntityId,
                                 State = (value) ? TerminalState.Shoot_On : TerminalState.Shoot_Off

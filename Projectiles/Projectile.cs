@@ -48,20 +48,8 @@ namespace ProjectilesImproved.Projectiles
         [XmlIgnore]
         public bool IsInitialized = false;
 
-        //private bool hasExpired = false;
         [XmlIgnore]
         public bool HasExpired;
-        //{
-        //    get { return hasExpired; }
-        //    set
-        //    {
-        //        if (value == true && hasExpired != true)
-        //        {
-        //            hasExpired = true;
-        //            Core.RemoveProjectile(this);
-        //        }
-        //    }
-        //}
         [XmlIgnore]
         public float LastPositionFraction = 0;
 
