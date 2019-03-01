@@ -64,7 +64,7 @@ namespace ProjectilesImproved.Weapons
                 return false;
             }
 
-            WeaponControlLayer controlLayer = (block.GameLogic as WeaponControlLayer);
+            WeaponControlLayer controlLayer = block.GameLogic.GetAs<WeaponControlLayer>(); // (block.GameLogic as WeaponControlLayer);
             if (controlLayer == null)
             {
                 MyLog.Default.Warning($"Failed set weapon to {data.State.ToString()}. Block was of type {block.GameLogic.GetType()} not ProjectileWeapon.");
@@ -117,7 +117,7 @@ namespace ProjectilesImproved.Weapons
                 }
             }
 
-            MyLog.Default.Info(MyAPIGateway.Utilities.SerializeToXML(data));
+            //MyLog.Default.Info(MyAPIGateway.Utilities.SerializeToXML(data));
 
             return true;
         }
@@ -157,10 +157,10 @@ namespace ProjectilesImproved.Weapons
 
         public virtual void Update()
         {
-            if (!MyAPIGateway.Utilities.IsDedicated)
-            {
-                MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{AmmoDatas[0].ShotsInBurst}, {(CurrentReloadTime > 0 ? $"Cooldown {(ReloadTime - CurrentReloadTime).ToString("n0")}/{ReloadTime}, " : "")}release: {CurrentReleaseTime.ToString("n0")}/{ReleaseTimeAfterFire}, Time: {TimeTillNextShot.ToString("n2")}", 1);
-            }
+            //if (!MyAPIGateway.Utilities.IsDedicated)
+            //{
+            //    MyAPIGateway.Utilities.ShowNotification($"{(IsShooting ? "Shooting" : "Idle")}, RoF: {AmmoDatas[0].RateOfFire}, Shots: {CurrentShotInBurst}/{AmmoDatas[0].ShotsInBurst}, {(CurrentReloadTime > 0 ? $"Cooldown {(ReloadTime - CurrentReloadTime).ToString("n0")}/{ReloadTime}, " : "")}release: {CurrentReleaseTime.ToString("n0")}/{ReleaseTimeAfterFire}, Time: {TimeTillNextShot.ToString("n2")}", 1);
+            //}
 
             WillFireThisFrame = true;
 
@@ -374,7 +374,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = (block.GameLogic as WeaponControlLayer).Weapon as WeaponBasic;
+                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
 
                         if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
                         {
@@ -394,7 +394,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = (block.GameLogic as WeaponControlLayer).Weapon as WeaponBasic;
+                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
 
                         if (basic != null && !basic.TerminalShootOnce)
                         {
@@ -416,7 +416,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = (block.GameLogic as WeaponControlLayer).Weapon as WeaponBasic;
+                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
 
                         if (basic != null && !basic.TerminalShooting)
                         {
@@ -439,7 +439,7 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = (block.GameLogic as WeaponControlLayer).Weapon as WeaponBasic;
+                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
 
                         if (basic != null && basic.TerminalShooting)
                         {
@@ -478,7 +478,7 @@ namespace ProjectilesImproved.Weapons
 
                     onoff.Setter = (block, value) =>
                     {
-                        WeaponBasic basic = (block.GameLogic as WeaponControlLayer).Weapon as WeaponBasic;
+                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
 
                         if (basic != null && basic.TerminalShooting != value)
                         {
@@ -497,7 +497,7 @@ namespace ProjectilesImproved.Weapons
 
                     onoff.Getter = (block) =>
                     {
-                        return ((block.GameLogic as WeaponControlLayer).Weapon as WeaponBasic).TerminalShooting;
+                        return (block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic).TerminalShooting;
                     };
                 }
             }
@@ -505,7 +505,7 @@ namespace ProjectilesImproved.Weapons
 
         protected void WeaponsFiringWriter(IMyTerminalBlock block, StringBuilder str)
         {
-            if (((block.GameLogic as WeaponControlLayer).Weapon as WeaponBasic).TerminalShooting)
+            if ((block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic).TerminalShooting)
             {
                 str.Append("On");
             }

@@ -15,6 +15,8 @@ namespace ProjectilesImproved
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation | MyUpdateOrder.BeforeSimulation)]
     public class Core : MySessionComponentBase
     {
+        public static Queue<DamageDefinition> DamageRequests = new Queue<DamageDefinition>();
+
         private static HashSet<Projectile> PendingProjectiles = new HashSet<Projectile>();
         private static HashSet<Projectile> ActiveProjectiles = new HashSet<Projectile>();
         private static HashSet<Projectile> ExpiredProjectiles = new HashSet<Projectile>();
@@ -115,9 +117,9 @@ namespace ProjectilesImproved
             */
             if (!MyAPIGateway.Session.IsServer && !IsInitialized())
             {
-                if (waitInterval == 600) // 5 second timer before sending update request
+                if (waitInterval == 60)
                 {
-                    MyAPIGateway.Utilities.ShowNotification("Sending update Request", 1000);
+                    //MyAPIGateway.Utilities.ShowNotification("Sending update Request", 1000);
                     Network.SendCommand("update");
                 }
 
@@ -125,7 +127,7 @@ namespace ProjectilesImproved
             }
 
 
-            MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}, Pending: {PendingProjectiles.Count}, Expired: {ExpiredProjectiles.Count}", 1);
+            //MyAPIGateway.Utilities.ShowNotification($"Total Projectiles: {ActiveProjectiles.Count}, Pending: {PendingProjectiles.Count}, Expired: {ExpiredProjectiles.Count}", 1);
 
 
             ActiveProjectiles.ExceptWith(ExpiredProjectiles);
@@ -180,7 +182,24 @@ namespace ProjectilesImproved
 
             //    p.Draw();
             //    p.Update();
+
+            //    if (p.HasExpired)
+            //    {
+            //        ExpiredProjectiles.Add(p);
+            //    }
             //}
+
+            //MyAPIGateway.Utilities.ShowNotification($"Damage Requests: {DamageRequests.Count}", 1);
+
+            while (DamageRequests.Count > 0)
+            {
+                DamageDefinition def = DamageRequests.Dequeue();
+
+                if (def.Victim != null)
+                {
+                    def.Victim.DoDamage(def.Damage, def.DamageType, def.Sync, def.Hit, def.AttackerId);
+                }
+            }
         }
 
         public override void Draw()

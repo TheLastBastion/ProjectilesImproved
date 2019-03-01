@@ -1,6 +1,8 @@
-﻿using ProjectilesImproved.Projectiles;
+﻿using ProjectilesImproved.Definitions;
+using ProjectilesImproved.Projectiles;
 using ProtoBuf;
 using Sandbox.ModAPI;
+using System;
 using System.Collections.Generic;
 using VRage.Game;
 using VRage.Game.Components;
@@ -105,90 +107,121 @@ namespace ProjectilesImproved.Effects.Collision
 
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {
-            IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
-            if (hit.HitEntity is IMyCubeGrid)
+            try
             {
-                IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
-                Vector3D direction = bullet.Direction;
-                Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
-                if (hitPos.HasValue)
+                IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
+                if (hit.HitEntity is IMyCubeGrid)
                 {
-                    obj = grid.GetCubeBlock(hitPos.Value);
+                    IMyCubeGrid grid = hit.HitEntity as IMyCubeGrid;
+                    Vector3D direction = bullet.Direction;
+                    Vector3I? hitPos = grid.RayCastBlocks(hit.Position, hit.Position + direction);
+                    if (hitPos.HasValue)
+                    {
+                        obj = grid.GetCubeBlock(hitPos.Value);
+                    }
                 }
-            }
 
-            Vector3 hitObjectVelocity = Vector3.Zero;
-            if (hit.HitEntity.Physics != null)
-            {
-                hitObjectVelocity = hit.HitEntity.Physics.LinearVelocity;
-            }
-            Vector3D relativeV = bullet.Velocity - hitObjectVelocity;
-
-            float NotHitAngle = (float)Tools.AngleBetween(-Vector3D.Normalize(relativeV), hit.Normal);
-            float HitAngle = (90f - NotHitAngle);
-            float NotHitFraction = NotHitAngle / 90f;
-
-            float random = (float)Tools.Random.NextDouble();
-
-            if (HitAngle < DeflectionAngle && RicochetChance > random)
-            {
-                // Apply impulse
-                float impulse = bullet.ProjectileHitImpulse * NotHitFraction * MaxVelocityTransfer;
+                Vector3 hitObjectVelocity = Vector3.Zero;
                 if (hit.HitEntity.Physics != null)
                 {
-                    hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Velocity * impulse * -hit.Normal, hit.Position, null);
+                    hitObjectVelocity = hit.HitEntity.Physics.LinearVelocity;
                 }
-                bullet.ProjectileHitImpulse -= impulse;
+                Vector3D relativeV = bullet.Velocity - hitObjectVelocity;
 
-                // apply partial damage
-                float damage = bullet.ProjectileMassDamage * NotHitFraction * MaxDamageTransfer;
-                if (obj != null && MyAPIGateway.Session.IsServer)
+                float NotHitAngle = (float)Tools.AngleBetween(-Vector3D.Normalize(relativeV), hit.Normal);
+                float HitAngle = (90f - NotHitAngle);
+                float NotHitFraction = NotHitAngle / 90f;
+
+                float random = (float)Tools.Random.NextDouble();
+
+                if (HitAngle < DeflectionAngle && RicochetChance > random)
                 {
-                    obj.DoDamage(damage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
+                    // Apply impulse
+                    float impulse = bullet.ProjectileHitImpulse * NotHitFraction * MaxVelocityTransfer;
+                    if (hit.HitEntity.Physics != null)
+                    {
+                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Velocity * impulse * -hit.Normal, hit.Position, null);
+                    }
+                    bullet.ProjectileHitImpulse -= impulse;
+
+                    // apply partial damage
+                    float damage = bullet.ProjectileMassDamage * NotHitFraction * MaxDamageTransfer;
+                    if (obj != null && MyAPIGateway.Session.IsServer)
+                    {
+                        lock (Core.DamageRequests)
+                        {
+                            Core.DamageRequests.Enqueue(new DamageDefinition
+                            {
+                                Victim = obj,
+                                Damage = damage,
+                                DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
+                                Sync = true,
+                                Hit = default(MyHitInfo),
+                                AttackerId = bullet.ParentBlockId
+                            });
+                        }
+                        //obj.DoDamage(damage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
+                    }
+                    bullet.ProjectileMassDamage -= damage;
+
+                    // reduce velocity
+                    bullet.Velocity -= bullet.Velocity * NotHitFraction * MaxVelocityTransfer;
+
+                    // reflect
+                    bullet.Velocity = Vector3.Reflect(bullet.Velocity, hit.Normal);
+
+                    // calculate new direction
+                    bullet.ResetCollisionCheck();
+                    bullet.Direction = Vector3D.Normalize(bullet.Velocity);
+                    bullet.Position = hit.Position + (bullet.Direction * 0.5f);
+
+                    bullet.PreCollitionDetection();
+                    bullet.CollisionDetection();
+                    //bullet.Draw();
+
+                    if (!MyAPIGateway.Utilities.IsDedicated)
+                    {
+                        MatrixD world = MatrixD.CreateFromDir(hit.Normal);
+                        world.Translation = hit.Position;
+
+                        MyParticleEffect effect;
+                        MyParticlesManager.TryCreateParticleEffect("Collision_Sparks_Directional", world, out effect);
+
+                        effect.Loop = false;
+                        effect.UserScale = 0.5f;
+                        effect.UserEmitterScale = 16f;
+                        effect.UserRadiusMultiplier = 0.1f;
+                        effect.UserBirthMultiplier = 20f;
+                        effect.DurationMin = 0.015f;
+                        effect.DurationMax = 0.025f;
+                        effect.SetRandomDuration();
+                    }
                 }
-                bullet.ProjectileMassDamage -= damage;
-
-                // reduce velocity
-                bullet.Velocity -= bullet.Velocity * NotHitFraction * MaxVelocityTransfer;
-
-                // reflect
-                bullet.Velocity = Vector3.Reflect(bullet.Velocity, hit.Normal);
-
-                // calculate new direction
-                bullet.ResetCollisionCheck();
-                bullet.Direction = Vector3D.Normalize(bullet.Velocity);
-                bullet.Position = hit.Position + (bullet.Direction * 0.5f);
-
-                bullet.PreCollitionDetection();
-                bullet.CollisionDetection();
-                //bullet.Draw();
-
-                if (!MyAPIGateway.Utilities.IsDedicated)
+                else
                 {
-                    MatrixD world = MatrixD.CreateFromDir(hit.Normal);
-                    world.Translation = hit.Position;
+                    if (obj != null && MyAPIGateway.Session.IsServer)
+                    {
+                        lock (Core.DamageRequests)
+                        {
+                            Core.DamageRequests.Enqueue(new DamageDefinition
+                            {
+                                Victim = obj,
+                                Damage = bullet.ProjectileMassDamage,
+                                DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
+                                Sync = true,
+                                Hit = default(MyHitInfo),
+                                AttackerId = bullet.ParentBlockId
+                            });
+                        }
+                        //obj.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
+                    }
 
-                    MyParticleEffect effect;
-                    MyParticlesManager.TryCreateParticleEffect("Collision_Sparks_Directional", world, out effect);
-
-                    effect.Loop = false;
-                    effect.UserScale = 0.5f;
-                    effect.UserEmitterScale = 16f;
-                    effect.UserRadiusMultiplier = 0.1f;
-                    effect.UserBirthMultiplier = 20f;
-                    effect.DurationMin = 0.015f;
-                    effect.DurationMax = 0.025f;
-                    effect.SetRandomDuration();
+                    bullet.HasExpired = true;
                 }
             }
-            else
+            catch (Exception e)
             {
-                if (obj != null && MyAPIGateway.Session.IsServer)
-                {
-                    obj.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
-                }
-
-                bullet.HasExpired = true;
+                MyLog.Default.Info(e.ToString());
             }
         }
 

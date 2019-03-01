@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
+using VRage.Utils;
 
 namespace ProjectilesImproved.Effects.Collision
 {
@@ -37,7 +38,9 @@ namespace ProjectilesImproved.Effects.Collision
                     {
                         Ammo = ammo,
                         Neighbours = slim.Neighbours,
-                        OverKill = overkill
+                        OverKill = overkill,
+                        Type = info.Type,
+                        AttackerId = info.AttackerId
                     });
                 }
             }
@@ -52,7 +55,7 @@ namespace ProjectilesImproved.Effects.Collision
                 foreach (IMySlimBlock neighbour in data.Neighbours)
                 {
                     float damage = ((data.OverKill / (float)count) * data.Ammo.OverKillSpreadScaler);
-                    neighbour.DoDamage(damage, MyDamageType.Bullet, true);
+                    neighbour.DoDamage(damage, data.Type, true, default(MyHitInfo), data.AttackerId);
                 }
             }
         }
@@ -63,5 +66,7 @@ namespace ProjectilesImproved.Effects.Collision
         public ProjectileDefinition Ammo { get; set; }
         public float OverKill { get; set; }
         public List<IMySlimBlock> Neighbours { get; set; }
+        public long AttackerId;
+        public MyStringHash Type;
     }
 }
