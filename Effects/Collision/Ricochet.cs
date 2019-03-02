@@ -140,7 +140,7 @@ namespace ProjectilesImproved.Effects.Collision
                     float impulse = bullet.ProjectileHitImpulse * NotHitFraction * MaxVelocityTransfer;
                     if (hit.HitEntity.Physics != null)
                     {
-                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Velocity * impulse * -hit.Normal, hit.Position, null);
+                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(impulse * bullet.Direction), hit.Position, null);
                     }
                     bullet.ProjectileHitImpulse -= impulse;
 
@@ -148,19 +148,15 @@ namespace ProjectilesImproved.Effects.Collision
                     float damage = bullet.ProjectileMassDamage * NotHitFraction * MaxDamageTransfer;
                     if (obj != null && MyAPIGateway.Session.IsServer)
                     {
-                        lock (Core.DamageRequests)
+                        Core.DamageRequests.Enqueue(new DamageDefinition
                         {
-                            Core.DamageRequests.Enqueue(new DamageDefinition
-                            {
-                                Victim = obj,
-                                Damage = damage,
-                                DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
-                                Sync = true,
-                                Hit = default(MyHitInfo),
-                                AttackerId = bullet.ParentBlockId
-                            });
-                        }
-                        //obj.DoDamage(damage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
+                            Victim = obj,
+                            Damage = damage,
+                            DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
+                            Sync = true,
+                            Hit = default(MyHitInfo),
+                            AttackerId = bullet.ParentBlockId
+                        });
                     }
                     bullet.ProjectileMassDamage -= damage;
 
@@ -201,19 +197,15 @@ namespace ProjectilesImproved.Effects.Collision
                 {
                     if (obj != null && MyAPIGateway.Session.IsServer)
                     {
-                        lock (Core.DamageRequests)
+                        Core.DamageRequests.Enqueue(new DamageDefinition
                         {
-                            Core.DamageRequests.Enqueue(new DamageDefinition
-                            {
-                                Victim = obj,
-                                Damage = bullet.ProjectileMassDamage,
-                                DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
-                                Sync = true,
-                                Hit = default(MyHitInfo),
-                                AttackerId = bullet.ParentBlockId
-                            });
-                        }
-                        //obj.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true);
+                            Victim = obj,
+                            Damage = bullet.ProjectileMassDamage,
+                            DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
+                            Sync = true,
+                            Hit = default(MyHitInfo),
+                            AttackerId = bullet.ParentBlockId
+                        });
                     }
 
                     bullet.HasExpired = true;

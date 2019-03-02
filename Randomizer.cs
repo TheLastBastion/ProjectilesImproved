@@ -1,8 +1,10 @@
 ﻿using ProtoBuf;
+using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
+using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
@@ -15,14 +17,24 @@ namespace ProjectilesImproved
         public int Index;
 
         private bool isInitialized = false;
-        private float currentAngle;
+        //private float currentAngle;
 
         private float[] RandomSet = new float[128];
         private float[] RandomSetFromAngle = new float[128];
 
-        public void Initialize(float maxAngle)
+        public void Initialize(long EntityId, float maxAngle)
         {
             Random rand = new Random(Seed);
+
+            char[] id = EntityId.ToString().ToCharArray();
+
+            char[] indexValues = new char[2]
+            {
+                id[id.Length-1],
+                id[id.Length-2]
+            };
+
+            Index = int.Parse(new string(indexValues));
 
             for (int i = 0; i < 128; i++)
             {
@@ -34,21 +46,22 @@ namespace ProjectilesImproved
                 RandomSetFromAngle[i] = (float)(rand.NextDouble() * (maxAngle*2) - maxAngle);
             }
 
-            currentAngle = maxAngle;
+            //currentAngle = maxAngle;
 
             isInitialized = true;
         }
 
-        public Vector3 ApplyDeviation(Vector3 direction, float maxAngle)
+        public Vector3 ApplyDeviation(IMyEntity entity, Vector3 direction, float maxAngle)
         {
             if (maxAngle == 0)
             {
                 return direction;
             }
 
-            if (maxAngle != currentAngle || isInitialized)
+            if (!isInitialized)
             {
-                Initialize(maxAngle);
+                Initialize(entity.EntityId, maxAngle);
+                //MyAPIGateway.Utilities.ShowNotification($"Initialized: {Index}");
             }
 
             Index++;
@@ -61,8 +74,15 @@ namespace ProjectilesImproved
 
             float randomFloat = RandomSetFromAngle[Index];
             float randomFloat2 = RandomSet[Index];
+
+            //MyAPIGateway.Utilities.ShowNotification($"Random Values: {randomFloat}  |  {randomFloat2}");
+
             Vector3 normal = -new Vector3(MyMath.FastSin(randomFloat) * MyMath.FastCos(randomFloat2), MyMath.FastSin(randomFloat) * MyMath.FastSin(randomFloat2), MyMath.FastCos(randomFloat));
-            return Vector3.TransformNormal(normal, matrix);
+            Vector3 vector = Vector3.TransformNormal(normal, matrix);
+
+            //MyAPIGateway.Utilities.ShowNotification($"Angle: {maxAngle} Random Values: {normal.X}  |  {normal.Y}  |  {normal.Z}");
+
+            return vector;
         }
     }
 }

@@ -65,8 +65,8 @@ namespace ProjectilesImproved.Effects.Collision
                 {
                     IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
 
-                    lock (Core.DamageRequests)
-                    {
+                    //lock (Core.DamageRequests)
+                    //{
                         Core.DamageRequests.Enqueue(new DamageDefinition
                         {
                             Victim = (hit.HitEntity as IMyDestroyableObject),
@@ -76,7 +76,7 @@ namespace ProjectilesImproved.Effects.Collision
                             Hit = default(MyHitInfo),
                             AttackerId = bullet.ParentBlockId
                         });
-                    }
+                    //}
 
                     //(hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
 
@@ -97,8 +97,8 @@ namespace ProjectilesImproved.Effects.Collision
                         {
                             float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                            lock (Core.DamageRequests)
-                            {
+                            //lock (Core.DamageRequests)
+                            //{
                                 Core.DamageRequests.Enqueue(new DamageDefinition
                                 {
                                     Victim = block,
@@ -108,14 +108,14 @@ namespace ProjectilesImproved.Effects.Collision
                                     Hit = default(MyHitInfo),
                                     AttackerId = bullet.ParentBlockId
                                 });
-                            }
+                            //}
 
                             //block.DoDamage(bullet.ProjectileMassDamage * mult, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
                         }
                         else
                         {
-                            lock (Core.DamageRequests)
-                            {
+                            //lock (Core.DamageRequests)
+                            //{
                                 Core.DamageRequests.Enqueue(new DamageDefinition
                                 {
                                     Victim = block,
@@ -125,7 +125,7 @@ namespace ProjectilesImproved.Effects.Collision
                                     Hit = default(MyHitInfo),
                                     AttackerId = bullet.ParentBlockId
                                 });
-                            }
+                            //}
 
                             //block.DoDamage(bullet.ProjectileMassDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
                         }

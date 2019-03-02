@@ -60,7 +60,7 @@ namespace ProjectilesImproved.Weapons
 
             if (block == null)
             {
-                MyLog.Default.Warning("Failed to find block in entities");
+                //MyLog.Default.Warning("Failed to find block in entities");
                 return false;
             }
 
@@ -248,10 +248,11 @@ namespace ProjectilesImproved.Weapons
             if (TimeTillNextShot >= 1 && WillFireThisFrame)
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
-                Vector3D bonus = (Block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
 
-                bonus.Rotate(muzzleMatrix);
-                muzzleMatrix.Translation += bonus;
+                //Vector3D bonus = (Block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
+
+                //bonus.Rotate(muzzleMatrix);
+                //muzzleMatrix.Translation += bonus;
 
                 ProjectileDefinition bulletData = Settings.GetAmmoDefinition(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId.String);
 
@@ -259,12 +260,12 @@ namespace ProjectilesImproved.Weapons
                 {
                     MatrixD positionMatrix = Matrix.CreateWorld(
                         muzzleMatrix.Translation,
-                        Randomizer.ApplyDeviation(muzzleMatrix.Forward, DeviateShotAngle),
-                        //gun.GunBase.GetDeviatedVector(DeviateShotAngle, muzzleMatrix.Forward),
+                        Randomizer.ApplyDeviation(Entity, muzzleMatrix.Forward, DeviateShotAngle),
                         muzzleMatrix.Up);
 
                     Projectile bullet = bulletData.CreateProjectile();
                     bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
+                    bullet.Direction = positionMatrix.Forward;
                     bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * bulletData.DesiredSpeed);
                     bullet.Position = positionMatrix.Translation;
 
@@ -304,34 +305,34 @@ namespace ProjectilesImproved.Weapons
 
         public virtual void Draw()
         {
-            if (barrelSubpart == null) return;
+            //if (barrelSubpart == null) return;
 
-            double rotationAmount = 0.0002f * AmmoDatas[0].RateOfFire;
-            if (IsShooting)
-            {
-                CurrentReleaseTime = 0;
-            }
-            else if (CurrentReleaseTime <= ReleaseTimeAfterFire)
-            {
-                rotationAmount *= (1 - CurrentReleaseTime / ReleaseTimeAfterFire);
+            //double rotationAmount = 0.0002f * AmmoDatas[0].RateOfFire;
+            //if (IsShooting)
+            //{
+            //    CurrentReleaseTime = 0;
+            //}
+            //else if (CurrentReleaseTime <= ReleaseTimeAfterFire)
+            //{
+            //    rotationAmount *= (1 - CurrentReleaseTime / ReleaseTimeAfterFire);
 
-                CurrentReleaseTime += Tools.MillisecondPerFrame;
+            //    CurrentReleaseTime += Tools.MillisecondPerFrame;
 
-                if (CurrentReleaseTime >= ReleaseTimeAfterFire)
-                {
-                    CurrentReleaseTime = ReleaseTimeAfterFire;
-                }
-            }
+            //    if (CurrentReleaseTime >= ReleaseTimeAfterFire)
+            //    {
+            //        CurrentReleaseTime = ReleaseTimeAfterFire;
+            //    }
+            //}
 
-            if (rotationAmount == 0) return;
+            //if (rotationAmount == 0) return;
 
-            MatrixD rotation = MatrixD.CreateRotationZ(rotationAmount);
+            //MatrixD rotation = MatrixD.CreateRotationZ(rotationAmount);
 
-            Matrix matrix = barrelSubpart.PositionComp.LocalMatrix;
+            //Matrix matrix = barrelSubpart.PositionComp.LocalMatrix;
 
-            matrix.Translation = new Vector3(originalBarrelPostion.X, originalBarrelPostion.Y, matrix.Translation.Z);
+            //matrix.Translation = new Vector3(originalBarrelPostion.X, originalBarrelPostion.Y, matrix.Translation.Z);
 
-            barrelSubpart.PositionComp.LocalMatrix = matrix * rotation;
+            //barrelSubpart.PositionComp.LocalMatrix = matrix * rotation;
         }
 
         public virtual void IdleReload()
@@ -375,6 +376,8 @@ namespace ProjectilesImproved.Weapons
                     a.Action = (block) =>
                     {
                         WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
+
+                        if (basic == null) return;
 
                         if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
                         {
@@ -517,37 +520,37 @@ namespace ProjectilesImproved.Weapons
 
         protected void InitializeBarrel()
         {
-            MyEntity ent = (MyEntity)Entity;
+            //MyEntity ent = (MyEntity)Entity;
 
-            if (ent.Subparts.ContainsKey("GatlingTurretBase1"))
-            {
-                if (ent.Subparts["GatlingTurretBase1"].Subparts.ContainsKey("GatlingTurretBase2"))
-                {
-                    if (ent.Subparts["GatlingTurretBase1"].Subparts["GatlingTurretBase2"].Subparts.ContainsKey("GatlingBarrel"))
-                    {
-                        barrelSubpart = ent.Subparts["GatlingTurretBase1"].Subparts["GatlingTurretBase2"].Subparts["GatlingBarrel"];
-                    }
-                }
-            }
-            else if (ent.Subparts.ContainsKey("InteriorTurretBase1"))
-            {
-                if (ent.Subparts["InteriorTurretBase1"].Subparts.ContainsKey("InteriorTurretBase2"))
-                {
-                    if (ent.Subparts["InteriorTurretBase1"].Subparts["InteriorTurretBase2"].Subparts.ContainsKey("Barrel"))
-                    {
-                        barrelSubpart = ent.Subparts["InteriorTurretBase1"].Subparts["InteriorTurretBase2"].Subparts["Barrel"];
-                    }
-                }
-            }
-            else if (ent.Subparts.ContainsKey("Barrel"))
-            {
-                barrelSubpart = ent.Subparts["Barrel"];
-            }
+            //if (ent.Subparts.ContainsKey("GatlingTurretBase1"))
+            //{
+            //    if (ent.Subparts["GatlingTurretBase1"].Subparts.ContainsKey("GatlingTurretBase2"))
+            //    {
+            //        if (ent.Subparts["GatlingTurretBase1"].Subparts["GatlingTurretBase2"].Subparts.ContainsKey("GatlingBarrel"))
+            //        {
+            //            barrelSubpart = ent.Subparts["GatlingTurretBase1"].Subparts["GatlingTurretBase2"].Subparts["GatlingBarrel"];
+            //        }
+            //    }
+            //}
+            //else if (ent.Subparts.ContainsKey("InteriorTurretBase1"))
+            //{
+            //    if (ent.Subparts["InteriorTurretBase1"].Subparts.ContainsKey("InteriorTurretBase2"))
+            //    {
+            //        if (ent.Subparts["InteriorTurretBase1"].Subparts["InteriorTurretBase2"].Subparts.ContainsKey("Barrel"))
+            //        {
+            //            barrelSubpart = ent.Subparts["InteriorTurretBase1"].Subparts["InteriorTurretBase2"].Subparts["Barrel"];
+            //        }
+            //    }
+            //}
+            //else if (ent.Subparts.ContainsKey("Barrel"))
+            //{
+            //    barrelSubpart = ent.Subparts["Barrel"];
+            //}
 
-            if (barrelSubpart != null)
-            {
-                originalBarrelPostion = barrelSubpart.PositionComp.LocalMatrix.Translation;
-            }
+            //if (barrelSubpart != null)
+            //{
+            //    originalBarrelPostion = barrelSubpart.PositionComp.LocalMatrix.Translation;
+            //}
         }
 
         protected void MakeShootSound()
@@ -590,12 +593,12 @@ namespace ProjectilesImproved.Weapons
         {
             if (soundEmitter.Loop)
             {
-                soundEmitter.StopSound(false, true);
+                soundEmitter.StopSound(true, true);
             }
 
             if (secondarySoundEmitter.Loop)
             {
-                secondarySoundEmitter.StopSound(false, true);
+                secondarySoundEmitter.StopSound(true, true);
             }
         }
 

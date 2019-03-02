@@ -9,13 +9,14 @@ using VRage.Game.ModAPI;
 using ProjectilesImproved.Definitions;
 using VRage.Utils;
 using ProjectilesImproved.Weapons;
+using System.Collections.Concurrent;
 
 namespace ProjectilesImproved
 {
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation | MyUpdateOrder.BeforeSimulation)]
     public class Core : MySessionComponentBase
     {
-        public static Queue<DamageDefinition> DamageRequests = new Queue<DamageDefinition>();
+        public static ConcurrentQueue<DamageDefinition> DamageRequests = new ConcurrentQueue<DamageDefinition>();
 
         private static HashSet<Projectile> PendingProjectiles = new HashSet<Projectile>();
         private static HashSet<Projectile> ActiveProjectiles = new HashSet<Projectile>();
@@ -191,9 +192,10 @@ namespace ProjectilesImproved
 
             //MyAPIGateway.Utilities.ShowNotification($"Damage Requests: {DamageRequests.Count}", 1);
 
+            DamageDefinition def;
             while (DamageRequests.Count > 0)
             {
-                DamageDefinition def = DamageRequests.Dequeue();
+                DamageRequests.TryDequeue(out def);
 
                 if (def.Victim != null)
                 {

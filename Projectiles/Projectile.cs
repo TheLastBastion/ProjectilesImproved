@@ -69,7 +69,10 @@ namespace ProjectilesImproved.Projectiles
         /// </summary>
         public void Init()
         {
-            Direction = Vector3D.Normalize(Velocity);
+            if (Direction == null)
+            {
+                Direction = Vector3D.Normalize(Velocity);
+            }
 
             if (HasBulletDrop)
             {
@@ -181,22 +184,17 @@ namespace ProjectilesImproved.Projectiles
                         {
                             IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
 
-                            lock (Core.DamageRequests)
+                            Core.DamageRequests.Enqueue(new DamageDefinition
                             {
-                                Core.DamageRequests.Enqueue(new DamageDefinition
-                                {
-                                    Victim = (hit.HitEntity as IMyDestroyableObject),
-                                    Damage = ProjectileHealthDamage,
-                                    DamageType = MyStringHash.GetOrCompute(SubtypeId),
-                                    Sync = true,
-                                    Hit = default(MyHitInfo),
-                                    AttackerId = ParentBlockId
-                                });
-                            }
+                                Victim = (hit.HitEntity as IMyDestroyableObject),
+                                Damage = ProjectileHealthDamage,
+                                DamageType = MyStringHash.GetOrCompute(SubtypeId),
+                                Sync = true,
+                                Hit = default(MyHitInfo),
+                                AttackerId = ParentBlockId
+                            });
 
-                            //(hit.HitEntity as IMyDestroyableObject).DoDamage(ProjectileHealthDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), ParentBlockId);
-
-                            hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, Direction * ProjectileHitImpulse, hit.Position, null);
+                            hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(Direction * ProjectileHitImpulse), hit.Position, null);
 
                             LastPositionFraction = hit.Fraction;
                         }
@@ -213,40 +211,32 @@ namespace ProjectilesImproved.Projectiles
                                 {
                                     float mult = Tools.GetScalerInverse(((MyCubeBlockDefinition)block.BlockDefinition).GeneralDamageMultiplier);
 
-                                    lock (Core.DamageRequests)
+                                    Core.DamageRequests.Enqueue(new DamageDefinition
                                     {
-                                        Core.DamageRequests.Enqueue(new DamageDefinition
-                                        {
-                                            Victim = block,
-                                            Damage = ProjectileMassDamage * mult,
-                                            DamageType = MyStringHash.GetOrCompute(SubtypeId),
-                                            Sync = true,
-                                            Hit = default(MyHitInfo),
-                                            AttackerId = ParentBlockId
-                                        });
-                                    }
-
-                                    //block.DoDamage(ProjectileMassDamage * mult, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), ParentBlockId);
+                                        Victim = block,
+                                        Damage = ProjectileMassDamage * mult,
+                                        DamageType = MyStringHash.GetOrCompute(SubtypeId),
+                                        Sync = true,
+                                        Hit = default(MyHitInfo),
+                                        AttackerId = ParentBlockId
+                                    });
                                 }
                                 else
                                 {
-                                    lock (Core.DamageRequests)
+                                    //lock (Core.DamageRequests)
+                                    //{
+                                    Core.DamageRequests.Enqueue(new DamageDefinition
                                     {
-                                        Core.DamageRequests.Enqueue(new DamageDefinition
-                                        {
-                                            Victim = block,
-                                            Damage = ProjectileMassDamage,
-                                            DamageType = MyStringHash.GetOrCompute(SubtypeId),
-                                            Sync = true,
-                                            Hit = default(MyHitInfo),
-                                            AttackerId = ParentBlockId
-                                        });
-                                    }
-
-                                    //block.DoDamage(ProjectileMassDamage, MyStringHash.GetOrCompute(SubtypeId), true, default(MyHitInfo), ParentBlockId);
+                                        Victim = block,
+                                        Damage = ProjectileMassDamage,
+                                        DamageType = MyStringHash.GetOrCompute(SubtypeId),
+                                        Sync = true,
+                                        Hit = default(MyHitInfo),
+                                        AttackerId = ParentBlockId
+                                    });
                                 }
 
-                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, Direction * ProjectileHitImpulse, hit.Position, null);
+                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(Direction * ProjectileHitImpulse), hit.Position, null);
 
                                 LastPositionFraction = hit.Fraction;
                             }

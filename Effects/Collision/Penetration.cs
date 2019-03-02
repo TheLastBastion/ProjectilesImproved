@@ -20,7 +20,7 @@ namespace ProjectilesImproved.Effects.Collision
         public float VelocityDecreasePerHp
         {
             get { return velocityDecreasePerHp; }
-            set { velocityDecreasePerHp = (value >= 0) ? value : 0;  }
+            set { velocityDecreasePerHp = (value >= 0) ? value : 0; }
         }
 
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
@@ -30,7 +30,7 @@ namespace ProjectilesImproved.Effects.Collision
                 hit = hitlist[i];
 
                 int framesToWait = (int)Math.Floor(hit.Fraction * (float)bullet.CollisionCheckFrames);
-                if (framesToWait > 1)                
+                if (framesToWait > 1)
                 {
                     bullet.CollisionCheckCounter = bullet.CollisionCheckWaitFrames() - framesToWait;
                     bullet.DoShortRaycast = true;
@@ -41,22 +41,17 @@ namespace ProjectilesImproved.Effects.Collision
                     {
                         IMyDestroyableObject obj = hit.HitEntity as IMyDestroyableObject;
 
-                        lock (Core.DamageRequests)
+                        Core.DamageRequests.Enqueue(new DamageDefinition
                         {
-                            Core.DamageRequests.Enqueue(new DamageDefinition
-                            {
-                                Victim = (hit.HitEntity as IMyDestroyableObject),
-                                Damage = bullet.ProjectileHealthDamage,
-                                DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
-                                Sync = true,
-                                Hit = default(MyHitInfo),
-                                AttackerId = bullet.ParentBlockId
-                            });
-                        }
+                            Victim = (hit.HitEntity as IMyDestroyableObject),
+                            Damage = bullet.ProjectileHealthDamage,
+                            DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
+                            Sync = true,
+                            Hit = default(MyHitInfo),
+                            AttackerId = bullet.ParentBlockId
+                        });
 
-                        //(hit.HitEntity as IMyDestroyableObject).DoDamage(bullet.ProjectileHealthDamage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
-
-                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Direction * bullet.ProjectileHitImpulse, hit.Position, null);
+                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(bullet.Direction * bullet.ProjectileHitImpulse), hit.Position, null);
 
                         bullet.LastPositionFraction = hit.Fraction;
                     }
@@ -105,22 +100,17 @@ namespace ProjectilesImproved.Effects.Collision
                                     }
                                 }
 
-                                lock (Core.DamageRequests)
+                                Core.DamageRequests.Enqueue(new DamageDefinition
                                 {
-                                    Core.DamageRequests.Enqueue(new DamageDefinition
-                                    {
-                                        Victim = block,
-                                        Damage = damage,
-                                        DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
-                                        Sync = true,
-                                        Hit = default(MyHitInfo),
-                                        AttackerId = bullet.ParentBlockId
-                                    });
-                                }
+                                    Victim = block,
+                                    Damage = damage,
+                                    DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
+                                    Sync = true,
+                                    Hit = default(MyHitInfo),
+                                    AttackerId = bullet.ParentBlockId
+                                });
 
-                                //block.DoDamage(damage, MyStringHash.GetOrCompute(bullet.SubtypeId), true, default(MyHitInfo), bullet.ParentBlockId);
-
-                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, bullet.Direction * bullet.ProjectileHitImpulse, hit.Position, null);
+                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(bullet.Direction * bullet.ProjectileHitImpulse), hit.Position, null);
 
                                 bullet.LastPositionFraction = hit.Fraction;
                             }

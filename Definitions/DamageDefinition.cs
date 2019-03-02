@@ -4,6 +4,7 @@ using System.Text;
 using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 using VRage.Utils;
+using VRageMath;
 
 namespace ProjectilesImproved.Definitions
 {
