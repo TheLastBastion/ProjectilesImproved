@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using VRage.Game.ModAPI;
+﻿using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
+using VRage.ModAPI;
 using VRage.Utils;
 using VRageMath;
 
@@ -21,5 +19,11 @@ namespace ProjectilesImproved.Definitions
         public MyHitInfo? Hit;
 
         public long AttackerId;
+
+        public IMyEntity ImpulseEntity;
+
+        public Vector3 ImpulseForce;
+
+        public Vector3 ImpulsePosition;
     }
 }

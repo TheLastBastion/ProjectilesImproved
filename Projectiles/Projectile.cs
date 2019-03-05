@@ -191,10 +191,11 @@ namespace ProjectilesImproved.Projectiles
                                 DamageType = MyStringHash.GetOrCompute(SubtypeId),
                                 Sync = true,
                                 Hit = default(MyHitInfo),
-                                AttackerId = ParentBlockId
+                                AttackerId = ParentBlockId,
+                                ImpulseEntity = hit.HitEntity,
+                                ImpulseForce = (Direction * ProjectileHitImpulse),
+                                ImpulsePosition = hit.Position
                             });
-
-                            hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(Direction * ProjectileHitImpulse), hit.Position, null);
 
                             LastPositionFraction = hit.Fraction;
                         }
@@ -218,13 +219,14 @@ namespace ProjectilesImproved.Projectiles
                                         DamageType = MyStringHash.GetOrCompute(SubtypeId),
                                         Sync = true,
                                         Hit = default(MyHitInfo),
-                                        AttackerId = ParentBlockId
+                                        AttackerId = ParentBlockId,
+                                        ImpulseEntity = hit.HitEntity,
+                                        ImpulseForce = (Direction * ProjectileHitImpulse),
+                                        ImpulsePosition = hit.Position
                                     });
                                 }
                                 else
                                 {
-                                    //lock (Core.DamageRequests)
-                                    //{
                                     Core.DamageRequests.Enqueue(new DamageDefinition
                                     {
                                         Victim = block,
@@ -232,11 +234,12 @@ namespace ProjectilesImproved.Projectiles
                                         DamageType = MyStringHash.GetOrCompute(SubtypeId),
                                         Sync = true,
                                         Hit = default(MyHitInfo),
-                                        AttackerId = ParentBlockId
+                                        AttackerId = ParentBlockId,
+                                        ImpulseEntity = hit.HitEntity,
+                                        ImpulseForce = (Direction * ProjectileHitImpulse),
+                                        ImpulsePosition = hit.Position
                                     });
                                 }
-
-                                block.CubeGrid.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(Direction * ProjectileHitImpulse), hit.Position, null);
 
                                 LastPositionFraction = hit.Fraction;
                             }

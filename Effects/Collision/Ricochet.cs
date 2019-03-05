@@ -136,15 +136,9 @@ namespace ProjectilesImproved.Effects.Collision
 
                 if (HitAngle < DeflectionAngle && RicochetChance > random)
                 {
-                    // Apply impulse
+                    // partial impulse
                     float impulse = bullet.ProjectileHitImpulse * NotHitFraction * MaxVelocityTransfer;
-                    if (hit.HitEntity.Physics != null)
-                    {
-                        hit.HitEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, -(impulse * bullet.Direction), hit.Position, null);
-                    }
-                    bullet.ProjectileHitImpulse -= impulse;
-
-                    // apply partial damage
+                    // partial damage
                     float damage = bullet.ProjectileMassDamage * NotHitFraction * MaxDamageTransfer;
                     if (obj != null && MyAPIGateway.Session.IsServer)
                     {
@@ -155,9 +149,14 @@ namespace ProjectilesImproved.Effects.Collision
                             DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
                             Sync = true,
                             Hit = default(MyHitInfo),
-                            AttackerId = bullet.ParentBlockId
+                            AttackerId = bullet.ParentBlockId,
+                            ImpulseEntity = hit.HitEntity,
+                            ImpulseForce = (impulse * bullet.Direction),
+                            ImpulsePosition = hit.Position
                         });
                     }
+
+                    bullet.ProjectileHitImpulse -= impulse;
                     bullet.ProjectileMassDamage -= damage;
 
                     // reduce velocity
@@ -173,7 +172,6 @@ namespace ProjectilesImproved.Effects.Collision
 
                     bullet.PreCollitionDetection();
                     bullet.CollisionDetection();
-                    //bullet.Draw();
 
                     if (!MyAPIGateway.Utilities.IsDedicated)
                     {
@@ -204,7 +202,10 @@ namespace ProjectilesImproved.Effects.Collision
                             DamageType = MyStringHash.GetOrCompute(bullet.SubtypeId),
                             Sync = true,
                             Hit = default(MyHitInfo),
-                            AttackerId = bullet.ParentBlockId
+                            AttackerId = bullet.ParentBlockId,
+                            ImpulseEntity = hit.HitEntity,
+                            ImpulseForce = (bullet.Direction * bullet.ProjectileHitImpulse),
+                            ImpulsePosition = hit.Position
                         });
                     }
 

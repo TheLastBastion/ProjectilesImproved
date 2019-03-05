@@ -6,6 +6,7 @@ using Sandbox.Game.Entities;
 using Sandbox.Game.Weapons;
 using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using VRage.Game;
@@ -139,13 +140,15 @@ namespace ProjectilesImproved.Weapons
 
         public virtual void OnAddedToContainer()
         {
-            OverrideDefaultControls();
-            WeaponSync sync = new WeaponSync() { BlockId = Entity.EntityId };
-            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(sync));
+
         }
 
         public virtual void OnAddedToScene()
         {
+            OverrideDefaultControls();
+            WeaponSync sync = new WeaponSync() { BlockId = Entity.EntityId };
+            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(sync));
+
             InitializeBarrel();
         }
 
@@ -249,11 +252,6 @@ namespace ProjectilesImproved.Weapons
             {
                 MatrixD muzzleMatrix = gun.GunBase.GetMuzzleWorldMatrix();
 
-                //Vector3D bonus = (Block.CubeGrid.Physics.LinearVelocity * Tools.Tick);
-
-                //bonus.Rotate(muzzleMatrix);
-                //muzzleMatrix.Translation += bonus;
-
                 ProjectileDefinition bulletData = Settings.GetAmmoDefinition(gun.GunBase.CurrentAmmoDefinition.Id.SubtypeId.String);
 
                 while (TimeTillNextShot >= 1)
@@ -264,6 +262,8 @@ namespace ProjectilesImproved.Weapons
                         muzzleMatrix.Up);
 
                     Projectile bullet = bulletData.CreateProjectile();
+                    bullet.ParentBlockId = Entity.EntityId;
+                    bullet.PartentSlim = Cube.SlimBlock;
                     bullet.InitialGridVelocity = Block.CubeGrid.Physics.LinearVelocity;
                     bullet.Direction = positionMatrix.Forward;
                     bullet.Velocity = Block.CubeGrid.Physics.LinearVelocity + (positionMatrix.Forward * bulletData.DesiredSpeed);
@@ -355,6 +355,18 @@ namespace ProjectilesImproved.Weapons
 
         protected void OverrideDefaultControls()
         {
+            if (!WeaponControlLayer.DefaultTerminalControlsInitialized)
+            {
+                WeaponControlLayer.TerminalIntitalize();
+            }
+
+            if (WeaponControlLayer.IsThisBlockBlacklisted(Entity))
+            {
+                Entity.GameLogic.GetAs<WeaponControlLayer>().MarkForClose();
+                ControlsUpdated = true;
+                return;
+            }
+
             if (ControlsUpdated) return;
             ControlsUpdated = true;
 
@@ -375,91 +387,229 @@ namespace ProjectilesImproved.Weapons
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
-
-                        if (basic == null) return;
-
-                        if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                        try
                         {
-                            basic.TerminalShooting = !basic.TerminalShooting;
+                            var logic = block.GameLogic.GetAs<WeaponControlLayer>();
+                            if (logic != null)
+                            {
+                                WeaponBasic basic = logic.Weapon as WeaponBasic;
+                                if (basic == null) return;
+
+                                if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                                {
+                                    basic.TerminalShooting = !basic.TerminalShooting;
+                                }
+
+                                NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                {
+                                    BlockId = block.EntityId,
+                                    State = ((basic.TerminalShooting) ? TerminalState.Shoot_On : TerminalState.Shoot_Off)
+                                }));
+                            }
+                            else
+                            {
+                                if (Entity is IMyLargeTurretBase)
+                                {
+                                    WeaponControlLayer.TerminalShootActionTurretBase.Invoke(block);
+                                }
+                                else
+                                {
+                                    WeaponControlLayer.TerminalShootActionGatlingGun.Invoke(block);
+                                }
+                            }
                         }
-
-                        NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                        catch (Exception e)
                         {
-                            BlockId = block.EntityId,
-                            State = ((basic.TerminalShooting) ? TerminalState.Shoot_On : TerminalState.Shoot_Off)
-                        }));
+                            MyLog.Default.Warning($"Failed the shoot on/off action\n {e.ToString()}");
+                        }
                     };
 
-                    a.Writer = WeaponsFiringWriter;
+                    a.Writer = (block, text) =>
+                        {
+                            if (block.GameLogic.GetAs<WeaponControlLayer>() != null)
+                            {
+                                WeaponsFiringWriter(block, text);
+                            }
+                            else
+                            {
+                                if (Entity is IMyLargeTurretBase)
+                                {
+                                    WeaponControlLayer.TerminalShootWriterTurretBase(block, text);
+                                }
+                                else
+                                {
+                                    WeaponControlLayer.TerminalShootWriterGatlingGun(block, text);
+                                }
+                            }
+                        };
                 }
                 else if (a.Id == "ShootOnce")
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
-
-                        if (basic != null && !basic.TerminalShootOnce)
+                        try
                         {
-                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            var logic = block.GameLogic.GetAs<WeaponControlLayer>();
+                            if (logic != null)
                             {
-                                basic.TerminalShootOnce = true;
-                            }
+                                WeaponBasic basic = logic.Weapon as WeaponBasic;
 
-                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                if (basic != null && !basic.TerminalShootOnce)
+                                {
+                                    if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                                    {
+                                        basic.TerminalShootOnce = true;
+                                    }
+
+                                    NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                    {
+                                        BlockId = block.EntityId,
+                                        State = TerminalState.ShootOnce
+                                    }));
+                                }
+                            }
+                            else
                             {
-                                BlockId = block.EntityId,
-                                State = TerminalState.ShootOnce
-                            }));
+                                if (Entity is IMyLargeTurretBase)
+                                {
+                                    WeaponControlLayer.TerminalShootOnceActionTurretBase.Invoke(block);
+                                }
+                                else
+                                {
+                                    WeaponControlLayer.TerminalShootOnceActionGatlingGun.Invoke(block);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MyLog.Default.Warning($"Failed the shoot once action\n {e.ToString()}");
                         }
                     };
-
                 }
                 if (a.Id == "Shoot_On")
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
-
-                        if (basic != null && !basic.TerminalShooting)
+                        try
                         {
-                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            var logic = block.GameLogic.GetAs<WeaponControlLayer>();
+                            if (logic != null)
                             {
-                                basic.TerminalShooting = true;
-                            }
+                                WeaponBasic basic = logic.Weapon as WeaponBasic;
 
-                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                if (basic != null && !basic.TerminalShooting)
+                                {
+                                    if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                                    {
+                                        basic.TerminalShooting = true;
+                                    }
+
+                                    NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                    {
+                                        BlockId = block.EntityId,
+                                        State = TerminalState.Shoot_On
+                                    }));
+                                }
+                            }
+                            else
                             {
-                                BlockId = block.EntityId,
-                                State = TerminalState.Shoot_On
-                            }));
+                                if (Entity is IMyLargeTurretBase)
+                                {
+                                    WeaponControlLayer.TerminalShootOnActionTurretBase.Invoke(block);
+                                }
+                                else
+                                {
+                                    WeaponControlLayer.TerminalShootOnActionGatlingGun.Invoke(block);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MyLog.Default.Warning($"Failed the shoot on action\n {e.ToString()}");
                         }
                     };
 
-                    a.Writer = WeaponsFiringWriter;
+                    a.Writer = (block, text) =>
+                    {
+                        if (block.GameLogic.GetAs<WeaponControlLayer>() != null)
+                        {
+                            WeaponsFiringWriter(block, text);
+                        }
+                        else
+                        {
+                            if (Entity is IMyLargeTurretBase)
+                            {
+                                WeaponControlLayer.TerminalShootOnWriterTurretBase(block, text);
+                            }
+                            else
+                            {
+                                WeaponControlLayer.TerminalShootOnWriterGatlingGun(block, text);
+                            }
+                        }
+                    };
+
                 }
                 else if (a.Id == "Shoot_Off")
                 {
                     a.Action = (block) =>
                     {
-                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
-
-                        if (basic != null && basic.TerminalShooting)
+                        try
                         {
-                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            var logic = block.GameLogic.GetAs<WeaponControlLayer>();
+                            if (logic != null)
                             {
-                                basic.TerminalShooting = false;
-                            }
+                                WeaponBasic basic = logic.Weapon as WeaponBasic;
 
-                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                if (basic != null && basic.TerminalShooting)
+                                {
+                                    if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                                    {
+                                        basic.TerminalShooting = false;
+                                    }
+
+                                    NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                    {
+                                        BlockId = block.EntityId,
+                                        State = TerminalState.Shoot_Off
+                                    }));
+                                }
+                            }
+                            else
                             {
-                                BlockId = block.EntityId,
-                                State = TerminalState.Shoot_Off
-                            }));
+                                if (Entity is IMyLargeTurretBase)
+                                {
+                                    WeaponControlLayer.TerminalShootOffActionTurretBase.Invoke(block);
+                                }
+                                else
+                                {
+                                    WeaponControlLayer.TerminalShootOffActionGatlingGun.Invoke(block);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MyLog.Default.Warning($"Failed the shoot off action\n {e.ToString()}");
                         }
                     };
 
-                    a.Writer = WeaponsFiringWriter;
+                    a.Writer = (block, text) =>
+                    {
+                        if (block.GameLogic.GetAs<WeaponControlLayer>() != null)
+                        {
+                            WeaponsFiringWriter(block, text);
+                        }
+                        else
+                        {
+                            if (Entity is IMyLargeTurretBase)
+                            {
+                                WeaponControlLayer.TerminalShootOffWriterTurretBase(block, text);
+                            }
+                            else
+                            {
+                                WeaponControlLayer.TerminalShootOffWriterGatlingGun(block, text);
+                            }
+                        }
+                    };
                 }
             }
 
@@ -481,26 +631,71 @@ namespace ProjectilesImproved.Weapons
 
                     onoff.Setter = (block, value) =>
                     {
-                        WeaponBasic basic = block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic;
-
-                        if (basic != null && basic.TerminalShooting != value)
+                        try
                         {
-                            if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                            var logic = block.GameLogic.GetAs<WeaponControlLayer>();
+                            if (logic != null)
                             {
-                                basic.TerminalShooting = value;
-                            }
+                                WeaponBasic basic = logic.Weapon as WeaponBasic;
 
-                            NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                if (basic != null && basic.TerminalShooting != value)
+                                {
+                                    if (MyAPIGateway.Session.IsServer && !MyAPIGateway.Utilities.IsDedicated)
+                                    {
+                                        basic.TerminalShooting = value;
+                                    }
+
+                                    NetworkAPI.Instance.SendCommand("sync", data: MyAPIGateway.Utilities.SerializeToBinary(new WeaponSync
+                                    {
+                                        BlockId = block.EntityId,
+                                        State = (value) ? TerminalState.Shoot_On : TerminalState.Shoot_Off
+                                    }));
+                                }
+                            }
+                            else
                             {
-                                BlockId = block.EntityId,
-                                State = (value) ? TerminalState.Shoot_On : TerminalState.Shoot_Off
-                            }));
+                                if (Entity is IMyLargeTurretBase)
+                                {
+                                    WeaponControlLayer.TerminalShootSetterTurretBase.Invoke(block, value);
+                                }
+                                else
+                                {
+                                    WeaponControlLayer.TerminalShootSetterGatlingGun.Invoke(block, value);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MyLog.Default.Warning($"Failed to toggle Shoot On/Off terminal control\n {e.ToString()}");
                         }
                     };
 
                     onoff.Getter = (block) =>
                     {
-                        return (block.GameLogic.GetAs<WeaponControlLayer>()?.Weapon as WeaponBasic).TerminalShooting;
+                        try
+                        {
+                            var logic = block.GameLogic.GetAs<WeaponControlLayer>();
+                            if (logic != null)
+                            {
+                                return (logic.Weapon as WeaponBasic).TerminalShooting;
+                            }
+                            else
+                            {
+                                if (Entity is IMyLargeTurretBase)
+                                {
+                                    return WeaponControlLayer.TerminalShootGetterTurretBase.Invoke(block);
+                                }
+                                else
+                                {
+                                    return WeaponControlLayer.TerminalShootGetterGatlingGun.Invoke(block);
+                                }
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            MyLog.Default.Warning($"Failed to get the Shoot On/Off terminal control\n {e.ToString()}");
+                            return false;
+                        }
                     };
                 }
             }

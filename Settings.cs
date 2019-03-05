@@ -18,6 +18,16 @@ namespace ProjectilesImproved
     {
         public const string Filename = "WeaponsOverhaul.cfg";
 
+        public static readonly List<string> BlackList = new List<string>
+        {
+            "SmallGridRegularLaser",
+            "LargeGridRegularLaser",
+            "LargeRailGunLZM",
+            "LargeRailgunTurretLZM",
+            "SmallRailGunLZM",
+            "OKIObserverWEP"
+        };
+
         public static Settings Instance = new Settings();
 
         [XmlIgnore]

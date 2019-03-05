@@ -10,6 +10,7 @@ using ProjectilesImproved.Definitions;
 using VRage.Utils;
 using ProjectilesImproved.Weapons;
 using System.Collections.Concurrent;
+using VRage.ModAPI;
 
 namespace ProjectilesImproved
 {
@@ -200,6 +201,12 @@ namespace ProjectilesImproved
                 if (def.Victim != null)
                 {
                     def.Victim.DoDamage(def.Damage, def.DamageType, def.Sync, def.Hit, def.AttackerId);
+
+                    if (def.ImpulseEntity?.Physics != null && def.ImpulseForce != null && def.ImpulsePosition != null)
+                    {
+                        def.ImpulseEntity.Physics.AddForce(MyPhysicsForceType.APPLY_WORLD_IMPULSE_AND_WORLD_ANGULAR_IMPULSE, def.ImpulseForce, def.ImpulsePosition, null);
+                    }
+
                 }
             }
         }
