@@ -12,6 +12,10 @@ namespace ProjectilesImproved.Weapons
 
         void OnAddedToScene();
 
+        void OnRemovedFromScene();
+
+        void OnRemovedFromContainer();
+
         /// <summary>
         /// Updates game logic every frame: RoF, Cooldown...
         /// </summary>

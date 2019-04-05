@@ -146,6 +146,16 @@ namespace ProjectilesImproved.Weapons
             Weapon.Draw();
         }
 
+        public override void OnRemovedFromScene()
+        {
+            Weapon.OnRemovedFromScene();
+        }
+
+        public override void OnBeforeRemovedFromContainer()
+        {
+            Weapon.OnRemovedFromContainer();
+        }
+
         public override void Close()
         {
             Core.OnSettingsUpdate -= OnSettingsUpdate;

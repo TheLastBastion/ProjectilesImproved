@@ -38,10 +38,12 @@ namespace ProjectilesImproved.Weapons
 
             // if the block is not functional toggle shooting to off
             // this is not venilla and may get changed
-            if (!Cube.IsFunctional)
+            if (!Cube.IsWorking)
             {
                 TerminalShooting = false;
                 WillFireThisFrame = false;
+                StopShootingSound();
+                return;
             }
 
             // if a user is manually shooting toggle terminal shoot off

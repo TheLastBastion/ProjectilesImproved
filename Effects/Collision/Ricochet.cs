@@ -214,7 +214,7 @@ namespace ProjectilesImproved.Effects.Collision
             }
             catch (Exception e)
             {
-                MyLog.Default.Info(e.ToString());
+                //MyLog.Default.Info(e.ToString());
             }
         }
 

@@ -152,6 +152,18 @@ namespace ProjectilesImproved.Weapons
             InitializeBarrel();
         }
 
+        public virtual void OnRemovedFromScene()
+        {
+            soundEmitter?.StopSound(true, true);
+            secondarySoundEmitter?.StopSound(true, true);
+        }
+
+        public void OnRemovedFromContainer()
+        {
+            soundEmitter?.StopSound(true, true);
+            secondarySoundEmitter?.StopSound(true, true);
+        }
+
         public virtual void Close()
         {
             soundEmitter?.StopSound(true, true);
@@ -185,10 +197,12 @@ namespace ProjectilesImproved.Weapons
 
             // if the block is not functional toggle shooting to off
             // this is not venilla and may get changed
-            if (!Cube.IsFunctional)
+            if (!Cube.IsWorking)
             {
                 TerminalShooting = false;
                 WillFireThisFrame = false;
+                StopShootingSound();
+                return;
             }
 
             // if a user is manually shooting toggle terminal shoot off
@@ -273,7 +287,7 @@ namespace ProjectilesImproved.Weapons
                     gun.GunBase.ConsumeAmmo();
                     TimeTillNextShot--;
                     MakeShootSound();
-                    MakeSecondaryShotSound();
+                    //MakeSecondaryShotSound();
 
 
                     CurrentShotInBurst++;
@@ -770,11 +784,11 @@ namespace ProjectilesImproved.Weapons
         {
             if (gun.GunBase.SecondarySound != null)
             {
-                if (soundEmitter.IsPlaying)
+                if (secondarySoundEmitter.IsPlaying)
                 {
                     if (!soundEmitter.Loop)
                     {
-                        secondarySoundEmitter.PlaySound(gun.GunBase.SecondarySound, false, false, false, false, false, null);
+                        secondarySoundEmitter.PlaySound(gun.GunBase.SecondarySound, true, false, false, false, false, null);
                     }
                 }
                 else

@@ -68,6 +68,7 @@ namespace ProjectilesImproved
                     HasBulletDrop = true,
                     BulletDropGravityScaler = 1f,
                     UseOverKillSpread = false,
+                    Explosive = new Explosive() { Radius = 2f }
                 }
             },
             { "OKI50mmAmmoPars", new ProjectileDefinition()

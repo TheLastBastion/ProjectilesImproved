@@ -64,6 +64,11 @@ namespace ProjectilesImproved.Effects.Collision
         public void Execute(IHitInfo hit, List<IHitInfo> hitlist, Projectile bullet)
         {
             bullet.HasExpired = true;
+
+            MyExplosionInfo keenExplosion = new MyExplosionInfo(bullet.ProjectileHealthDamage, bullet.ProjectileMassDamage, new BoundingSphereD(bullet.Position, Radius), MyExplosionTypeEnum.MISSILE_EXPLOSION, true);
+
+            MyExplosions.AddExplosion(ref keenExplosion);
+
             //epicenter = hit.Position - (bullet.PositionMatrix.Forward * Offset);
 
             //if (!MyAPIGateway.Utilities.IsDedicated)
